@@ -13,4 +13,12 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software */
+#include <stdlib.h>
+#include <stdio.h>
 
+#include "spiceman.h"
+#include "remove.h"
+
+int rm(int argc, char *argv[]) {
+	return 0;
+}

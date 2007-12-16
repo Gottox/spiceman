@@ -13,11 +13,5 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software */
-#include <stdlib.h>
-#include <stdio.h>
 
-#include "libpkg.h"
-
-int main(int argc, char *argv[]) {
-	
-}
+int ins(int argc, char *argv[]);

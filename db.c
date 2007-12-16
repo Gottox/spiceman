@@ -16,8 +16,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "libpkg.h"
+#include "spiceman.h"
+#include "db.h"
 
-int main(int argc, char *argv[]) {
-	
+int db(int argc, char *argv[]) {
+	puts("Hallo!");
+	return 0;
 }

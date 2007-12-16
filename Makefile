@@ -3,12 +3,11 @@
 
 include config.mk
 
-SRC = spicedb.c spiceins.c spicerm.c spiceget.c libpkg.c
+SRC = db.c install.c remove.c main.c
 OBJ = ${SRC:.c=.o}
-TARGET = spicedb spiceins spicerm spiceget
-COMMON = libpkg.o
+TARGET = spiceman
 
-all: options ${COMMON} ${TARGET}
+all: options ${TARGET}
 
 options:
 	@echo spice build options:
@@ -16,28 +15,28 @@ options:
 	@echo "LDFLAGS  = ${LDFLAGS}"
 	@echo "CC       = ${CC}"
 
-%.o: %.c
-	@echo CC $<
-	@${CC} -c ${CFLAGS} $<
-
 ${OBJ}: config.mk
 
-% : %.o ${COMMON}
-	@echo LD $< $@
-	@${CC} -o $@ $< ${COMMON} ${LDFLAGS}
+%.o: %.c
+	@echo CC $@
+	@${CC} -c ${CFLAGS} $<
+
+${TARGET}: ${OBJ}
+	@echo LD $@
+	@${CC} -o $@ ${OBJ} ${LDFLAGS}
 
 clean:
 	@echo cleaning
-	@rm -f  ${OBJ} ${TARGET} spiceman-${VERSION}.tar.gz
+	@rm -f  ${OBJ} ${TARGET} ${TARGET}-${VERSION}.tar.gz
 
 dist: clean
 	@echo creating dist tarball
-	@mkdir -p spiceman-${VERSION}
-	@cp -R LICENSE Makefile README config.def.h config.mk \
-		spiceman.1 ${SRC} spiceman-${VERSION}
-	@tar -cf spiceman-${VERSION}.tar spiceman-${VERSION}
-	@gzip spiceman-${VERSION}.tar
-	@rm -rf spiceman-${VERSION}
+	@mkdir -p ${TARGET}-${VERSION}
+	@cp -R LICENSE Makefile \
+		${TARGET}.1 ${SRC} ${TARGET}-${VERSION}
+	@tar -cf ${TARGET}-${VERSION}.tar ${TARGET}-${VERSION}
+	@gzip ${TARGET}-${VERSION}.tar
+	@rm -rf ${TARGET}-${VERSION}
 
 install: all
 	@echo installing executable file to ${DESTDIR}${PREFIX}/bin
