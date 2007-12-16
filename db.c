@@ -1,4 +1,4 @@
-/* spiceman - suckless package manager tools
+/* spiceman - suckless package management tools
  * Copyright (C) Enno Boland
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,10 +16,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "spiceman.h"
+#include "common.h"
 #include "db.h"
 
-int db(int argc, char *argv[]) {
+int db(int argc, char *argv[], FILE *in, FILE *out) {
 	puts("Hallo!");
 	return 0;
 }

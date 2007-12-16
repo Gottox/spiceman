@@ -1,4 +1,4 @@
-/* spiceman - suckless package manager tools
+/* spiceman - suckless package management tools
  * Copyright (C) Enno Boland
  *
  * This program is free software; you can redistribute it and/or modify
@@ -13,5 +13,12 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software */
+#include <stdlib.h>
+#include <stdio.h>
 
-int rm(int argc, char *argv[]);
+#include "common.h"
+#include "extract.h"
+
+int extract(int argc, char *argv[], FILE *in, FILE *out) {
+	return 0;
+}

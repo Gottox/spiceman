@@ -13,22 +13,12 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software */
-/* Applets */
-#include <db.h>
-#include <install.h>
-#include <remove.h>
+#include <stdlib.h>
+#include <stdio.h>
 
-#define APPLETPREFIX "sp-"
-#define LENGTH(x) sizeof(x)/sizeof(x[0])
+#include "common.h"
+#include "delete.h"
 
-struct Applet {
-	int (*function)(int, char *[]);
-	char *name;
-};
-
-static struct Applet applets[] = {
-	{ db, APPLETPREFIX "db" },
-	{ ins, APPLETPREFIX "ins" },
-	{ db, APPLETPREFIX "db" },
-};
-
+int delete(int argc, char *argv[], FILE *in, FILE *out) {
+	return 0;
+}

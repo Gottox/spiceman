@@ -1,4 +1,4 @@
-/* spiceman - suckless package manager tools
+/* spiceman - suckless package management tools
  * Copyright (C) Enno Boland
  *
  * This program is free software; you can redistribute it and/or modify
@@ -13,12 +13,15 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software */
-#include <stdlib.h>
 #include <stdio.h>
 
-#include "spiceman.h"
-#include "remove.h"
+typedef int (*Cmdfunction)(int, char *[], FILE *in, FILE *out);
 
-int rm(int argc, char *argv[]) {
-	return 0;
-}
+struct Cmd {
+	Cmdfunction function;
+	int argc;
+	char **argv;
+}; 
+
+int cmdchain(int cmdc, ...);
+void eprint(const char *format, ...);

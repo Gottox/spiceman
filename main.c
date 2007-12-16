@@ -1,4 +1,4 @@
-/* spiceman - suckless package manager tools
+/* spiceman - suckless package management tools
  * Copyright (C) Enno Boland
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,36 +18,40 @@
 #include <string.h>
 #include <libgen.h>
 
-#include "spiceman.h"
+#include "common.h"
 
 #include "db.h"
-#include "install.h"
-#include "remove.h"
+#include "extract.h"
+#include "delete.h"
 
 #define APPLETPREFIX "sp-"
 #define LENGTH(x) sizeof(x)/sizeof(x[0])
 
 struct Applet {
-	int (*function)(int, char *[]);
+	Cmdfunction function;
 	char *name;
 };
 
 static struct Applet applets[] = {
-	{ db, "db" },
-	{ ins, "ins" },
-	{ db, "db" },
+	{ db,	"db" },
+	{ extract,	"extract" },
+	{ delete,	"delete" },
 };
 
 void help() {
 	int i;
-	char *argv[2] = { NULL,"-h" }
+	char *argv[2] = { NULL,"-h" };
 
-	puts("Applets:");
+	puts("spiceman-" VERSION " - suckless package management tools");
+	puts("	-h	This help message");
+	puts("	-i	Install packages");
+	puts("	-r	Remove packages");
+	puts("	-s	search package");
 	for(i = 0; i < LENGTH(applets); i++) {
-		printf("%s\n",applets[i].name);
-		applets[i].function(2.)
+		printf("\t%s\n",applets[i].name);
+		argv[0] = applets[i].name;
+		applets[i].function(2,argv,stdin,stdout);
 	}
-	exit(EXIT_FAILURE);
 }
 
 int main(int argc, char *argv[]) {
@@ -57,16 +61,17 @@ int main(int argc, char *argv[]) {
 	bn = basename(argv[0]);
 	for(i = 0; i < LENGTH(applets); i++) {
 		if(strncmp(bn, APPLETPREFIX, LENGTH(APPLETPREFIX)-1) == 0 &&
-				strcmp(bn + LENGTH(APPLETPREFIX)-1,applets[i].name) == 0)
-			return applets[i].function(argc,argv);
-		else if(argc > 1 && strcmp(argv[1],applets[i].name) == 0)
-			return applets[i].function(argc-1,argv+1);
+				strcmp(bn + LENGTH(APPLETPREFIX)-1, applets[i].name) == 0)
+			return applets[i].function(argc, argv, stdin, stdout);
+		else if(argc > 1 && strcmp(argv[1], applets[i].name) == 0)
+			return applets[i].function(argc-1, argv+1, stdin, stdout);
 	}
-
-	help();
 
 	for(i = 1; i < argc; i++) {
-		
+		if(argv[i][0] != '-') {
+			help();
+			return EXIT_FAILURE;
+		}
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }

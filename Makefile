@@ -1,16 +1,18 @@
-# spice - suckless pkgmanager tools
-# © 2006-2007 Enno Boland
+# spiceman - suckless package management tools
+# (c) 2007 Enno Boland
 
 include config.mk
 
-SRC = db.c install.c remove.c main.c
+SRC = db.c extract.c delete.c main.c common.c ui.c
 OBJ = ${SRC:.c=.o}
-TARGET = spiceman
+TARGET_ONEFILE = spiceman
+TARGET_SEPERATE = spiceman
+COMMON = common.o
 
 all: options ${TARGET}
 
 options:
-	@echo spice build options:
+	@echo spiceman build options:
 	@echo "CFLAGS   = ${CFLAGS}"
 	@echo "LDFLAGS  = ${LDFLAGS}"
 	@echo "CC       = ${CC}"
@@ -25,9 +27,16 @@ ${TARGET}: ${OBJ}
 	@echo LD $@
 	@${CC} -o $@ ${OBJ} ${LDFLAGS}
 
+%: %.c ${COMMON}
+	@echo LD $@
+	@echo -e "#define $@(argc,argv, ...) main(argc,argv)\n#include \"$<\"" > temp.c
+	@${CC} -o $@ temp.c ${COMMON} ${LDFLAGS}
+	@rm temp.c
+
+
 clean:
 	@echo cleaning
-	@rm -f  ${OBJ} ${TARGET} ${TARGET}-${VERSION}.tar.gz
+	@rm -f  ${OBJ} ${OBJ:.o=} ${TARGET} ${TARGET}-${VERSION}.tar.gz
 
 dist: clean
 	@echo creating dist tarball
