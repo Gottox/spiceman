@@ -1,32 +1,34 @@
-# spiceman - a suckless pkgmanager
+# spice - suckless pkgmanager tools
 # © 2006-2007 Enno Boland
 
 include config.mk
 
-SRC = main.c
+SRC = spicedb.c spiceins.c spicerm.c spiceget.c libpkg.c
 OBJ = ${SRC:.c=.o}
+TARGET = spicedb spiceins spicerm spiceget
+COMMON = libpkg.o
 
-all: options spiceman
+all: options ${COMMON} ${TARGET}
 
 options:
-	@echo spiceman build options:
+	@echo spice build options:
 	@echo "CFLAGS   = ${CFLAGS}"
 	@echo "LDFLAGS  = ${LDFLAGS}"
 	@echo "CC       = ${CC}"
 
-.c.o:
+%.o: %.c
 	@echo CC $<
 	@${CC} -c ${CFLAGS} $<
 
 ${OBJ}: config.mk
 
-spiceman: ${OBJ}
-	@echo CC -o $@
-	${CC} -o $@ ${OBJ} ${LDFLAGS}
+% : %.o ${COMMON}
+	@echo LD $< $@
+	@${CC} -o $@ $< ${COMMON} ${LDFLAGS}
 
 clean:
 	@echo cleaning
-	@rm -f spiceman ${OBJ} spiceman-${VERSION}.tar.gz
+	@rm -f  ${OBJ} ${TARGET} spiceman-${VERSION}.tar.gz
 
 dist: clean
 	@echo creating dist tarball
