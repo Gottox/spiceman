@@ -3,10 +3,9 @@
 
 include config.mk
 
-SRC = db.c extract.c delete.c main.c common.c depency.c
+SRC = common.c db.c delete.c depency.c extract.c main.c
 OBJ = ${SRC:.c=.o}
 TARGET = spiceman
-COMMON = common.o
 
 all: options ${TARGET}
 
@@ -25,13 +24,6 @@ ${OBJ}: config.mk
 ${TARGET}: ${OBJ}
 	@echo LD $@
 	@${CC} -o $@ ${OBJ} ${LDFLAGS}
-
-%: %.c ${COMMON}
-	@echo LD $@
-	@echo -e "int main(int argc, char *argv[]) { return $@(argc,argv,stdin,stdout); }\n#include \"$<\"" > temp.c
-	@${CC} -o $@ temp.c ${COMMON} ${LDFLAGS}
-	@rm temp.c
-
 
 clean:
 	@echo cleaning

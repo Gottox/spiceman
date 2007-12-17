@@ -23,9 +23,8 @@ void db_help() {
 	APPLETUSAGE("db", "[-L] [-l] [-r] [-s]");
 	puts("	-B	list binary packages only");
 	puts("	-S	list source packages only");
-	puts("	-L	list all installed packages");
+	puts("	-L	list installed packages only");
 	puts("	-l	list all packages");
-	puts("	-r	list all repositories");
 	puts("	-s	sync with repository");
 }
 

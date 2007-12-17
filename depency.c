@@ -21,9 +21,11 @@
 
 void depency_help() {
 	APPLETUSAGE("depency","");
+	INFILEHELP;
+	puts("	-i	interactively select");
+	puts("	-b	backward depencies");
 }
 
 int depency(int argc, char *argv[], FILE *in, FILE *out) {
-	puts("Hallo!");
 	return 0;
 }

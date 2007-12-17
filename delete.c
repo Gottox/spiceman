@@ -21,6 +21,8 @@
 
 void delete_help() {
 	APPLETUSAGE("delete", "");
+	INFILEHELP;
+	puts("	-f	force remove (even if it's not installed)");
 }
 
 int delete(int argc, char *argv[], FILE *in, FILE *out) {

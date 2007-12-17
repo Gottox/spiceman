@@ -26,6 +26,7 @@
 #include "depency.h"
 
 void help();
+int main_applet(int argc, char *argv[], FILE *in, FILE *out);
 void version();
 
 struct Applet {
@@ -39,12 +40,21 @@ static struct Applet applets[] = {
 	{ delete,	delete_help,	"delete" },
 	{ extract,	extract_help,	"extract" },
 	{ depency,	depency_help,	"depency" },
+	{ main_applet,	help,		NULL },
 };
+
+int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
+	int i;
+
+	for(i = 0; i < argc; i++) {
+	
+	}
+	return EXIT_FAILURE;
+}
 
 void help() {
 	int i;
 
-	version();
 	puts("spiceman [-I] [-h] [-v] [-i pkg|-r pkg|-s pkg]");
 	puts("	-I	use installed packages as db source.");
 	puts("	-h	This help message");
@@ -53,7 +63,7 @@ void help() {
 	puts("	-r	Remove packages");
 	puts("	-s	search package");
 	puts("Applets:");
-	for(i = 0; i < LENGTH(applets); i++) {
+	for(i = 0; i < LENGTH(applets)-1; i++) {
 		applets[i].help();
 	}
 }
@@ -65,49 +75,43 @@ void version() {
 int main(int argc, char *argv[]) {
 	int i;
 	char *bn;
-	int showhelp;
+	int showhelp, retval;
+	FILE *in;
 
-	showhelp = 0;
+	showhelp = argc <= 1;
+	in = stdin;
 	bn = basename(argv[0]);
-	for(i = 0; i < argc; i++)
-		if(argv[i][0] == '-' && strchr(argv[i],'v')) {
+	for(i = 0; i < argc && !showhelp; i++) {
+		if(argv[i][0] != '-')
+			continue;
+		switch(argv[i][1]) {
+		case 'v':
 			version();
 			exit(EXIT_FAILURE);
-		}
-		else if(argv[i][0] == '-' && strchr(argv[i],'h')) {
+		case 'h':
 			showhelp = 1;
-		}
-	if(argc <= 1) {
-		help();
-		exit(EXIT_FAILURE);
-	}
-	for(i = 0; i < LENGTH(applets); i++) {
-		if(strncmp(bn, APPLETPREFIX, LENGTH(APPLETPREFIX)-1) == 0 &&
-				strcmp(bn + LENGTH(APPLETPREFIX)-1, applets[i].name) == 0)
-			return applets[i].function(argc, argv, stdin, stdout);
-		else if(argc > 1 && strcmp(argv[1], applets[i].name) == 0) {
-			if(showhelp) {
-				version();
-				applets[i].help();
-				exit(EXIT_FAILURE);
-			}
-			else
-				return applets[i].function(argc-1, argv+1, stdin, stdout);
-		}
-	}
-	for(i = 1; i < argc; i++) {
-		if(argv[i][0] != '-') {
-			help();
-			exit(EXIT_FAILURE);
-		}
-		switch(argv[i][1]) {
-		case 'i':
-			
 			break;
-		default:
-			help();
-			exit(EXIT_FAILURE);
+		case 'R':
+			if(++i < argc)
+				showhelp = 1;
+			else if(!(in = fopen(argv[i],"r")))
+				eprint("Cannot open `%s`.",argv[i]);
 		}
 	}
-	return EXIT_SUCCESS;
+	for(i = 0; i < LENGTH(applets) - 1; i++)
+		if((strncmp(bn, APPLETPREFIX, LENGTH(APPLETPREFIX)-1) == 0 &&
+				strcmp(bn + LENGTH(APPLETPREFIX)-1, applets[i].name) == 0) ||
+				(argc > 1 && strcmp(argv[1], applets[i].name) == 0))
+			break;
+	if(showhelp) {
+		version();
+		applets[i].help();
+		retval = EXIT_FAILURE;
+	}
+	else if(applets[i].name == NULL || strcmp(argv[1], applets[i].name) != 0)
+		retval = applets[i].function(argc, argv, in, stdout);
+	else
+		retval = applets[i].function(argc-1, argv+1, in, stdout);
+	fclose(in);
+	return retval;
 }

@@ -21,6 +21,9 @@
 
 void extract_help() {
 	APPLETUSAGE("extract","");
+	INFILEHELP;
+	puts("	-o	overwrite files");
+	puts("	-i	interactive");
 }
 
 int extract(int argc, char *argv[], FILE *in, FILE *out) {
