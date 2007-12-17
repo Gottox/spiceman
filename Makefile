@@ -3,7 +3,7 @@
 
 include config.mk
 
-SRC = common.c db.c delete.c depency.c extract.c main.c
+SRC = common.c db.c delete.c depency.c extract.c filter.c main.c
 OBJ = ${SRC:.c=.o}
 TARGET = spiceman
 
@@ -17,11 +17,11 @@ options:
 
 ${OBJ}: config.mk
 
-main.o: main.c
+main.o: main.c common.h
 	@echo CC $@
 	@${CC} -c ${CFLAGS} $<
 
-%.o: %.c %.h
+%.o: %.c %.h common.h
 	@echo CC $@
 	@${CC} -c ${CFLAGS} $<
 

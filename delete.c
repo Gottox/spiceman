@@ -20,9 +20,9 @@
 #include "delete.h"
 
 void delete_help() {
-	APPLETUSAGE("delete", "");
+	APPLETUSAGE("delete");
 	INFILEHELP;
-	puts("	-f	force remove (even if it's not installed)");
+	fputs("	-f	force remove (even if it's not installed)\n", stderr);
 }
 
 int delete(int argc, char *argv[], FILE *in, FILE *out) {

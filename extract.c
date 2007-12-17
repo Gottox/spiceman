@@ -20,10 +20,10 @@
 #include "extract.h"
 
 void extract_help() {
-	APPLETUSAGE("extract","");
+	APPLETUSAGE("extract");
 	INFILEHELP;
-	puts("	-o	overwrite files");
-	puts("	-i	interactive");
+	fputs("	-o	overwrite files\n", stderr);
+	fputs("	-i	interactive\n", stderr);
 }
 
 int extract(int argc, char *argv[], FILE *in, FILE *out) {

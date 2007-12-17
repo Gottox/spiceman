@@ -20,15 +20,15 @@
 #include "db.h"
 
 void db_help() {
-	APPLETUSAGE("db", "[-L] [-l] [-r] [-s]");
-	puts("	-B	list binary packages only");
-	puts("	-S	list source packages only");
-	puts("	-L	list installed packages only");
-	puts("	-l	list all packages");
-	puts("	-s	sync with repository");
+	APPLETUSAGE("db");
+	fputs("	-B	list binary packages only\n", stderr);
+	fputs("	-S	list source packages only\n", stderr);
+	fputs("	-L	list installed packages only\n", stderr);
+	fputs("	-l	list all packages\n", stderr);
+	fputs("	-s	sync with repository\n", stderr);
 }
 
 int db(int argc, char *argv[], FILE *in, FILE *out) {
-	puts("Hallo!");
+	fputs("db",out);
 	return 0;
 }

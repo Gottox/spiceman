@@ -18,8 +18,8 @@
 #define APPLETPREFIX "sp-"
 
 #define LENGTH(x)		sizeof(x)/sizeof(x[0])
-#define APPLETUSAGE(a,u)	puts("sp-" a "\nspiceman " a " " u);
-#define INFILEHELP		puts("	-R <f>	read packages from file (default: stdin)");
+#define APPLETUSAGE(a)	fputs("sp-" a "\nspiceman " a "\n", stderr);
+#define INFILEHELP		fputs("	-R <f>	read packages from file (default: stdin)\n", stderr);
 
 typedef int (*Cmdfunction)(int, char *[], FILE *in, FILE *out);
 
@@ -29,6 +29,6 @@ struct Cmd {
 	char **argv;
 };
 
-int cmdchain(int cmdc, ...);
-void eprint(const char *format, ...);
-int spawn(int argc, char *argv[], FILE *in, FILE *out);
+int checksyntax(char *line);			/* syntaxcheck of input */
+int cmdchain(int cmdc, struct Cmd *cmd);		/* executes a chain of commands */
+void eprint(const char *format, ...);		/* prints message and exits*/

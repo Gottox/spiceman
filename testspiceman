@@ -1,0 +1,6 @@
+#!/bin/sh
+chroot=/work/gnuffy_chroot
+make clean all
+cp spiceman $chroot/tmp
+echo ---------------------------------------------------------
+sudo chroot "$chroot" /tmp/spiceman "$@"

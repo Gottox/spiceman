@@ -20,10 +20,10 @@
 #include "depency.h"
 
 void depency_help() {
-	APPLETUSAGE("depency","");
+	APPLETUSAGE("depency");
 	INFILEHELP;
-	puts("	-i	interactively select");
-	puts("	-b	backward depencies");
+	fputs("	-i	interactively select\n", stderr);
+	fputs("	-b	backward depencies\n", stderr);
 }
 
 int depency(int argc, char *argv[], FILE *in, FILE *out) {

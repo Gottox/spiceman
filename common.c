@@ -22,36 +22,34 @@
 
 #include "common.h"
 
-int cmdchain(int cmdc, ...) {
-	va_list ap;
-	struct Cmd *c;
+int checksyntax(char *line) {
+	return 1;
+}
+
+int cmdchain(int cmdc, struct Cmd *cmd) {
 	FILE *in, *out;
-	int fd[2], pid, retval, status;
+	int i, fd[2], pid, retval, status;
 
 	in = stdin;
-	va_start(ap, cmdc);
-	while(--cmdc) {
-		if(cmdc - 1 && pipe(fd) != 0)
-			eprint("Cannot create pipe");
-		if(!(out = fdopen(fd[0], "w")))
-			eprint("Cannot open pipe for writing");
-		c = va_arg(ap, struct Cmd *);
+	for(i = 0; i < cmdc-1; i++) {
+		if(pipe(fd) != 0)
+			eprint("Cannot create pipe: ");
+		if(!(out = fdopen(fd[1], "w")))
+			eprint("Cannot open pipe for writing: ");
 		pid = fork();
 		if(pid < 0)
-			eprint("Cannot fork");
+			eprint("Cannot fork: ");
 		else if(pid == 0)
-			exit(c->function(c->argc,c->argv,in,out));
+			exit(cmd[i].function(cmd[i].argc,cmd[i].argv,in,out));
 		fclose(out);
 		if(in != stdin)
 			fclose(in);
-		if(!(in = fdopen(fd[1], "r")))
-			eprint("Cannot open pipe for reading");
+		if(!(in = fdopen(fd[0], "r")))
+			eprint("Cannot open pipe for reading: ");
 	}
 	out = stdout;
-	c = va_arg(ap, struct Cmd *);
-	retval = c->function(c->argc,c->argv,in,out);
+	retval = cmd[i].function(cmd[i].argc,cmd[i].argv,in,out);
 	while(wait(&status) != -1);
-	va_end(ap);
 	return retval;
 }
 
@@ -61,12 +59,7 @@ eprint(const char *format, ...) {
 
 	va_start(ap, format);
 	vfprintf(stderr, format, ap);
+	perror(NULL);
 	va_end(ap);
 	exit(EXIT_FAILURE);
 }
-
-int spawn(int argc, char *argv[], FILE *in, FILE *out) {
-	
-	return 0;
-}
-
