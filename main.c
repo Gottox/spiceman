@@ -50,15 +50,25 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 	int action;
 	int installed = 0;
 	struct Cmd cmds[2];
-	char *v[1][10];
+	char *v[2][10], *arg;
 
 	action = 0;
-	for(i = 0; i < argc && argv[i][0] == '-'; i++) 
+	arg = NULL;
+	for(i = 0; i < argc; i++) {
+		if(argv[i][0] != '-') {
+			help();
+			return EXIT_FAILURE;
+		}
 		switch(argv[i][1]) {
 		case 's':
 		case 'i':
 		case 'r':
 			action = argv[i][1];
+			if(++i >= argc) {
+				help();
+				return EXIT_FAILURE;
+			}
+			arg = argv[i];
 			break;
 		case 'I':
 			installed = 1;
@@ -68,8 +78,7 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 			help();
 			return EXIT_FAILURE;
 		}
-	if(i == argc) 
-		eprint("No package do search defined\n");
+	}
 
 	switch(action) {
 		case 's':
@@ -79,7 +88,9 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 			cmds[0].argv = v[0];
 			cmds[1].function = filter;
 			cmds[1].argc = 0;
-			cmds[0].argv = NULL;
+			v[1][0] = "-s";
+			v[1][1] = arg;
+			cmds[1].argv = v[1];
 			cmdchain(2, cmds);
 			break;
 	}

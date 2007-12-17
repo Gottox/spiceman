@@ -21,8 +21,6 @@
 
 void db_help() {
 	APPLETUSAGE("db");
-	fputs("	-B	list binary packages only\n", stderr);
-	fputs("	-S	list source packages only\n", stderr);
 	fputs("	-L	list installed packages only\n", stderr);
 	fputs("	-l	list all packages\n", stderr);
 	fputs("	-s	sync with repository\n", stderr);
