@@ -15,6 +15,11 @@
  * along with this program; if not, write to the Free Software */
 #include <stdio.h>
 
+#define APPLETPREFIX "sp-"
+
+#define LENGTH(x) sizeof(x)/sizeof(x[0])
+#define APPLETUSAGE(a,u) puts("sp-" a "|spiceman " a " " u);
+
 typedef int (*Cmdfunction)(int, char *[], FILE *in, FILE *out);
 
 struct Cmd {

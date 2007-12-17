@@ -13,4 +13,17 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software */
-int ui(int argc, char *argv[], FILE *in, FILE *out);
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "common.h"
+#include "depency.h"
+
+void depency_help() {
+	APPLETUSAGE("depency","");
+}
+
+int depency(int argc, char *argv[], FILE *in, FILE *out) {
+	puts("Hallo!");
+	return 0;
+}

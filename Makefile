@@ -3,7 +3,7 @@
 
 include config.mk
 
-SRC = db.c extract.c delete.c main.c common.c ui.c
+SRC = db.c extract.c delete.c main.c common.c depency.c
 OBJ = ${SRC:.c=.o}
 TARGET = spiceman
 COMMON = common.o

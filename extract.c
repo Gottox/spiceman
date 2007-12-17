@@ -19,6 +19,10 @@
 #include "common.h"
 #include "extract.h"
 
+void extract_help() {
+	APPLETUSAGE("extract","");
+}
+
 int extract(int argc, char *argv[], FILE *in, FILE *out) {
 	return 0;
 }

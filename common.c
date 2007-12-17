@@ -55,11 +55,6 @@ int cmdchain(int cmdc, ...) {
 	return retval;
 }
 
-int spawn(int argc, char *argv[], FILE *in, FILE *out) {
-	
-	return 0;
-}
-
 void
 eprint(const char *format, ...) {
 	va_list ap;
@@ -69,3 +64,9 @@ eprint(const char *format, ...) {
 	va_end(ap);
 	exit(EXIT_FAILURE);
 }
+
+int spawn(int argc, char *argv[], FILE *in, FILE *out) {
+	
+	return 0;
+}
+

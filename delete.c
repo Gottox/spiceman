@@ -19,6 +19,10 @@
 #include "common.h"
 #include "delete.h"
 
+void delete_help() {
+	APPLETUSAGE("delete", "");
+}
+
 int delete(int argc, char *argv[], FILE *in, FILE *out) {
 	return 0;
 }
