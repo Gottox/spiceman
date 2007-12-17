@@ -5,8 +5,7 @@ include config.mk
 
 SRC = db.c extract.c delete.c main.c common.c ui.c
 OBJ = ${SRC:.c=.o}
-TARGET_ONEFILE = spiceman
-TARGET_SEPERATE = spiceman
+TARGET = spiceman
 COMMON = common.o
 
 all: options ${TARGET}
@@ -29,14 +28,14 @@ ${TARGET}: ${OBJ}
 
 %: %.c ${COMMON}
 	@echo LD $@
-	@echo -e "#define $@(argc,argv, ...) main(argc,argv)\n#include \"$<\"" > temp.c
+	@echo -e "int main(int argc, char *argv[]) { return $@(argc,argv,stdin,stdout); }\n#include \"$<\"" > temp.c
 	@${CC} -o $@ temp.c ${COMMON} ${LDFLAGS}
 	@rm temp.c
 
 
 clean:
 	@echo cleaning
-	@rm -f  ${OBJ} ${OBJ:.o=} ${TARGET} ${TARGET}-${VERSION}.tar.gz
+	@rm -f -- ${OBJ} ${OBJ:.o=} ${TARGET} ${TARGET}-${VERSION}.tar.gz
 
 dist: clean
 	@echo creating dist tarball

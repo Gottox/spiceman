@@ -25,3 +25,4 @@ struct Cmd {
 
 int cmdchain(int cmdc, ...);
 void eprint(const char *format, ...);
+int spawn(int argc, char *argv[], FILE *in, FILE *out);

@@ -33,7 +33,7 @@ struct Applet {
 };
 
 static struct Applet applets[] = {
-	{ db,	"db" },
+	{ db,		"db" },
 	{ extract,	"extract" },
 	{ delete,	"delete" },
 };
@@ -71,6 +71,11 @@ int main(int argc, char *argv[]) {
 		if(argv[i][0] != '-') {
 			help();
 			return EXIT_FAILURE;
+		}
+		switch(argv[i][1]) {
+		case 'i':
+			
+			break;
 		}
 	}
 	return EXIT_SUCCESS;

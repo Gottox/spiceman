@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "common.h"
 
@@ -24,7 +26,7 @@ int cmdchain(int cmdc, ...) {
 	va_list ap;
 	struct Cmd *c;
 	FILE *in, *out;
-	int fd[2], pid;
+	int fd[2], pid, retval, status;
 
 	in = stdin;
 	va_start(ap, cmdc);
@@ -39,14 +41,23 @@ int cmdchain(int cmdc, ...) {
 			eprint("Cannot fork");
 		else if(pid == 0)
 			exit(c->function(c->argc,c->argv,in,out));
+		fclose(out);
+		if(in != stdin)
+			fclose(in);
 		if(!(in = fdopen(fd[1], "r")))
 			eprint("Cannot open pipe for reading");
 	}
 	out = stdout;
 	c = va_arg(ap, struct Cmd *);
-	c->function(c->argc,c->argv,in,out);
-	while(wait() != -1);
+	retval = c->function(c->argc,c->argv,in,out);
+	while(wait(&status) != -1);
 	va_end(ap);
+	return retval;
+}
+
+int spawn(int argc, char *argv[], FILE *in, FILE *out) {
+	
+	return 0;
 }
 
 void
