@@ -17,12 +17,16 @@ options:
 
 ${OBJ}: config.mk
 
-%.o: %.c
+main.o: main.c
+	@echo CC $@
+	@${CC} -c ${CFLAGS} $<
+
+%.o: %.c %.h
 	@echo CC $@
 	@${CC} -c ${CFLAGS} $<
 
 ${TARGET}: ${OBJ}
-	@echo LD $@
+	@echo CC -o $@
 	@${CC} -o $@ ${OBJ} ${LDFLAGS}
 
 clean:

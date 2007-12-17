@@ -62,7 +62,6 @@ void help() {
 	puts("	-i	Install packages");
 	puts("	-r	Remove packages");
 	puts("	-s	search package");
-	puts("Applets:");
 	for(i = 0; i < LENGTH(applets)-1; i++) {
 		applets[i].help();
 	}
