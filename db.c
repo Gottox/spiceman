@@ -24,6 +24,7 @@ void db_help() {
 	fputs("	-L	list installed packages only\n", stderr);
 	fputs("	-l	list all packages\n", stderr);
 	fputs("	-s	sync with repository\n", stderr);
+	fputs("	-o	find all versions of the same packages\n", stderr);
 }
 
 int db(int argc, char *argv[], FILE *in, FILE *out) {

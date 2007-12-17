@@ -28,6 +28,7 @@
 
 void help();
 int main_applet(int argc, char *argv[], FILE *in, FILE *out);
+void printchain(int cmdc, struct Cmd *cmd);
 void version();
 
 struct Applet {
@@ -48,10 +49,12 @@ static struct Applet applets[] = {
 int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 	int i;
 	int action;
+	int showcommand;
+
+	showcommand = 0;
 	int installed = 0;
 	struct Cmd cmds[2];
 	char *v[2][10], *arg;
-
 	action = 0;
 	arg = NULL;
 	for(i = 0; i < argc; i++) {
@@ -73,6 +76,9 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 		case 'I':
 			installed = 1;
 			break;
+		case 'c':
+			showcommand = 1;
+			break;
 		default:
 			version();
 			help();
@@ -87,25 +93,49 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 			v[0][0] = "-I";
 			cmds[0].argv = v[0];
 			cmds[1].function = filter;
-			cmds[1].argc = 0;
+			cmds[1].argc = 2;
 			v[1][0] = "-s";
 			v[1][1] = arg;
 			cmds[1].argv = v[1];
-			cmdchain(2, cmds);
+			if(showcommand)
+				printchain(2, cmds);
+			else
+				return cmdchain(2, cmds);
 			break;
 	}
-	return EXIT_FAILURE;
+	return EXIT_SUCCESS;
+}
+
+void printchain(int cmdc, struct Cmd *cmd) {
+	int i, j;
+
+	for(i = 0; i < cmdc; i++) {
+		for(j = 0; j < LENGTH(applets)-1; j++) 
+			if(applets[j].function == cmd[i].function)
+				break;
+		if(j == LENGTH(applets)-1)
+			fputs("<unknown>", stderr);
+		else
+			fprintf(stderr,APPLETPREFIX "%s", applets[j].name);
+		for(j = 0; j < cmd[i].argc;j++) {
+			fprintf(stderr," \"%s\"",cmd[i].argv[j]);
+		}
+		if(i + 1 < cmdc)
+			fputs(" | ",stderr);
+	}
+	fputs("\n",stderr);
 }
 
 void help() {
 	fputs("spiceman\n", stderr);
+	fputs("	-H	help message for all applets\n", stderr);
 	fputs("	-I	use installed packages as db source.\n", stderr);
 	fputs("	-h	help message\n", stderr);
-	fputs("	-H	help message for all applets\n", stderr);
+	fputs("	-c	show command and exit\n", stderr);
+	fputs("	-i <p>	Install packages\n", stderr);
+	fputs("	-r <p>	Remove packages\n", stderr);
+	fputs("	-s <p>	search package\n", stderr);
 	fputs("	-v	Version\n", stderr);
-	fputs("	-i	Install packages\n", stderr);
-	fputs("	-r	Remove packages\n", stderr);
-	fputs("	-s	search package\n", stderr);
 }
 
 void version() {

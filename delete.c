@@ -22,7 +22,7 @@
 void delete_help() {
 	APPLETUSAGE("delete");
 	INFILEHELP;
-	fputs("	-f	force remove (even if it's not installed)\n", stderr);
+	fputs("	-f	force remove (even if db says it's not installed)\n", stderr);
 }
 
 int delete(int argc, char *argv[], FILE *in, FILE *out) {

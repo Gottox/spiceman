@@ -30,5 +30,5 @@ struct Cmd {
 };
 
 int checksyntax(char *line);			/* syntaxcheck of input */
-int cmdchain(int cmdc, struct Cmd *cmd);		/* executes a chain of commands */
+int cmdchain(int cmdc, struct Cmd *cmd);	/* executes a chain of commands */
 void eprint(const char *format, ...);		/* prints message and exits*/

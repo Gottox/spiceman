@@ -22,7 +22,9 @@
 void extract_help() {
 	APPLETUSAGE("extract");
 	INFILEHELP;
+	fputs("	-f	reinstall if not installed\n", stderr);
 	fputs("	-o	overwrite files\n", stderr);
+	fputs("	-p	print conflicting packages to stdout\n", stderr);
 	fputs("	-i	interactive\n", stderr);
 }
 
