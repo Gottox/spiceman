@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software */
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -22,8 +23,13 @@
 
 #include "common.h"
 
-int checksyntax(char *line) {
-	return 1;
+
+
+/* common.c */
+void *
+amemcpy(void *d, void *s, size_t n) {
+	d = erealloc(0,n);
+	return memcpy(d, s, n);
 }
 
 int cmdchain(int cmdc, struct Cmd *cmd) {
@@ -53,6 +59,15 @@ int cmdchain(int cmdc, struct Cmd *cmd) {
 	return retval;
 }
 
+void *
+erealloc(void *p, size_t size) {
+	if(!(p = realloc(p, size))) {
+		perror("Cannot Malloc");
+		exit(EXIT_FAILURE);
+	}
+	return p;
+}
+
 void
 eprint(const char *format, ...) {
 	va_list ap;
@@ -62,4 +77,91 @@ eprint(const char *format, ...) {
 	perror(NULL);
 	va_end(ap);
 	exit(EXIT_FAILURE);
+}
+
+int
+getpkg(struct Package *pkg, FILE *in, char *sep) {
+	char *b;
+	int l, ent, i;
+
+	if(strlen(sep) != 2)
+		return 0;
+	ent = l = 0;
+	b = erealloc(NULL, sizeof(char) * BUFFERSIZE);
+	while((b[l] = fgetc(in)) && b[l] != sep[1]) {
+		if(l && l % BUFFERSIZE == 0)
+			b = erealloc(b, sizeof(char) * BUFFERSIZE + l);
+		if(b[l] == sep[0]) {
+			b[l] = '\0';
+			switch(ent) {
+			case TYPE:
+				pkg->type = b[0];
+				break;
+			case NAME:
+				amemcpy(pkg->name,b, sizeof(char) * l);
+				break;
+			case VER:
+				amemcpy(pkg->name,b, sizeof(char) * l);
+				break;
+			case REL:
+				pkg->rel = atoi(b);
+				break;
+			case RELTIME:
+				pkg->reltime = atoi(b);
+				break;
+			case DESC:
+				amemcpy(pkg->desc,b, sizeof(char) * l);
+				break;
+			case URL:
+				amemcpy(pkg->url,b, sizeof(char) * l);
+				break;
+			case USEF:
+				amemcpy(pkg->usef,b, sizeof(char) * l);
+				break;
+			case REPO:
+				amemcpy(pkg->repo,b, sizeof(char) * l);
+				break;
+			case DEP:
+				amemcpy(pkg->dep,b, sizeof(char) * l);
+				break;
+			case CONFLICT:
+				amemcpy(pkg->conflict,b, sizeof(char) * l);
+				break;
+			case PROV:
+				amemcpy(pkg->prov,b, sizeof(char) * l);
+				break;
+			case SIZE:
+				pkg->size = atoi(b);
+				break;
+			case MD5:
+				for(i = 0; sscanf(b+i*2, "%2x", (unsigned int *)&pkg->key[i]) && i < LENGTH(pkg->md5);i++);
+			case SHA1:
+				for(i = 0; sscanf(b+i*2, "%2x", (unsigned int *)&pkg->key[i]) && i < LENGTH(pkg->sha1);i++);
+			case KEY:
+				for(i = 0; sscanf(b+i*2, "%2x", (unsigned int *)&pkg->key[i]) && i < LENGTH(pkg->key);i++);
+			case INSTIME:
+				pkg->reltime = atoi(b);
+				break;
+			default:
+				break;
+			}
+			l = 0;
+			ent++;
+		}
+		l++;
+	}
+	
+	return 0;
+}
+
+void putpkg(struct Package *pkg, FILE *out, char *sep) {
+	int i = 0;
+	
+	for(i = 0; i < NENTRIES; i++) {
+		
+	}
+}
+
+void version() {
+	fputs("spiceman-" VERSION " - suckless package management tools\n",stderr);
 }

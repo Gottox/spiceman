@@ -22,14 +22,14 @@
 
 #include "db.h"
 #include "delete.h"
-#include "extract.h"
 #include "depency.h"
+#include "download.h"
+#include "extract.h"
 #include "filter.h"
 
 void help();
 int main_applet(int argc, char *argv[], FILE *in, FILE *out);
 void printchain(int cmdc, struct Cmd *cmd);
-void version();
 
 struct Applet {
 	Cmdfunction function;
@@ -40,8 +40,9 @@ struct Applet {
 static struct Applet applets[] = {
 	{ db,		db_help,	"db" },
 	{ delete,	delete_help,	"delete" },
-	{ extract,	extract_help,	"extract" },
 	{ depency,	depency_help,	"depency" },
+	{ download,	download_help,	"download" },
+	{ extract,	extract_help,	"extract" },
 	{ filter,	filter_help,	"filter" },
 	{ main_applet,	help,		NULL },
 };
@@ -85,12 +86,11 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 			return EXIT_FAILURE;
 		}
 	}
-
 	switch(action) {
 		case 's':
 			cmds[0].function = db;
 			cmds[0].argc = installed;
-			v[0][0] = "-I";
+			v[0][0] = "-i";
 			cmds[0].argv = v[0];
 			cmds[1].function = filter;
 			cmds[1].argc = 2;
@@ -102,6 +102,10 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 			else
 				return cmdchain(2, cmds);
 			break;
+		default:
+			version();
+			help();
+			return EXIT_FAILURE;
 	}
 	return EXIT_SUCCESS;
 }
@@ -135,11 +139,8 @@ void help() {
 	fputs("	-i <p>	Install packages\n", stderr);
 	fputs("	-r <p>	Remove packages\n", stderr);
 	fputs("	-s <p>	search package\n", stderr);
+	fputs("	-u	Update system\n", stderr);
 	fputs("	-v	Version\n", stderr);
-}
-
-void version() {
-	fputs("spiceman-" VERSION " - suckless package management tools\n",stderr);
 }
 
 int main(int argc, char *argv[]) {

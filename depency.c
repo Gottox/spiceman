@@ -22,10 +22,10 @@
 void depency_help() {
 	APPLETUSAGE("depency");
 	INFILEHELP;
+	fputs("	-b	backward depencies\n", stderr);
+	fputs("	-i	interactively select\n", stderr);
 	fputs("	-n	only print not installed depencies\n", stderr);
 	fputs("	-r	recursive walk to the depencies\n", stderr);
-	fputs("	-i	interactively select\n", stderr);
-	fputs("	-b	backward depencies\n", stderr);
 }
 
 int depency(int argc, char *argv[], FILE *in, FILE *out) {
