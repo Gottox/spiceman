@@ -28,7 +28,7 @@
 /* common.c */
 void *
 amemcpy(void *d, void *s, size_t n) {
-	d = erealloc(0,n);
+	d = erealloc(0, n);
 	return memcpy(d, s, n);
 }
 
@@ -81,27 +81,31 @@ eprint(const char *format, ...) {
 
 int
 getpkg(struct Package *pkg, FILE *in, char *sep) {
+	char c;
 	char *b;
 	int l, ent, i;
 
-	if(strlen(sep) != 2)
-		return 0;
 	ent = l = 0;
-	b = erealloc(NULL, sizeof(char) * BUFFERSIZE);
-	while((b[l] = fgetc(in)) && b[l] != sep[1]) {
-		if(l && l % BUFFERSIZE == 0)
+	b = NULL;
+	while((c = fgetc(in)) && c != sep[1]) {
+		if(l % BUFFERSIZE == 0)
 			b = erealloc(b, sizeof(char) * BUFFERSIZE + l);
-		if(b[l] == sep[0]) {
+		b[l] = c;
+		if(b[l] == '\\') {
+			b[l] = fgetc(in);
+			l++;
+		}
+		else if(b[l] == sep[0]) {
 			b[l] = '\0';
 			switch(ent) {
 			case TYPE:
 				pkg->type = b[0];
 				break;
 			case NAME:
-				amemcpy(pkg->name,b, sizeof(char) * l);
+				pkg->name = amemcpy(pkg->name, b, sizeof(char) * l);
 				break;
 			case VER:
-				amemcpy(pkg->name,b, sizeof(char) * l);
+				pkg->ver = amemcpy(pkg->ver, b, sizeof(char) * l);
 				break;
 			case REL:
 				pkg->rel = atoi(b);
@@ -110,35 +114,38 @@ getpkg(struct Package *pkg, FILE *in, char *sep) {
 				pkg->reltime = atoi(b);
 				break;
 			case DESC:
-				amemcpy(pkg->desc,b, sizeof(char) * l);
+				pkg->desc = amemcpy(pkg->desc, b, sizeof(char) * l);
 				break;
 			case URL:
-				amemcpy(pkg->url,b, sizeof(char) * l);
+				pkg->url = amemcpy(pkg->url, b, sizeof(char) * l);
 				break;
 			case USEF:
-				amemcpy(pkg->usef,b, sizeof(char) * l);
+				pkg->usef = amemcpy(pkg->usef, b, sizeof(char) * l);
 				break;
 			case REPO:
-				amemcpy(pkg->repo,b, sizeof(char) * l);
+				pkg->repo = amemcpy(pkg->repo, b, sizeof(char) * l);
 				break;
 			case DEP:
-				amemcpy(pkg->dep,b, sizeof(char) * l);
+				pkg->dep = amemcpy(pkg->dep, b, sizeof(char) * l);
 				break;
 			case CONFLICT:
-				amemcpy(pkg->conflict,b, sizeof(char) * l);
+				pkg->conflict = amemcpy(pkg->conflict,b, sizeof(char) * l);
 				break;
 			case PROV:
-				amemcpy(pkg->prov,b, sizeof(char) * l);
+				pkg->prov = amemcpy(pkg->prov,b, sizeof(char) * l);
 				break;
 			case SIZE:
 				pkg->size = atoi(b);
 				break;
 			case MD5:
-				for(i = 0; sscanf(b+i*2, "%2x", (unsigned int *)&pkg->key[i]) && i < LENGTH(pkg->md5);i++);
+				for(i = 0; sscanf(b+i*2, "%2x", (unsigned int *)&pkg->md5[i]) && i < LENGTH(pkg->md5);i++);
+				break;
 			case SHA1:
-				for(i = 0; sscanf(b+i*2, "%2x", (unsigned int *)&pkg->key[i]) && i < LENGTH(pkg->sha1);i++);
+				for(i = 0; sscanf(b+i*2, "%2x", (unsigned int *)&pkg->sha1[i]) && i < LENGTH(pkg->sha1);i++);
+				break;
 			case KEY:
 				for(i = 0; sscanf(b+i*2, "%2x", (unsigned int *)&pkg->key[i]) && i < LENGTH(pkg->key);i++);
+				break;
 			case INSTIME:
 				pkg->reltime = atoi(b);
 				break;
@@ -148,18 +155,89 @@ getpkg(struct Package *pkg, FILE *in, char *sep) {
 			l = 0;
 			ent++;
 		}
-		l++;
+		else
+			l++;
 	}
-	
-	return 0;
+	return NENTRIES == ent;
 }
 
 void putpkg(struct Package *pkg, FILE *out, char *sep) {
-	int i = 0;
+	unsigned int i;
+	char *p;
 	
 	for(i = 0; i < NENTRIES; i++) {
-		
+		p = NULL;
+		switch(i) {
+		case TYPE:
+			fputc(pkg->type, out);
+			break;
+		case NAME:
+			p = pkg->name;
+			break;
+		case VER:
+			p = pkg->ver;
+			break;
+		case REL:
+			fprintf(out,"%u", pkg->rel);
+			break;
+		case RELTIME:
+			fprintf(out,"%u", pkg->reltime);
+			break;
+		case DESC:
+			p = pkg->desc;
+			break;
+		case URL:
+			p = pkg->url;
+			break;
+		case USEF:
+			p = pkg->usef;
+			break;
+		case REPO:
+			p = pkg->repo;
+			break;
+		case DEP:
+			p = pkg->dep;
+			break;
+		case CONFLICT:
+			p = pkg->conflict;
+			break;
+		case PROV:
+			p = pkg->prov;
+			break;
+		case SIZE:
+			fprintf(out,"%u", pkg->size);
+			break;
+		case MD5:
+			break;
+		case SHA1:
+			break;
+		case KEY:
+			break;
+		case INSTIME:
+			fprintf(out,"%u",pkg->instime);
+			break;
+		}
+		if(p)
+			for(; *p != '\0'; p++) {
+				if(*p == sep[0] || *p == sep[1] || *p == '\\')
+					fputc('\\',out);
+				fputc(*p,out);
+			}
+		fputc(sep[0],out);
 	}
+	fputc(sep[1],out);
+}
+
+void freepkg(struct Package *pkg) {
+	free(pkg->name);
+	free(pkg->ver);
+	free(pkg->desc);
+	free(pkg->url);
+	free(pkg->usef);
+	free(pkg->repo);
+	free(pkg->dep);
+	free(pkg->conflict);
+	free(pkg->prov);
 }
 
 void version() {

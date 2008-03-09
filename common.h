@@ -66,6 +66,7 @@ void *amemcpy(void *d, void *s, size_t n);	/* cpy memory to an allocated buffer 
 int cmdchain(int cmdc, struct Cmd *cmd);	/* executes a chain of commands */
 void *erealloc(void *p, size_t size);		/* remalloc + error testing */
 void eprint(const char *format, ...);		/* prints message and exits */
+void freepkg(struct Package *pkg);
 int getpkg(struct Package *pkg, FILE *in, char *sep);
 						/* reads a package from in */
 void putpkg(struct Package *pkg, FILE *out, char *sep);

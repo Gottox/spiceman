@@ -28,6 +28,13 @@ void db_help() {
 }
 
 int db(int argc, char *argv[], FILE *in, FILE *out) {
-	fputs("db",out);
+	struct Package pkg;
+	char sep[2];
+	FILE *f = fopen("pkglist","r");
+	fread(sep, sizeof(sep), 1, f);
+	getpkg(&pkg, f, sep);
+	puts(pkg.repo);
+	putpkg(&pkg, stdout, sep);
+	fclose(f);
 	return 0;
 }
