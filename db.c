@@ -33,8 +33,11 @@ int db(int argc, char *argv[], FILE *in, FILE *out) {
 	FILE *f = fopen("pkglist","r");
 	fread(sep, sizeof(sep), 1, f);
 	getpkg(&pkg, f, sep);
-	puts(pkg.repo);
+	freepkg(&pkg);
+
+	getpkg(&pkg, f, sep);
 	putpkg(&pkg, stdout, sep);
+	freepkg(&pkg);
 	fclose(f);
 	return 0;
 }

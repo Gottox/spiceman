@@ -84,10 +84,9 @@ getpkg(struct Package *pkg, FILE *in, char *sep) {
 	char c;
 	char *b;
 	int l, ent, i;
-
-	ent = l = 0;
+	 
 	b = NULL;
-	while((c = fgetc(in)) && c != sep[1]) {
+	for(c = ent = l = 0; c != sep[1] && (c = fgetc(in));) {
 		if(l % BUFFERSIZE == 0)
 			b = erealloc(b, sizeof(char) * BUFFERSIZE + l);
 		b[l] = c;
@@ -95,7 +94,7 @@ getpkg(struct Package *pkg, FILE *in, char *sep) {
 			b[l] = fgetc(in);
 			l++;
 		}
-		else if(b[l] == sep[0]) {
+		else if(b[l] == sep[0] || b[l] == sep[1]) {
 			b[l] = '\0';
 			switch(ent) {
 			case TYPE:
@@ -138,16 +137,19 @@ getpkg(struct Package *pkg, FILE *in, char *sep) {
 				pkg->size = atoi(b);
 				break;
 			case MD5:
-				for(i = 0; sscanf(b+i*2, "%2x", (unsigned int *)&pkg->md5[i]) && i < LENGTH(pkg->md5);i++);
+				for(i = 0; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->md5[i]) &&
+						i < LENGTH(pkg->md5);i++);
 				break;
 			case SHA1:
-				for(i = 0; sscanf(b+i*2, "%2x", (unsigned int *)&pkg->sha1[i]) && i < LENGTH(pkg->sha1);i++);
+				for(i = 0; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->sha1[i]) &&
+						i < LENGTH(pkg->sha1);i++);
 				break;
 			case KEY:
-				for(i = 0; sscanf(b+i*2, "%2x", (unsigned int *)&pkg->key[i]) && i < LENGTH(pkg->key);i++);
+				for(i = 0; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->key[i]) &&
+						i < LENGTH(pkg->key);i++);
 				break;
 			case INSTIME:
-				pkg->reltime = atoi(b);
+				pkg->instime = atoi(b);
 				break;
 			default:
 				break;
@@ -158,7 +160,13 @@ getpkg(struct Package *pkg, FILE *in, char *sep) {
 		else
 			l++;
 	}
-	return NENTRIES == ent;
+	if(ent < NENTRIES) {
+		freepkg(pkg);
+		return 0;
+	}
+	else {
+		return 1;
+	}
 }
 
 void putpkg(struct Package *pkg, FILE *out, char *sep) {
@@ -169,7 +177,8 @@ void putpkg(struct Package *pkg, FILE *out, char *sep) {
 		p = NULL;
 		switch(i) {
 		case TYPE:
-			fputc(pkg->type, out);
+			if(pkg->type != '\0')
+				fputc(pkg->type, out);
 			break;
 		case NAME:
 			p = pkg->name;
@@ -229,15 +238,15 @@ void putpkg(struct Package *pkg, FILE *out, char *sep) {
 }
 
 void freepkg(struct Package *pkg) {
-	free(pkg->name);
-	free(pkg->ver);
-	free(pkg->desc);
-	free(pkg->url);
-	free(pkg->usef);
-	free(pkg->repo);
-	free(pkg->dep);
-	free(pkg->conflict);
-	free(pkg->prov);
+	if(pkg->name)		free(pkg->name);
+	if(pkg->ver)		free(pkg->ver);
+	if(pkg->desc)		free(pkg->desc);
+	if(pkg->url)		free(pkg->url);
+	if(pkg->usef)		free(pkg->usef);
+	if(pkg->repo)		free(pkg->repo);
+	if(pkg->dep)		free(pkg->dep);
+	if(pkg->conflict)	free(pkg->conflict);
+	if(pkg->prov)		free(pkg->prov);
 }
 
 void version() {
