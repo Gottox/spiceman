@@ -1,4 +1,4 @@
-/* spiceman - suckless package management tools
+/* spiceman - distributed package management tools
  * Copyright (C) Enno Boland
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,6 +18,7 @@
 
 #include "common.h"
 #include "depency.h"
+#include "db.h"
 
 void depency_help() {
 	APPLETUSAGE("depency");

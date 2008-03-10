@@ -1,4 +1,4 @@
-/* spiceman - suckless package management tools
+/* spiceman - distributed package management tools
  * Copyright (C) Enno Boland
  *
  * This program is free software; you can redistribute it and/or modify
@@ -144,54 +144,53 @@ void help() {
 }
 
 int main(int argc, char *argv[]) {
-	int i;
+	int applet, i;
 	char *bn;
-	int showhelp, retval;
+	unsigned int showhelp, retval;
 	FILE *in;
 
 	showhelp = argc <= 1;
 	in = stdin;
 	bn = basename(argv[0]);
-	for(i = 0; i < argc && !showhelp; i++) {
-		if(argv[i][0] != '-')
-			continue;
-		switch(argv[i][1]) {
-		case 'v':
-			version();
-			exit(EXIT_FAILURE);
-		case 'h':
-			showhelp = 1;
-			break;
-		case 'H':
-			showhelp = 2;
-			break;
-		case 'R':
-			if(++i < argc)
-				showhelp = 1;
-			else if(!(in = fopen(argv[i],"r")))
-				eprint("Cannot open `%s`.",argv[i]);
-		}
-	}
-	for(i = 0; i < LENGTH(applets) - 1; i++)
+	for(applet = 0; applet < LENGTH(applets) - 1; applet++)
 		if((strncmp(bn, APPLETPREFIX, LENGTH(APPLETPREFIX) - 1) == 0 &&
-				strcmp(bn + LENGTH(APPLETPREFIX) - 1, applets[i].name) == 0) ||
-				(argc > 1 && strcmp(argv[1], applets[i].name) == 0))
+				strcmp(bn + LENGTH(APPLETPREFIX) - 1, applets[applet].name) == 0) ||
+				(argc > 1 && strcmp(argv[1], applets[applet].name) == 0))
 			break;
+	for(i = 1; i < argc && !showhelp; i++)
+		if(argv[i][0] == '-')
+			switch(argv[i][1]) {
+			case 'v':
+				version();
+				exit(EXIT_FAILURE);
+			case 'h':
+				showhelp = 1;
+				break;
+			case 'H':
+				showhelp = 2;
+				break;
+			case 'R':
+				if(++i == argc || i > applet)
+					showhelp = 1;
+				else if(!(in = fopen(argv[i],"r")))
+					eprint("Cannot open `%s`: ",argv[i]);
+				break;
+			}
 	if(showhelp) {
 		version();
-		if(showhelp == 2 && i == LENGTH(applets)-1) {
-			applets[i].help();
+		if(showhelp == 2 && applet == LENGTH(applets) - 1) {
+			applets[applet].help();
 			for(i = 0; i < LENGTH(applets) - 1;i++)
 				applets[i].help();
 		}
 		else
-			applets[i].help();
+			applets[applet].help();
 		retval = EXIT_FAILURE;
 	}
-	else if(applets[i].name == NULL || strcmp(argv[1], applets[i].name) != 0)
-		retval = applets[i].function(argc-1, argv+1, in, stdout);
+	else if(applets[applet].name == NULL || strcmp(argv[1], applets[applet].name) != 0)
+		retval = applets[applet].function(argc-1, argv+1, in, stdout);
 	else
-		retval = applets[i].function(argc-2, argv+2, in, stdout);
+		retval = applets[applet].function(argc-2, argv+2, in, stdout);
 	fclose(in);
 	return retval;
 }

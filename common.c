@@ -1,4 +1,4 @@
-/* spiceman - suckless package management tools
+/* spiceman - distributed package management tools
  * Copyright (C) Enno Boland
  *
  * This program is free software; you can redistribute it and/or modify
@@ -250,5 +250,5 @@ void freepkg(struct Package *pkg) {
 }
 
 void version() {
-	fputs("spiceman-" VERSION " - suckless package management tools\n",stderr);
+	fputs("spiceman-" VERSION " - distributed package management tools\n",stderr);
 }

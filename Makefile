@@ -1,4 +1,4 @@
-# spiceman - suckless package management tools
+# spiceman - distributed package management tools
 # (c) 2007 Enno Boland
 
 include config.mk

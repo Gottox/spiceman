@@ -1,4 +1,4 @@
-/* spiceman - suckless package management tools
+/* spiceman - distributed package management tools
  * Copyright (C) Enno Boland
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,6 +22,7 @@
 #define INFILEHELP		fputs("	-R <f>	read packages from file (default: stdin)\n", stderr);
 #define BUFFERSIZE		1024
 #define DEFAULTSEP		":\n"
+
 
 typedef int (*Cmdfunction)(int, char *[], FILE *in, FILE *out);
 

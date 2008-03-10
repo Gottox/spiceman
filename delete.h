@@ -1,4 +1,4 @@
-/* spiceman - suckless package management tools
+/* spiceman - distributed package management tools
  * Copyright (C) Enno Boland
  *
  * This program is free software; you can redistribute it and/or modify

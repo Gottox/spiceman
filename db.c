@@ -1,4 +1,4 @@
-/* spiceman - suckless package management tools
+/* spiceman - distributed package management tools
  * Copyright (C) Enno Boland
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,20 +24,24 @@ void db_help() {
 	fputs("	-i	list installed packages only\n", stderr);
 	fputs("	-p	list repository packages\n", stderr);
 	fputs("	-s	sync with repository\n", stderr);
-	fputs("	-o	find all versions of the same packages\n", stderr);
 }
 
 int db(int argc, char *argv[], FILE *in, FILE *out) {
-	struct Package pkg;
-	char sep[2];
-	FILE *f = fopen("pkglist","r");
-	fread(sep, sizeof(sep), 1, f);
-	getpkg(&pkg, f, sep);
-	freepkg(&pkg);
+	int i;
 
-	getpkg(&pkg, f, sep);
-	putpkg(&pkg, stdout, sep);
-	freepkg(&pkg);
-	fclose(f);
-	return 0;
+	if(argc == 0) {
+		db_help();
+		return EXIT_FAILURE;
+	}
+	for(i = 0; i < argc; i++)
+		switch(argv[0][0] ? argv[0][1] : 0) {
+		case 'i':
+		case 'p':
+		case 's':
+			break;
+		default:
+			db_help();
+			return EXIT_FAILURE;
+		}
+	return EXIT_SUCCESS;
 }
