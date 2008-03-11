@@ -24,8 +24,8 @@
 #include "delete.h"
 #include "depency.h"
 #include "download.h"
-#include "extract.h"
 #include "filter.h"
+#include "install.h"
 
 #define APPLET(x) { x, x ## _help, #x }
 

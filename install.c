@@ -17,10 +17,10 @@
 #include <stdio.h>
 
 #include "common.h"
-#include "extract.h"
+#include "install.h"
 
 void extract_help() {
-	APPLETUSAGE("extract");
+	APPLETUSAGE("install");
 	INFILEHELP;
 	fputs("	-f	reinstall if not installed\n", stderr);
 	fputs("	-o	overwrite files\n", stderr);
