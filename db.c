@@ -23,7 +23,6 @@ void db_help() {
 	APPLETUSAGE("db");
 	fputs("	-i	list installed packages only\n", stderr);
 	fputs("	-p	list packages in database\n", stderr);
-	fputs("	-r	list repository packages\n", stderr);
 }
 
 int db(int argc, char *argv[], FILE *in, FILE *out) {
@@ -33,7 +32,7 @@ int db(int argc, char *argv[], FILE *in, FILE *out) {
 	struct Package pkg;
 
 	if(argc == 0)
-		src = 'l';
+		src = 'p';
 	else if(argv[0][0] == '-')
 		src = argv[0][1];
 	switch(src) {
@@ -42,9 +41,6 @@ int db(int argc, char *argv[], FILE *in, FILE *out) {
 		break;
 	case 'p':
 		db = fopen(DBPREFIX "/packages", "r");
-		break;
-	case 'r':
-		db = fopen(DBPREFIX "/repositories", "r");
 		break;
 	default:
 		db_help();

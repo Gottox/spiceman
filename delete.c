@@ -21,7 +21,6 @@
 
 void delete_help() {
 	APPLETUSAGE("delete");
-	INFILEHELP;
 	fputs("	-f	force remove (even if db says it's not installed)\n", stderr);
 }
 

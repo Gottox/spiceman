@@ -19,15 +19,12 @@
 #include "common.h"
 #include "install.h"
 
-void extract_help() {
+void install_help() {
 	APPLETUSAGE("install");
-	INFILEHELP;
-	fputs("	-f	reinstall if not installed\n", stderr);
+	fputs("	-f	reinstall if installed\n", stderr);
 	fputs("	-o	overwrite files\n", stderr);
-	fputs("	-p	print conflicting packages to stdout\n", stderr);
-	fputs("	-i	interactive\n", stderr);
 }
 
-int extract(int argc, char *argv[], FILE *in, FILE *out) {
+int install(int argc, char *argv[], FILE *in, FILE *out) {
 	return 0;
 }

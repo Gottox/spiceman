@@ -13,5 +13,5 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software */
-int extract(int argc, char *argv[], FILE *in, FILE *out);
-void extract_help();
+int install(int argc, char *argv[], FILE *in, FILE *out);
+void install_help();

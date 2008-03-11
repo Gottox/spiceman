@@ -19,7 +19,6 @@
 
 #define LENGTH(x)		sizeof(x)/sizeof(x[0])
 #define APPLETUSAGE(a)		fputs("sp-" a "\nspiceman " a "\n", stderr);
-#define INFILEHELP		fputs("	-R <f>	read packages from file (default: stdin)\n", stderr);
 #define BUFFERSIZE		1024
 #define DEFAULTSEP		":\n"
 #define SEP(f,sep)		fread(sep, sizeof(char), 2, f);
@@ -33,7 +32,7 @@ enum PkgEnt	{ TYPE, NAME, VER, REL, RELTIME, DESC, URL, USEF, REPO, DEP,
 struct Cmd {
 	Cmdfunction function;
 	int argc;
-	char **argv;
+	char *argv[16];
 };
 
 struct Package {

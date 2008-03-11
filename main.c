@@ -44,65 +44,102 @@ static struct Applet applets[] = {
 	APPLET(delete),
 	APPLET(depency),
 	APPLET(download),
-	APPLET(extract),
 	APPLET(filter),
+	APPLET(install),
 	{ main_applet, help, NULL },
 };
 
 int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
-	int i;
-	int action;
-	int showcommand;
+	int i, action = 0, installed = 0, sync = 0;
+	char *arg = NULL, *p;
+	struct Cmd syncchain[] = {
+		{ db,		1,	{ "-i" } },
+		{ filter,	1,	{ "-r" } },
+		{ download,	0,	{ NULL } },
+		{ install,	1,	{ "-o" } },
+	};
+	struct Cmd searchchain[] = {
+		{ db,		1,	{ "-l" } },
+		{ filter,	2,	{ "-s", NULL } },
+	};
+	struct Cmd installchain[] = {
+		{ db,		1,	{ "-l" } },
+		{ filter,	2,	{ "-e", NULL } },
+		{ download,	0,	{ NULL } },
+		{ install,	2,	{ "-f", "-p" } },
+	};
+	struct Cmd rmchain[] = {
+		{ db,		1,	{ "-i" } },
+		{ filter,	2,	{ "-e", NULL } },
+		{ delete,	0,	{ NULL } },
+	};
+	struct Cmd updatechain[] = {
+		{ db,		1,	{ "-i" } },
+		{ filter,	1,	{ "-o" } },
+		{ filter,	1,	{ "-n" } },
+		{ install,	0,	{ NULL } },
+	};
 
-	showcommand = 0;
-	int installed = 0;
-	struct Cmd cmds[2];
-	char *v[2][10], *arg;
-	action = 0;
-	arg = NULL;
+
 	for(i = 0; i < argc; i++) {
-		if(argv[i][0] != '-') {
+		if(argv[i][0] != '-' || argv[i][1] == 0) {
 			help();
 			return EXIT_FAILURE;
 		}
-		switch(argv[i][1]) {
-		case 's':
-		case 'i':
-		case 'r':
-			action = argv[i][1];
-			if(++i == argc) {
+		for(p = argv[i] + 1; *p; p++) {
+			switch(*p) {
+			case 'u':
+				if(action != 0) {
+					help();
+					return EXIT_FAILURE;
+				}
+				action = 'u';
+				break;
+			case 'y':
+				sync = 1;
+				break;
+			case 'r':
+			case 'i':
+			case 's':
+				if(action != 0 || i + 1 == argc) {
+					help();
+					return EXIT_FAILURE;
+				}
+				action = *p;
+				arg = argv[++i];
+				break;
+			case 'I':
+				installed = 1;
+				break;
+			default:
+				version();
 				help();
 				return EXIT_FAILURE;
 			}
-			arg = argv[i];
-			break;
-		case 'I':
-			installed = 1;
-			break;
-		case 'c':
-			showcommand = 1;
-			break;
-		default:
-			version();
-			help();
-			return EXIT_FAILURE;
 		}
+	}
+
+	if(sync) {
+		printchain(LENGTH(syncchain), syncchain);
+		cmdchain(LENGTH(syncchain), syncchain);
+		if(!action)
+			return EXIT_SUCCESS;
 	}
 	switch(action) {
 		case 's':
-			cmds[0].function = db;
-			cmds[0].argc = installed;
-			v[0][0] = "-i";
-			cmds[0].argv = v[0];
-			cmds[1].function = filter;
-			cmds[1].argc = 2;
-			v[1][0] = "-s";
-			v[1][1] = arg;
-			cmds[1].argv = v[1];
-			if(showcommand)
-				printchain(2, cmds);
-			else
-				return cmdchain(2, cmds);
+			searchchain[1].argv[1] = arg;
+			cmdchain(LENGTH(syncchain), syncchain);
+			break;
+		case 'i':
+			installchain[1].argv[1] = arg;
+			cmdchain(LENGTH(installchain), installchain);
+			break;
+		case 'r':
+			rmchain[1].argv[1] = arg;
+			cmdchain(LENGTH(rmchain), rmchain);
+			break;
+		case 'u':
+			cmdchain(LENGTH(updatechain), updatechain);
 			break;
 		default:
 			version();
@@ -129,7 +166,7 @@ void printchain(int cmdc, struct Cmd *cmd) {
 		if(i + 1 < cmdc)
 			fputs(" | ",stderr);
 	}
-	fputs("\n",stderr);
+	fputc('\n',stderr);
 }
 
 void help() {
@@ -137,17 +174,17 @@ void help() {
 	fputs("	-H	help message for all applets\n", stderr);
 	fputs("	-I	use installed packages as db source.\n", stderr);
 	fputs("	-h	help message\n", stderr);
-	fputs("	-c	show command and exit\n", stderr);
 	fputs("	-i <p>	Install packages\n", stderr);
 	fputs("	-r <p>	Remove packages\n", stderr);
 	fputs("	-s <p>	search package\n", stderr);
+	fputs("	-y	sync with repositories\n", stderr);
 	fputs("	-u	Update system\n", stderr);
 	fputs("	-v	Version\n", stderr);
 }
 
 int main(int argc, char *argv[]) {
 	int applet, i;
-	char *bn;
+	char *bn, *p;
 	unsigned int showhelp, retval;
 	FILE *in;
 
@@ -159,8 +196,11 @@ int main(int argc, char *argv[]) {
 				strcmp(bn + LENGTH(APPLETPREFIX) - 1, applets[applet].name) == 0) ||
 				(argc > 1 && strcmp(argv[1], applets[applet].name) == 0))
 			break;
-	for(i = 1; i < argc && !showhelp; i++)
-		if(argv[i][0] == '-')
+	/* global options */
+	for(i = 1; i < argc && !showhelp; i++) {
+		if(argv[i][0] != '-')
+			continue;
+		for(p = argv[i] + 1; *p; p++ )
 			switch(argv[i][1]) {
 			case 'v':
 				version();
@@ -171,13 +211,8 @@ int main(int argc, char *argv[]) {
 			case 'H':
 				showhelp = 2;
 				break;
-			case 'R':
-				if(++i == argc || i > applet)
-					showhelp = 1;
-				else if(!(in = fopen(argv[i],"r")))
-					eprint(1, "Cannot open `%s`: ", argv[i]);
-				break;
 			}
+	}
 	if(showhelp) {
 		version();
 		if(showhelp == 2 && applet == LENGTH(applets) - 1) {
