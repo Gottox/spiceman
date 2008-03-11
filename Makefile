@@ -11,9 +11,9 @@ all: options ${TARGET}
 
 options:
 	@echo spiceman build options:
-	@echo "CFLAGS   = ${CFLAGS}"
-	@echo "LDFLAGS  = ${LDFLAGS}"
-	@echo "CC       = ${CC}"
+	@echo "CFLAGS   = ${CFLAGSx}"
+	@echo "LDFLAGS  = ${LDFLAGSx}"
+	@echo "CC       = ${CCx}"
 
 ${OBJ}: config.mk
 

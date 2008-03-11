@@ -22,6 +22,7 @@
 #define INFILEHELP		fputs("	-R <f>	read packages from file (default: stdin)\n", stderr);
 #define BUFFERSIZE		1024
 #define DEFAULTSEP		":\n"
+#define SEP(f,sep)		fread(sep, sizeof(char), 2, f);
 
 
 typedef int (*Cmdfunction)(int, char *[], FILE *in, FILE *out);
@@ -66,10 +67,10 @@ struct Package {
 void *amemcpy(void *d, void *s, size_t n);	/* cpy memory to an allocated buffer */
 int cmdchain(int cmdc, struct Cmd *cmd);	/* executes a chain of commands */
 void *erealloc(void *p, size_t size);		/* remalloc + error testing */
-void eprint(const char *format, ...);		/* prints message and exits */
+void eprint(int pe, const char *format, ...);	/* prints message and exits */
 void freepkg(struct Package *pkg);
-int getpkg(struct Package *pkg, FILE *in, char *sep);
+int getpkg(struct Package *pkg, FILE *in, const char *sep);
 						/* reads a package from in */
-void putpkg(struct Package *pkg, FILE *out, char *sep);
+void putpkg(const struct Package *pkg, FILE *out, const char *sep);
 						/* puts a package to out */
 void version();

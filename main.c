@@ -27,6 +27,8 @@
 #include "extract.h"
 #include "filter.h"
 
+#define APPLET(x) { x, x ## _help, #x }
+
 void help();
 int main_applet(int argc, char *argv[], FILE *in, FILE *out);
 void printchain(int cmdc, struct Cmd *cmd);
@@ -38,13 +40,13 @@ struct Applet {
 };
 
 static struct Applet applets[] = {
-	{ db,		db_help,	"db" },
-	{ delete,	delete_help,	"delete" },
-	{ depency,	depency_help,	"depency" },
-	{ download,	download_help,	"download" },
-	{ extract,	extract_help,	"extract" },
-	{ filter,	filter_help,	"filter" },
-	{ main_applet,	help,		NULL },
+	APPLET(db),
+	APPLET(delete),
+	APPLET(depency),
+	APPLET(download),
+	APPLET(extract),
+	APPLET(filter),
+	{ main_applet, help, NULL },
 };
 
 int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
@@ -68,7 +70,7 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 		case 'i':
 		case 'r':
 			action = argv[i][1];
-			if(++i >= argc) {
+			if(++i == argc) {
 				help();
 				return EXIT_FAILURE;
 			}
@@ -173,14 +175,14 @@ int main(int argc, char *argv[]) {
 				if(++i == argc || i > applet)
 					showhelp = 1;
 				else if(!(in = fopen(argv[i],"r")))
-					eprint("Cannot open `%s`: ",argv[i]);
+					eprint(1, "Cannot open `%s`: ", argv[i]);
 				break;
 			}
 	if(showhelp) {
 		version();
 		if(showhelp == 2 && applet == LENGTH(applets) - 1) {
 			applets[applet].help();
-			for(i = 0; i < LENGTH(applets) - 1;i++)
+			for(i = 0; i < LENGTH(applets) - 1; i++)
 				applets[i].help();
 		}
 		else

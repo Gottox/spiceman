@@ -32,26 +32,27 @@ amemcpy(void *d, void *s, size_t n) {
 	return memcpy(d, s, n);
 }
 
-int cmdchain(int cmdc, struct Cmd *cmd) {
+int
+cmdchain(int cmdc, struct Cmd *cmd) {
 	FILE *in, *out;
 	int i, fd[2], pid, retval, status;
 
 	in = stdin;
 	for(i = 0; i < cmdc-1; i++) {
 		if(pipe(fd) != 0)
-			eprint("Cannot create pipe: ");
+			eprint(1, "Cannot create pipe: ");
 		if(!(out = fdopen(fd[1], "w")))
-			eprint("Cannot open pipe for writing: ");
+			eprint(1, "Cannot open pipe for writing: ");
 		pid = fork();
 		if(pid < 0)
-			eprint("Cannot fork: ");
+			eprint(1, "Cannot fork: ");
 		else if(pid == 0)
 			exit(cmd[i].function(cmd[i].argc,cmd[i].argv,in,out));
 		fclose(out);
 		if(in != stdin)
 			fclose(in);
 		if(!(in = fdopen(fd[0], "r")))
-			eprint("Cannot open pipe for reading: ");
+			eprint(1, "Cannot open pipe for reading: ");
 	}
 	out = stdout;
 	retval = cmd[i].function(cmd[i].argc,cmd[i].argv,in,out);
@@ -69,18 +70,21 @@ erealloc(void *p, size_t size) {
 }
 
 void
-eprint(const char *format, ...) {
+eprint(int pe, const char *format, ...) {
 	va_list ap;
 
 	va_start(ap, format);
 	vfprintf(stderr, format, ap);
-	perror(NULL);
+	if(pe)
+		perror("");
+	else
+		fputc('\n',stderr);
 	va_end(ap);
 	exit(EXIT_FAILURE);
 }
 
 int
-getpkg(struct Package *pkg, FILE *in, char *sep) {
+getpkg(struct Package *pkg, FILE *in, const char *sep) {
 	char c;
 	char *b;
 	int l, ent, i;
@@ -169,7 +173,7 @@ getpkg(struct Package *pkg, FILE *in, char *sep) {
 	}
 }
 
-void putpkg(struct Package *pkg, FILE *out, char *sep) {
+void putpkg(const struct Package *pkg, FILE *out, const char *sep) {
 	unsigned int i;
 	char *p;
 	

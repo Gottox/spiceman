@@ -22,26 +22,44 @@
 void db_help() {
 	APPLETUSAGE("db");
 	fputs("	-i	list installed packages only\n", stderr);
-	fputs("	-p	list repository packages\n", stderr);
-	fputs("	-s	sync with repository\n", stderr);
+	fputs("	-p	list packages in database\n", stderr);
+	fputs("	-r	list repository packages\n", stderr);
 }
 
 int db(int argc, char *argv[], FILE *in, FILE *out) {
-	int i;
+	char src = 0;
+	FILE *db;
+	char dbsep[2];
+	struct Package pkg;
 
-	if(argc == 0) {
+	if(argc == 0)
+		src = 'l';
+	else if(argv[0][0] == '-')
+		src = argv[0][1];
+	switch(src) {
+	case 'i':
+		db = fopen(DBPREFIX "/installed", "r");
+		break;
+	case 'p':
+		db = fopen(DBPREFIX "/packages", "r");
+		break;
+	case 'r':
+		db = fopen(DBPREFIX "/repositories", "r");
+		break;
+	default:
 		db_help();
 		return EXIT_FAILURE;
 	}
-	for(i = 0; i < argc; i++)
-		switch(argv[0][0] ? argv[0][1] : 0) {
-		case 'i':
-		case 'p':
-		case 's':
-			break;
-		default:
-			db_help();
-			return EXIT_FAILURE;
-		}
+	if(!db)
+		eprint(1, "Cannot open database file: ");
+	SEP(db, dbsep);
+	fputs(DEFAULTSEP, out);
+	while(!feof(db)) {
+		if(!getpkg(&pkg, db, dbsep))
+			eprint(0, "You can start crying now.\nMalformed Package in Database: %s", "TODO");
+		putpkg(&pkg, out, DEFAULTSEP);
+		freepkg(&pkg);
+	}
+	fclose(db);
 	return EXIT_SUCCESS;
 }
