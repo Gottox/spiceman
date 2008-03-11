@@ -55,16 +55,18 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 	struct Cmd syncchain[] = {
 		{ db,		1,	{ "-i" } },
 		{ filter,	1,	{ "-r" } },
+		{ depency,	1,	{ "-r" } },
 		{ download,	0,	{ NULL } },
 		{ install,	1,	{ "-o" } },
 	};
 	struct Cmd searchchain[] = {
-		{ db,		1,	{ "-l" } },
+		{ db,		1,	{ "-p" } },
 		{ filter,	2,	{ "-s", NULL } },
 	};
 	struct Cmd installchain[] = {
-		{ db,		1,	{ "-l" } },
+		{ db,		1,	{ "-p" } },
 		{ filter,	2,	{ "-e", NULL } },
+		{ depency,	1,	{ "-r" } },
 		{ download,	0,	{ NULL } },
 		{ install,	2,	{ "-f", "-p" } },
 	};
@@ -77,9 +79,9 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 		{ db,		1,	{ "-i" } },
 		{ filter,	1,	{ "-o" } },
 		{ filter,	1,	{ "-n" } },
+		{ depency,	1,	{ "-r" } },
 		{ install,	0,	{ NULL } },
 	};
-
 
 	for(i = 0; i < argc; i++) {
 		if(argv[i][0] != '-' || argv[i][1] == 0) {

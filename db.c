@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software */
 #include <stdlib.h>
 #include <stdio.h>
+#include <strings.h>
 
 #include "common.h"
 #include "db.h"
@@ -49,6 +50,7 @@ int db(int argc, char *argv[], FILE *in, FILE *out) {
 	if(!db)
 		eprint(1, "Cannot open database file: ");
 	SEP(db, dbsep);
+	bzero(&pkg,sizeof(pkg));
 	fputs(DEFAULTSEP, out);
 	while(!feof(db)) {
 		if(!getpkg(&pkg, db, dbsep))

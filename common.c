@@ -28,7 +28,7 @@
 /* common.c */
 void *
 amemcpy(void *d, void *s, size_t n) {
-	d = erealloc(0, n);
+	d = erealloc(d, n);
 	return memcpy(d, s, n);
 }
 
@@ -46,15 +46,8 @@ cmdchain(int cmdc, struct Cmd *cmd) {
 		pid = fork();
 		if(pid < 0)
 			eprint(1, "Cannot fork: ");
-		else if(pid == 0) {
-			pid = fork();
-			if(pid < 0)
-				eprint(1, "Cannot dbl-fork: ");
-			else if(pid == 0)
-				exit(cmd[i].function(cmd[i].argc,cmd[i].argv,in,out));
-			else
-				exit(0);
-		}
+		else if(pid == 0)
+			exit(cmd[i].function(cmd[i].argc,cmd[i].argv,in,out));
 		fclose(out);
 		if(in != stdin)
 			fclose(in);
