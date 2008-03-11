@@ -56,7 +56,7 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 		{ db,		1,	{ "-i" } },
 		{ filter,	1,	{ "-r" } },
 		{ depency,	1,	{ "-r" } },
-		{ download,	0,	{ NULL } },
+		{ download,	0,	{ "-f" } },
 		{ install,	1,	{ "-o" } },
 	};
 	struct Cmd searchchain[] = {
@@ -129,18 +129,24 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 	}
 	switch(action) {
 		case 's':
+			searchchain[0].argv[0] = installed ? "-i" : "-p";
 			searchchain[1].argv[1] = arg;
-			cmdchain(LENGTH(syncchain), syncchain);
+			printchain(LENGTH(searchchain), searchchain);
+			cmdchain(LENGTH(searchchain), searchchain);
 			break;
 		case 'i':
+			installchain[0].argv[0] = installed ? "-i" : "-p";
 			installchain[1].argv[1] = arg;
+			printchain(LENGTH(installchain), installchain);
 			cmdchain(LENGTH(installchain), installchain);
 			break;
 		case 'r':
 			rmchain[1].argv[1] = arg;
+			printchain(LENGTH(rmchain), rmchain);
 			cmdchain(LENGTH(rmchain), rmchain);
 			break;
 		case 'u':
+			printchain(LENGTH(updatechain), updatechain);
 			cmdchain(LENGTH(updatechain), updatechain);
 			break;
 		default:

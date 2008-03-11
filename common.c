@@ -84,13 +84,13 @@ eprint(int pe, const char *format, ...) {
 }
 
 int
-getpkg(struct Package *pkg, FILE *in, const char *sep) {
+getpkg(struct Package *pkg, FILE *in) {
 	char c;
 	char *b;
 	int l, ent, i;
 	 
 	b = NULL;
-	for(c = ent = l = 0; c != sep[1] && (c = fgetc(in));) {
+	for(c = ent = l = 0; c != seperator[1] && !feof(in) && (c = fgetc(in));) {
 		if(l % BUFFERSIZE == 0)
 			b = erealloc(b, sizeof(char) * BUFFERSIZE + l);
 		b[l] = c;
@@ -98,7 +98,7 @@ getpkg(struct Package *pkg, FILE *in, const char *sep) {
 			b[l] = fgetc(in);
 			l++;
 		}
-		else if(b[l] == sep[0] || b[l] == sep[1]) {
+		else if(b[l] == seperator[0] || b[l] == seperator[1]) {
 			b[l] = '\0';
 			switch(ent) {
 			case TYPE:
@@ -164,16 +164,19 @@ getpkg(struct Package *pkg, FILE *in, const char *sep) {
 		else
 			l++;
 	}
-	if(ent < NENTRIES) {
-		freepkg(pkg);
+	if(ent == 0) {
 		return 0;
+	}
+	else if(ent < NENTRIES) {
+		freepkg(pkg);
+		return -1;
 	}
 	else {
 		return 1;
 	}
 }
 
-void putpkg(const struct Package *pkg, FILE *out, const char *sep) {
+void putpkg(const struct Package *pkg, FILE *out) {
 	unsigned int i;
 	char *p;
 	
@@ -221,10 +224,16 @@ void putpkg(const struct Package *pkg, FILE *out, const char *sep) {
 			fprintf(out,"%u", pkg->size);
 			break;
 		case MD5:
+			for(i = 0; fprintf(out ,"%02x", (unsigned int )pkg->md5[i]) &&
+					i < LENGTH(pkg->md5);i++);
 			break;
 		case SHA1:
+			for(i = 0; fprintf(out, "%02x", (unsigned int )pkg->sha1[i]) &&
+					i < LENGTH(pkg->sha1);i++);
 			break;
 		case KEY:
+			for(i = 0; fprintf(out, "%02x", (unsigned int )pkg->key[i]) &&
+					i < LENGTH(pkg->key);i++);
 			break;
 		case INSTIME:
 			fprintf(out,"%u",pkg->instime);
@@ -232,25 +241,34 @@ void putpkg(const struct Package *pkg, FILE *out, const char *sep) {
 		}
 		if(p)
 			for(; *p != '\0'; p++) {
-				if(*p == sep[0] || *p == sep[1] || *p == '\\')
+				if(*p == seperator[0] || *p == seperator[1] || *p == '\\')
 					fputc('\\',out);
 				fputc(*p,out);
 			}
-		fputc(sep[0],out);
+		fputc(seperator[0], out);
 	}
-	fputc(sep[1],out);
+	fputc(seperator[1], out);
+	fflush(out);
 }
 
 void freepkg(struct Package *pkg) {
-	if(pkg->name)		free(pkg->name);
-	if(pkg->ver)		free(pkg->ver);
-	if(pkg->desc)		free(pkg->desc);
-	if(pkg->url)		free(pkg->url);
-	if(pkg->usef)		free(pkg->usef);
-	if(pkg->repo)		free(pkg->repo);
-	if(pkg->dep)		free(pkg->dep);
-	if(pkg->conflict)	free(pkg->conflict);
-	if(pkg->prov)		free(pkg->prov);
+	int i;
+	char **l[] = {
+		&pkg->name,
+		&pkg->ver,
+		&pkg->desc,
+		&pkg->url,
+		&pkg->usef,
+		&pkg->repo,
+		&pkg->dep,
+		&pkg->conflict,
+		&pkg->prov,
+	};
+	for(i = 0; i < LENGTH(l); i++)
+		if(*l[i] != NULL) {
+			free(*l[i]);
+			*l[i] = 0;
+		}
 }
 
 void version() {

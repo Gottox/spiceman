@@ -17,3 +17,4 @@
 int db(int argc, char *argv[], FILE *in, FILE *out);
 void db_help();
 int putdb(FILE *out, char opt);
+int alternate(FILE *in, FILE *out);

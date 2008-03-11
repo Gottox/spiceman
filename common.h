@@ -18,10 +18,8 @@
 #define APPLETPREFIX "sp-"
 
 #define LENGTH(x)		sizeof(x)/sizeof(x[0])
-#define APPLETUSAGE(a)		fputs("sp-" a "\nspiceman " a "\n", stderr);
+#define APPLETUSAGE(a)		fputs("sp-" a "\nspiceman " a "\n\t-h\thelp message\n", stderr);
 #define BUFFERSIZE		1024
-#define DEFAULTSEP		":\n"
-#define SEP(f,sep)		fread(sep, sizeof(char), 2, f);
 
 
 typedef int (*Cmdfunction)(int, char *[], FILE *in, FILE *out);
@@ -62,14 +60,18 @@ struct Package {
 	unsigned int instime;
 };
 
+/* seperators */
+static const char seperator[] = ":\n";
+
+
 /* common.c */
 void *amemcpy(void *d, void *s, size_t n);	/* cpy memory to an allocated buffer */
 int cmdchain(int cmdc, struct Cmd *cmd);	/* executes a chain of commands */
 void *erealloc(void *p, size_t size);		/* remalloc + error testing */
 void eprint(int pe, const char *format, ...);	/* prints message and exits */
 void freepkg(struct Package *pkg);
-int getpkg(struct Package *pkg, FILE *in, const char *sep);
+int getpkg(struct Package *pkg, FILE *in);
 						/* reads a package from in */
-void putpkg(const struct Package *pkg, FILE *out, const char *sep);
+void putpkg(const struct Package *pkg, FILE *out);
 						/* puts a package to out */
 void version();

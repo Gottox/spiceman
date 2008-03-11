@@ -22,42 +22,73 @@
 
 void db_help() {
 	APPLETUSAGE("db");
-	fputs("	-i	list installed packages only\n", stderr);
-	fputs("	-p	list packages in database\n", stderr);
+	fputs("	-i	list all installed packages\n", stderr);
+	fputs("	-p	list all packages in database\n", stderr);
+	fputs("	-o	list other version of pkgs read from stdin\n", stderr);
 }
 
 int db(int argc, char *argv[], FILE *in, FILE *out) {
-	char src = 0;
-	FILE *db;
-	char dbsep[2];
-	struct Package pkg;
+	char action = 0;
 
 	if(argc == 0)
-		src = 'p';
+		action = 'p';
 	else if(argv[0][0] == '-')
-		src = argv[0][1];
-	switch(src) {
+		action = argv[0][1];
+	switch(action) {
 	case 'i':
-		db = fopen(DBPREFIX "/installed", "r");
-		break;
 	case 'p':
-		db = fopen(DBPREFIX "/packages", "r");
-		break;
+		return putdb(out, action);
+	case 'o':
+		return alternate(in, out);
 	default:
 		db_help();
 		return EXIT_FAILURE;
 	}
-	if(!db)
-		eprint(1, "Cannot open database file: ");
-	SEP(db, dbsep);
-	bzero(&pkg,sizeof(pkg));
-	fputs(DEFAULTSEP, out);
-	while(!feof(db)) {
-		if(!getpkg(&pkg, db, dbsep))
-			eprint(0, "You can start crying now.\nMalformed Package in Database: %s", "TODO");
-		putpkg(&pkg, out, DEFAULTSEP);
+}
+
+int
+putdb(FILE *out, char action) {
+	int r;
+	FILE *db;
+	char *src;
+	struct Package pkg;
+
+	src = action == 'i' ? DBPREFIX "/installed" :  DBPREFIX "/packages";
+	if(!(db = fopen(src, "r")))
+		eprint(1, "Cannot open database `%s`: ", src);
+	bzero(&pkg, sizeof(pkg));
+	while((r = getpkg(&pkg, db) > 0)) {
+		putpkg(&pkg, out);
 		freepkg(&pkg);
 	}
+	if(r < 0)
+		eprint(0, "You can start crying now.\nMalformed Package in Database: %s", "TODO");
 	fclose(db);
+	return EXIT_SUCCESS;
+}
+
+int
+alternate(FILE *in, FILE *out) {
+	int i, run = 1;
+	FILE *db;
+	struct Package pkgs[16]/*, dbpkg*/;
+
+	bzero(pkgs, sizeof(pkgs));
+	while(run && !feof(in)) {
+		for(i = 0; !feof(in) && i < LENGTH(pkgs); i++)
+			if(!getpkg(&pkgs[i], in)) {
+				fputs("Defect Package!\n",stderr);
+				run = 0;
+				i--;
+				break;
+			}
+		if(!(db = fopen(DBPREFIX "/packages", "r")))
+			eprint(1, "Cannot open database `" DBPREFIX "/packages`: ");
+		/*while(!feof(db)) {
+			if(!getpkg(&pkgs[i], in)) {
+		}*/
+		while(i--)
+			freepkg(&pkgs[i]);
+	}
 	return EXIT_SUCCESS;
 }
