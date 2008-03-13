@@ -49,85 +49,72 @@ static struct Applet applets[] = {
 	{ main_applet, help, NULL },
 };
 
-int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
-	int i, action = 0, installed = 0, sync = 0;
-	char *arg = NULL, *p;
-	struct Cmd syncchain[] = {
-		{ db,		1,	{ "-i" } },
-		{ filter,	1,	{ "-r" } },
-		{ depency,	1,	{ "-r" } },
-		{ download,	0,	{ "-f" } },
-		{ install,	1,	{ "-o" } },
-	};
-	struct Cmd searchchain[] = {
-		{ db,		1,	{ "-p" } },
-		{ filter,	2,	{ "-s", NULL } },
-	};
-	struct Cmd installchain[] = {
-		{ db,		1,	{ "-p" } },
-		{ filter,	2,	{ "-e", NULL } },
-		{ depency,	1,	{ "-r" } },
-		{ download,	0,	{ NULL } },
-		{ install,	2,	{ "-f", "-p" } },
-	};
-	struct Cmd rmchain[] = {
-		{ db,		1,	{ "-i" } },
-		{ filter,	2,	{ "-e", NULL } },
-		{ delete,	0,	{ NULL } },
-	};
-	struct Cmd updatechain[] = {
-		{ db,		1,	{ "-i" } },
-		{ filter,	1,	{ "-o" } },
-		{ filter,	1,	{ "-n" } },
-		{ depency,	1,	{ "-r" } },
-		{ install,	0,	{ NULL } },
-	};
+static struct Cmd syncchain[] = {
+	{ db,		1,	{ "-i" } },
+	{ filter,	1,	{ "-r" } },
+	{ depency,	1,	{ "-r" } },
+	{ download,	0,	{ "-f" } },
+	{ install,	1,	{ "-o" } },
+};
+static struct Cmd searchchain[] = {
+	{ db,		1,	{ "-p" } },
+	{ filter,	2,	{ "-s", NULL } },
+};
+static struct Cmd installchain[] = {
+	{ db,		1,	{ "-p" } },
+	{ filter,	2,	{ "-e", NULL } },
+	{ depency,	1,	{ "-r" } },
+	{ download,	0,	{ NULL } },
+	{ install,	2,	{ "-f", "-p" } },
+};
+static struct Cmd rmchain[] = {
+	{ db,		1,	{ "-i" } },
+	{ filter,	2,	{ "-e", NULL } },
+	{ delete,	0,	{ NULL } },
+};
+static struct Cmd updatechain[] = {
+	{ db,		1,	{ "-i" } },
+	{ db,		1,	{ "-o" } },
+	{ filter,	1,	{ "-n" } },
+	{ depency,	1,	{ "-r" } },
+	{ install,	0,	{ NULL } },
+};
 
-	for(i = 0; i < argc; i++) {
-		if(argv[i][0] != '-' || argv[i][1] == 0) {
+int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
+	int action = 0, installed = 0, sync = 0;
+	char *arg = NULL;
+
+	ARGBEGIN {
+	case 'r':
+	case 'i':
+	case 's':
+		arg = ARGVAL();
+	case 'u':
+		if(action != 0) {
 			help();
 			return EXIT_FAILURE;
 		}
-		for(p = argv[i] + 1; *p; p++) {
-			switch(*p) {
-			case 'u':
-				if(action != 0) {
-					help();
-					return EXIT_FAILURE;
-				}
-				action = 'u';
-				break;
-			case 'y':
-				sync = 1;
-				break;
-			case 'r':
-			case 'i':
-			case 's':
-				if(action != 0 || i + 1 == argc) {
-					help();
-					return EXIT_FAILURE;
-				}
-				action = *p;
-				arg = argv[++i];
-				break;
-			case 'I':
-				installed = 1;
-				break;
-			default:
-				version();
-				help();
-				return EXIT_FAILURE;
-			}
-		}
-	}
-
+		action = ARGCHR;
+		break;
+	case 'y':
+		sync = 1;
+		break;
+	case 'I':
+		installed = 1;
+		break;
+	} ARGEND;
 	if(sync) {
 		printchain(LENGTH(syncchain), syncchain);
 		cmdchain(LENGTH(syncchain), syncchain);
 		if(!action)
 			return EXIT_SUCCESS;
 	}
-	switch(action) {
+	else if(action == 'u') {
+		printchain(LENGTH(updatechain), updatechain);
+		cmdchain(LENGTH(updatechain), updatechain);
+	}
+	else {
+		switch(arg ? action : 0) {
 		case 's':
 			searchchain[0].argv[0] = installed ? "-i" : "-p";
 			searchchain[1].argv[1] = arg;
@@ -145,14 +132,11 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 			printchain(LENGTH(rmchain), rmchain);
 			cmdchain(LENGTH(rmchain), rmchain);
 			break;
-		case 'u':
-			printchain(LENGTH(updatechain), updatechain);
-			cmdchain(LENGTH(updatechain), updatechain);
-			break;
 		default:
 			version();
 			help();
 			return EXIT_FAILURE;
+		}
 	}
 	return EXIT_SUCCESS;
 }
@@ -233,9 +217,9 @@ int main(int argc, char *argv[]) {
 		retval = EXIT_FAILURE;
 	}
 	else if(applets[applet].name == NULL || strcmp(argv[1], applets[applet].name) != 0)
-		retval = applets[applet].function(argc-1, argv+1, in, stdout);
+		retval = applets[applet].function(argc, argv, in, stdout);
 	else
-		retval = applets[applet].function(argc-2, argv+2, in, stdout);
+		retval = applets[applet].function(argc-1, argv+1, in, stdout);
 	fclose(in);
 	return retval;
 }

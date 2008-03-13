@@ -9,7 +9,9 @@ DEFREPO = "R:gtx-base:0.0:1:0::::gtx-base::::::::::http://s01.de/~gottox/rep/gtx
 # paths
 PREFIX = /usr/local
 MANPREFIX = ${PREFIX}/share/man
-DBPREFIX = ${PREFIX}/var/db/pkg
+#DBPREFIX = ${PREFIX}/var/db/pkg
+# This is better for debugging
+DBPREFIX = .
 
 # includes and libs
 INCS = -I. -I/usr/include

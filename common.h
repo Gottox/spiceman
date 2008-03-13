@@ -21,6 +21,15 @@
 #define APPLETUSAGE(a)		fputs("sp-" a "\nspiceman " a "\n\t-h\thelp message\n", stderr);
 #define BUFFERSIZE		1024
 
+/* Plan9-style Argument parsing */
+#define ARGBEGIN int _c; { char *_a; int _b; for(_c = 1; _c < argc; _c++) { \
+	if(argv[_c][0] != '-' || !argv[_c][1]) break; \
+	for(_a = &argv[_c][1], _b = 0; !_b && *_a; _a++ ) {; \
+		switch(*_a)
+#define ARGVAL()		(!_b && _a[1] && (_b = 1) ? &_a[1] : _c + 1 == argc ? 0 : argv[++_c])
+#define ARGCHR			*_a
+#define ARGEND			} } }
+#define LSTARG			_c
 
 typedef int (*Cmdfunction)(int, char *[], FILE *in, FILE *out);
 
