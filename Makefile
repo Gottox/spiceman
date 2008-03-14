@@ -7,13 +7,13 @@ SRC = common.c db.c delete.c depency.c download.c filter.c install.c main.c
 OBJ = ${SRC:.c=.o}
 TARGET = spiceman
 
-all: options ${TARGET}
+all: ${TARGET}
 
 options:
 	@echo spiceman build options:
-	@echo "CFLAGS   = ${CFLAGSx}"
-	@echo "LDFLAGS  = ${LDFLAGSx}"
-	@echo "CC       = ${CCx}"
+	@echo "CFLAGS   = ${CFLAGS}"
+	@echo "LDFLAGS  = ${LDFLAGS}"
+	@echo "CC       = ${CC}"
 
 ${OBJ}: config.mk
 
