@@ -34,9 +34,11 @@ void filter_help() {
 }
 
 int filter(int argc, char *argv[], FILE *in, FILE *out) {
+	int len = 0, j;
 	struct Package pkg;
 	char action = 0;
-	char *arg = NULL;
+	char *arg = NULL, *p;
+	char needle[512];
 	bzero(&pkg, sizeof(pkg));
 
 	ARGBEGIN {
@@ -56,22 +58,49 @@ int filter(int argc, char *argv[], FILE *in, FILE *out) {
 		filter_help();
 		return EXIT_FAILURE;
 	} ARGEND;
-	if(argc > 1 && argc != ARGC())
+	if(argc <= 0 || argc != ARGC())
 		goto argerr;
-
-	switch(action) {
-	case 't':
-		while(getpkg(&pkg, in, seperator))
+	if(arg)
+		len = strlen(arg);
+	while(getpkg(&pkg, in) > 0)
+		switch(action) {
+		case 't':
 			if(strchr(arg, pkg.type))
-				putpkg(&pkg, out, seperator);
-		break;
-	case 's':
-		break;
-	case 'R':
-	case 'e':
-		break;
-	case 'n':
-		break;
-	}
+				putpkg(&pkg, out);
+			break;
+		case 'R':
+			if(!strcmp(pkg.repo, arg))
+				putpkg(&pkg, out);
+			break;
+		case 's':
+			snprintf(needle, sizeof(needle), "%s-%s-%i",
+					pkg.name, pkg.ver, pkg.rel);
+			if(!fnmatch(arg, needle, 0))
+				putpkg(&pkg, out);
+			break;
+		case 'e':
+			for(p = arg, j = 0; p[j] && pkg.name[j] &&
+				p[j] == pkg.name[j]; j++);
+			if(p[j] == 0 && p[j] == pkg.name[j]) {
+				putpkg(&pkg, out);
+				break;
+			}
+			else if(p[j] != '-' || pkg.name[j++] != 0)
+				break;
+			for(p += j, j = 0; p[j] && pkg.ver[j] && 
+					p[j] == pkg.ver[j]; j++);
+			if(p[j] == 0 && p[j] == pkg.ver[j]) {
+				putpkg(&pkg, out);
+				break;
+			}
+			else if(p[j++] != '-' || pkg.ver[j++] != 0)
+				break;
+			if(atoi(p + j) == pkg.rel)
+				putpkg(&pkg, out);
+			break;
+		case 'n':
+			break;
+		}
+	freepkg(&pkg);
 	return EXIT_SUCCESS;
 }

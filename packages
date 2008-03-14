@@ -1,2 +1,2 @@
-type:name:ver:rel:reltime:desc:url:usef:repo:dep:mkdep:conflict:prov:size:md5:sha1:key:instime
-p:aalib:0.0:1:1000:ABC:http://:abc:gtx:gtk:make:bblib:bblib:1000:75dcabe8c1fe46f7a6529b19b63014a8:0:0:0
+type:name:ver:0:reltime:desc:url:usef:repo:dep:mkdep:conflict:prov:size:md5:sha1:key:instime
+type:name:ver:1:reltime:desc:url:usef:repo:dep:mkdep:conflict:prov:75dcabe8c1fe46f7a6529b19b63014a8:sha1:key:instime:aaa
