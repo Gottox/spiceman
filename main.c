@@ -186,9 +186,10 @@ int main(int argc, char *argv[]) {
 				strcmp(bn + LENGTH(APPLETPREFIX) - 1, applets[applet].name) == 0) ||
 				(argc > 1 && strcmp(argv[1], applets[applet].name) == 0))
 			break;
-	/* global options */
+	/* shifting to second argument to make ARG* work */
 	argc--;
 	argv++;
+	/* global options */
 	ARGBEGIN {
 	case 'v':
 		version();
