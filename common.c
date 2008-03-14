@@ -105,10 +105,10 @@ getpkg(struct Package *pkg, FILE *in) {
 				pkg->type = b[0];
 				break;
 			case NAME:
-				pkg->name = amemcpy(pkg->name, b, sizeof(char) * l);
+				pkg->name = amemcpy(pkg->name, b, sizeof(char) * l + 1);
 				break;
 			case VER:
-				pkg->ver = amemcpy(pkg->ver, b, sizeof(char) * l);
+				pkg->ver = amemcpy(pkg->ver, b, sizeof(char) * l + 1);
 				break;
 			case REL:
 				pkg->rel = atoi(b);
@@ -117,40 +117,40 @@ getpkg(struct Package *pkg, FILE *in) {
 				pkg->reltime = atoi(b);
 				break;
 			case DESC:
-				pkg->desc = amemcpy(pkg->desc, b, sizeof(char) * l);
+				pkg->desc = amemcpy(pkg->desc, b, sizeof(char) * l + 1);
 				break;
 			case URL:
-				pkg->url = amemcpy(pkg->url, b, sizeof(char) * l);
+				pkg->url = amemcpy(pkg->url, b, sizeof(char) * l + 1);
 				break;
 			case USEF:
-				pkg->usef = amemcpy(pkg->usef, b, sizeof(char) * l);
+				pkg->usef = amemcpy(pkg->usef, b, sizeof(char) * l + 1);
 				break;
 			case REPO:
-				pkg->repo = amemcpy(pkg->repo, b, sizeof(char) * l);
+				pkg->repo = amemcpy(pkg->repo, b, sizeof(char) * l + 1);
 				break;
 			case DEP:
-				pkg->dep = amemcpy(pkg->dep, b, sizeof(char) * l);
+				pkg->dep = amemcpy(pkg->dep, b, sizeof(char) * l + 1);
 				break;
 			case CONFLICT:
-				pkg->conflict = amemcpy(pkg->conflict,b, sizeof(char) * l);
+				pkg->conflict = amemcpy(pkg->conflict,b, sizeof(char) * l + 1);
 				break;
 			case PROV:
-				pkg->prov = amemcpy(pkg->prov,b, sizeof(char) * l);
+				pkg->prov = amemcpy(pkg->prov,b, sizeof(char) * l + 1);
 				break;
 			case SIZE:
 				pkg->size = atoi(b);
 				break;
 			case MD5:
-				for(i = 0; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->md5[i]) &&
-						i < LENGTH(pkg->md5);i++);
+				for(i = 0, l = 1; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->md5[i])
+					 && i < LENGTH(pkg->md5);i++);
 				break;
 			case SHA1:
-				for(i = 0; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->sha1[i]) &&
-						i < LENGTH(pkg->sha1);i++);
+				for(i = 0, l = 1; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->sha1[i])
+						&& i < LENGTH(pkg->sha1);i++);
 				break;
 			case KEY:
-				for(i = 0; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->key[i]) &&
-						i < LENGTH(pkg->key);i++);
+				for(i = 0, l = 1; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->key[i])
+						&& i < LENGTH(pkg->key);i++);
 				break;
 			case INSTIME:
 				pkg->instime = atoi(b);
@@ -177,7 +177,7 @@ getpkg(struct Package *pkg, FILE *in) {
 }
 
 void putpkg(const struct Package *pkg, FILE *out) {
-	unsigned int i;
+	unsigned int i, j;
 	char *p;
 	
 	for(i = 0; i < NENTRIES; i++) {
@@ -224,16 +224,16 @@ void putpkg(const struct Package *pkg, FILE *out) {
 			fprintf(out,"%u", pkg->size);
 			break;
 		case MD5:
-			for(i = 0; fprintf(out ,"%02x", (unsigned int )pkg->md5[i]) &&
-					i < LENGTH(pkg->md5);i++);
+			for(j = 0; j < LENGTH(pkg->md5); j++)
+				fprintf(out, "%02x", (unsigned int )pkg->md5[j] % 256);
 			break;
 		case SHA1:
-			for(i = 0; fprintf(out, "%02x", (unsigned int )pkg->sha1[i]) &&
-					i < LENGTH(pkg->sha1);i++);
+			for(j = 0; j < LENGTH(pkg->sha1); j++)
+				fprintf(out, "%02x", (unsigned int )pkg->sha1[j] % 256);
 			break;
 		case KEY:
-			for(i = 0; fprintf(out, "%02x", (unsigned int )pkg->key[i]) &&
-					i < LENGTH(pkg->key);i++);
+			for(j = 0; j < LENGTH(pkg->key); j++)
+				fprintf(out, "%02x", (unsigned int )pkg->key[j] % 256);
 			break;
 		case INSTIME:
 			fprintf(out,"%u",pkg->instime);

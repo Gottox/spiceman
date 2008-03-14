@@ -63,7 +63,7 @@ struct Package {
 	unsigned int size;		/* time of release */
 	char md5[16];
 	char sha1[20];
-	char key[100];			/* TODO: Don't know how many bytes to read. */
+	char key[10];			/* TODO: Don't know how many bytes to read. */
 
 	/* information for installed packages */
 	unsigned int instime;
