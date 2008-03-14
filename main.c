@@ -179,7 +179,8 @@ int main(int argc, char *argv[]) {
 	char *bn;
 	unsigned int showhelp, retval;
 
-	showhelp = argc <= 1;
+
+	showhelp = argc < 1;
 	bn = basename(argv[0]);
 	for(applet = 0; applet < LENGTH(applets) - 1; applet++)
 		if((strncmp(bn, APPLETPREFIX, LENGTH(APPLETPREFIX) - 1) == 0 &&
@@ -210,11 +211,12 @@ int main(int argc, char *argv[]) {
 		}
 		else
 			applets[applet].help();
-		retval = EXIT_FAILURE;
+		return EXIT_FAILURE;
 	}
-	else if(applets[applet].name == NULL || strcmp(argv[1], applets[applet].name) != 0)
-		retval = applets[applet].function(argc, argv, stdin, stdout);
+	else if(argc && applets[applet].name &&
+			!strcmp(applets[applet].name, argv[0]))
+		return applets[applet].function(argc-1, argv+1, stdin, stdout);
 	else
-		retval = applets[applet].function(argc, argv, stdin, stdout);
+		return applets[applet].function(argc, argv, stdin, stdout);
 	return retval;
 }
