@@ -16,15 +16,21 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <strings.h>
+#include <string.h>
 
 #include "common.h"
 #include "db.h"
+
+#define BUFSIZE 128
 
 void db_help() {
 	APPLETUSAGE("db");
 	fputs("	-i	list all installed packages\n", stderr);
 	fputs("	-p	list all packages in database\n", stderr);
 	fputs("	-o	list other version of pkgs read from stdin\n", stderr);
+	fputs("	-d	show depencies\n", stderr);
+	fputs("	-t	calculate recursive depencies\n", stderr);
+	fputs("	-r	calculate reverse depencies\n", stderr);
 }
 
 int db(int argc, char *argv[], FILE *in, FILE *out) {
@@ -69,26 +75,32 @@ putdb(FILE *out, char action) {
 
 int
 alternate(FILE *in, FILE *out) {
-	int i, run = 1;
 	FILE *db;
-	struct Package pkgs[16]/*, dbpkg*/;
+	struct Package pkg;
+	struct Package dbpkg;
+	long *found = 0, pos;
+	int fsize = 0, i;
 
-	bzero(pkgs, sizeof(pkgs));
-	while(run && !feof(in)) {
-		for(i = 0; !feof(in) && i < LENGTH(pkgs); i++)
-			if(!getpkg(&pkgs[i], in)) {
-				fputs("Defect Package!\n",stderr);
-				run = 0;
-				i--;
+	bzero(&pkg, sizeof(pkg));
+	bzero(&dbpkg, sizeof(pkg));
+	if(!(db = fopen(DBPREFIX "/packages", "r")))
+		eprint(1, "Cannot open database `" DBPREFIX "/packages`: ");
+	while(getpkg(&pkg, in) > 0) {
+		while(getpkg(&dbpkg, db) > 0) {
+			pos = ftell(db);
+			for(i = 0; i < fsize && found[i] != pos; i++);
+			if(fsize && i != fsize)
 				break;
+			if(strcmp(pkg.name, dbpkg.name) ||
+					strcmp(pkg.ver, dbpkg.ver))
+				break;
+			if(fsize % BUFSIZE == 0) {
+				found = erealloc(found, fsize + BUFSIZE);
 			}
-		if(!(db = fopen(DBPREFIX "/packages", "r")))
-			eprint(1, "Cannot open database `" DBPREFIX "/packages`: ");
-		/*while(!feof(db)) {
-			if(!getpkg(&pkgs[i], in)) {
-		}*/
-		while(i--)
-			freepkg(&pkgs[i]);
+			found[fsize++] = pos;
+			putpkg(&dbpkg, out);
+		}
+		rewind(db);
 	}
 	return EXIT_SUCCESS;
 }
