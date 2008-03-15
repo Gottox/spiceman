@@ -33,8 +33,8 @@
 
 typedef int (*Cmdfunction)(int, char *[], FILE *in, FILE *out);
 
-enum PkgEnt	{ TYPE, NAME, VER, REL, RELTIME, DESC, URL, USEF, REPO, DEP,
-	CONFLICT, PROV, SIZE, MD5, SHA1, KEY, INSTIME, NENTRIES };
+enum PkgEnt	{ TYPE, NAME, VER, REL, DESC, URL, USEF, REPO, DEP, CONFLICT,
+	PROV, SIZE, MD5, SHA1, KEY, RELTIME, INSTIME, NENTRIES };
 
 struct Cmd {
 	Cmdfunction function;
@@ -48,7 +48,6 @@ struct Package {
 	char *name;			/* name of pkg*/
 	char *ver;			/* version of pkg (empty if type == REPOSITORY) */
 	unsigned int rel;		/* release of pkg */
-	unsigned int reltime;		/* timestamp of release */
 	char *desc;			/* description */
 	char *url;			/* url of pkg */
 	char *usef;			/* useflags */
@@ -63,10 +62,10 @@ struct Package {
 	unsigned int size;		/* time of release */
 	char md5[16];
 	char sha1[20];
-	char key[10];			/* TODO: Don't know how many bytes to read. */
+	char key[4];
 
-	/* information for installed packages */
-	unsigned int instime;
+	unsigned long reltime;		/* timestamp of release */
+	unsigned long instime;
 };
 
 /* seperators */

@@ -13,5 +13,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software */
+void exactmatch(const char *s, FILE *in, FILE *out);
+void repository(const char *s, FILE *in, FILE *out);
+void search(const char *s, FILE *in, FILE *out);
+void type(const char *s, FILE *in, FILE *out);
+void unique(FILE *in, FILE *out);
 int filter(int argc, char *argv[], FILE *in, FILE *out);
 void filter_help();

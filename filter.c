@@ -24,6 +24,74 @@
 
 #define ARRAYSIZE 1
 
+void exactmatch(const char *s, FILE *in, FILE *out) {
+	int j;
+	struct Package pkg;
+
+	bzero(&pkg, sizeof(pkg));
+	while(getpkg(&pkg, in) > 0) {
+		for(j = 0; s[j] && pkg.name[j] &&
+			s[j] == pkg.name[j]; j++);
+		if(s[j] == 0 && s[j] == pkg.name[j]) {
+			putpkg(&pkg, out);
+			continue;
+		}
+		else if(s[j] != '-' || pkg.name[j++] != 0)
+			continue;
+		for(s += j, j = 0; s[j] && pkg.ver[j] && 
+				s[j] == pkg.ver[j]; j++);
+		if(s[j] == 0 && s[j] == pkg.ver[j]) {
+			putpkg(&pkg, out);
+			continue;
+		}
+		else if(s[j++] != '-' || pkg.ver[j++] != 0)
+			continue;
+		if(atoi(s + j) == pkg.rel)
+			putpkg(&pkg, out);
+		continue;
+	}
+}
+
+void repository(const char *s, FILE *in, FILE *out) {
+	struct Package pkg;
+
+	bzero(&pkg, sizeof(pkg));
+	while(getpkg(&pkg, in) > 0)
+		if(!strcmp(pkg.repo, s))
+			putpkg(&pkg, out);
+}
+
+void search(const char *s, FILE *in, FILE *out) {
+	char buf[128];
+	struct Package pkg;
+
+	bzero(&pkg, sizeof(pkg));
+	while(getpkg(&pkg, in) > 0) {
+		snprintf(buf, LENGTH(buf), "%s-%s-%i",
+				pkg.name, pkg.ver, pkg.rel);
+		if(!fnmatch(s, buf, 0))
+			putpkg(&pkg, out);
+	}
+}
+
+void type(const char *s, FILE *in, FILE *out) {
+	struct Package pkg;
+
+	bzero(&pkg, sizeof(pkg));
+	while(getpkg(&pkg, in) > 0)
+		if(strchr(s, pkg.type))
+			putpkg(&pkg, out);
+}
+
+void unique(FILE *in, FILE *out) {
+	struct Package pkg;
+
+	bzero(&pkg, sizeof(pkg));
+	while(getpkg(&pkg, in) > 0) {
+	
+	}
+}
+
 void filter_help() {
 	APPLETUSAGE("filter");
 	fputs("	-n	make packages unique, use newest\n", stderr);
@@ -34,13 +102,11 @@ void filter_help() {
 }
 
 int filter(int argc, char *argv[], FILE *in, FILE *out) {
-	int len = 0, j;
 	struct Package pkg;
 	char action = 0;
-	char *arg = NULL, *p;
-	char needle[512];
-	bzero(&pkg, sizeof(pkg));
+	char *arg = NULL;
 
+	bzero(&pkg, sizeof(pkg));
 	ARGBEGIN {
 	case 't':
 	case 'R':
@@ -60,47 +126,23 @@ int filter(int argc, char *argv[], FILE *in, FILE *out) {
 	} ARGEND;
 	if(argc <= 0 || argc != ARGC())
 		goto argerr;
-	if(arg)
-		len = strlen(arg);
-	while(getpkg(&pkg, in) > 0)
-		switch(action) {
-		case 't':
-			if(strchr(arg, pkg.type))
-				putpkg(&pkg, out);
-			break;
-		case 'R':
-			if(!strcmp(pkg.repo, arg))
-				putpkg(&pkg, out);
-			break;
-		case 's':
-			snprintf(needle, sizeof(needle), "%s-%s-%i",
-					pkg.name, pkg.ver, pkg.rel);
-			if(!fnmatch(arg, needle, 0))
-				putpkg(&pkg, out);
-			break;
-		case 'e':
-			for(p = arg, j = 0; p[j] && pkg.name[j] &&
-				p[j] == pkg.name[j]; j++);
-			if(p[j] == 0 && p[j] == pkg.name[j]) {
-				putpkg(&pkg, out);
-				break;
-			}
-			else if(p[j] != '-' || pkg.name[j++] != 0)
-				break;
-			for(p += j, j = 0; p[j] && pkg.ver[j] && 
-					p[j] == pkg.ver[j]; j++);
-			if(p[j] == 0 && p[j] == pkg.ver[j]) {
-				putpkg(&pkg, out);
-				break;
-			}
-			else if(p[j++] != '-' || pkg.ver[j++] != 0)
-				break;
-			if(atoi(p + j) == pkg.rel)
-				putpkg(&pkg, out);
-			break;
-		case 'n':
-			break;
-		}
+	switch(action) {
+	case 't':
+		type(arg, in, out);
+		break;
+	case 'R':
+		repository(arg, in, out);
+		break;
+	case 's':
+		search(arg, in, out);
+		break;
+	case 'e':
+		exactmatch(arg, in, out);
+		break;
+	case 'n':
+		unique(in, out);
+		break;
+	}
 	freepkg(&pkg);
 	return EXIT_SUCCESS;
 }

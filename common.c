@@ -113,9 +113,6 @@ getpkg(struct Package *pkg, FILE *in) {
 			case REL:
 				pkg->rel = atoi(b);
 				break;
-			case RELTIME:
-				pkg->reltime = atoi(b);
-				break;
 			case DESC:
 				pkg->desc = amemcpy(pkg->desc, b, sizeof(char) * l + 1);
 				break;
@@ -152,8 +149,11 @@ getpkg(struct Package *pkg, FILE *in) {
 				for(i = 0, l = 1; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->key[i])
 						&& i < LENGTH(pkg->key);i++);
 				break;
+			case RELTIME:
+				pkg->reltime = atol(b);
+				break;
 			case INSTIME:
-				pkg->instime = atoi(b);
+				pkg->instime = atol(b);
 				break;
 			default:
 				break;
@@ -196,9 +196,6 @@ void putpkg(const struct Package *pkg, FILE *out) {
 		case REL:
 			fprintf(out,"%u", pkg->rel);
 			break;
-		case RELTIME:
-			fprintf(out,"%u", pkg->reltime);
-			break;
 		case DESC:
 			p = pkg->desc;
 			break;
@@ -235,8 +232,11 @@ void putpkg(const struct Package *pkg, FILE *out) {
 			for(j = 0; j < LENGTH(pkg->key); j++)
 				fprintf(out, "%02x", (unsigned int )pkg->key[j] % 256);
 			break;
+		case RELTIME:
+			fprintf(out,"%lu", pkg->reltime);
+			break;
 		case INSTIME:
-			fprintf(out,"%u",pkg->instime);
+			fprintf(out,"%lu",pkg->instime);
 			break;
 		}
 		if(p)

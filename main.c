@@ -22,7 +22,6 @@
 
 #include "db.h"
 #include "delete.h"
-#include "depency.h"
 #include "download.h"
 #include "filter.h"
 #include "install.h"
@@ -42,7 +41,6 @@ struct Applet {
 static struct Applet applets[] = {
 	APPLET(db),
 	APPLET(delete),
-	APPLET(depency),
 	APPLET(download),
 	APPLET(filter),
 	APPLET(install),
@@ -52,7 +50,7 @@ static struct Applet applets[] = {
 static struct Cmd syncchain[] = {
 	{ db,		1,	{ "-i" } },
 	{ filter,	1,	{ "-tr" } },
-	{ depency,	1,	{ "-r" } },
+	{ db,		1,	{ "-dr" } },
 	{ download,	0,	{ "-f" } },
 	{ install,	1,	{ "-o" } },
 };
@@ -63,7 +61,7 @@ static struct Cmd searchchain[] = {
 static struct Cmd installchain[] = {
 	{ db,		1,	{ "-p" } },
 	{ filter,	2,	{ "-e", NULL } },
-	{ depency,	1,	{ "-r" } },
+	{ db,		1,	{ "-dr" } },
 	{ download,	0,	{ NULL } },
 	{ install,	2,	{ "-f", "-p" } },
 };
@@ -76,7 +74,7 @@ static struct Cmd updatechain[] = {
 	{ db,		1,	{ "-i" } },
 	{ db,		1,	{ "-o" } },
 	{ filter,	1,	{ "-n" } },
-	{ depency,	1,	{ "-r" } },
+	{ db,		1,	{ "-dr" } },
 	{ install,	0,	{ NULL } },
 };
 
