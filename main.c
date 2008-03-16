@@ -25,6 +25,7 @@
 #include "download.h"
 #include "filter.h"
 #include "install.h"
+#include "ui.h"
 
 #define APPLET(x) { x, x ## _help, #x }
 
@@ -44,6 +45,7 @@ static struct Applet applets[] = {
 	APPLET(download),
 	APPLET(filter),
 	APPLET(install),
+	APPLET(ui),
 	{ main_applet, help, NULL },
 };
 
