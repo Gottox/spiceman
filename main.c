@@ -59,6 +59,7 @@ static struct Cmd syncchain[] = {
 static struct Cmd searchchain[] = {
 	{ db,		1,	{ "-p" } },
 	{ filter,	2,	{ "-s", NULL } },
+	{ ui,		0,	{ NULL } },
 };
 static struct Cmd installchain[] = {
 	{ db,		1,	{ "-p" } },
