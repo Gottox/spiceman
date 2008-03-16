@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# reading availible fields
+fields=`man pkglist | grep "^[\t ]\+[1-9][0-9]*:[a-z]\+\($\|[\t ]\+[1-9][0-9]*:[a-z]\+\)" | sed "s/[0-9]*://g"`
+pkglist="bunzip2 -c /var/db/pkg/pkglist.bz2"
+
+$pkglist | while IFS=":" read $fields end; do
+	case $srcbin in
+		0|4)
+		echo "b:$pkgname:$pkgver:$pkgrel:$pkgdesc:${url//�/\:}:$useflags:$repositoy$repository:$depends:$conflicts:$provides:http\://s01.de:$bsize:$bmd5::$keyID:0:0:"
+		;;
+		2)
+		echo "p:$pkgname:$pkgver:$pkgrel:$pkgdesc:${url//�/\:}:$useflags:$repositoy$repository:$depends:$conflicts:$provides:http\://s01.de:$psize:$pmd5::$keyID:0:0:"
+		;;
+		*)
+		echo "b:$pkgname:$pkgver:$pkgrel:$pkgdesc:${url//�/\:}:$useflags:$repositoy$repository:$depends:$conflicts:$provides:http\://s01.de:$bsize:$bmd5::$keyID:0:0:"
+		echo "p:$pkgname:$pkgver:$pkgrel:$pkgdesc:${url//�/\:}:$useflags:$repositoy$repository:$depends:$conflicts:$provides:http\://s01.de:$psize:$pmd5::$keyID:0:0:"
+		;;
+	esac
+	unset $fields
+done 

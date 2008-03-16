@@ -27,6 +27,7 @@
 void exactmatch(const char *s, FILE *in, FILE *out) {
 	int j;
 	struct Package pkg;
+	const char *p;
 
 	bzero(&pkg, sizeof(pkg));
 	while(getpkg(&pkg, in) > 0) {
@@ -38,17 +39,16 @@ void exactmatch(const char *s, FILE *in, FILE *out) {
 		}
 		else if(s[j] != '-' || pkg.name[j++] != 0)
 			continue;
-		for(s += j, j = 0; s[j] && pkg.ver[j] && 
-				s[j] == pkg.ver[j]; j++);
-		if(s[j] == 0 && s[j] == pkg.ver[j]) {
+		for(p = s + j, j = 0; p[j] && pkg.ver[j] && 
+				p[j] == pkg.ver[j]; j++);
+		if(p[j] == 0 && p[j] == pkg.ver[j]) {
 			putpkg(&pkg, out);
 			continue;
 		}
-		else if(s[j++] != '-' || pkg.ver[j++] != 0)
+		else if(p[j] != '-' || pkg.ver[j++] != 0)
 			continue;
-		if(atoi(s + j) == pkg.rel)
+		if(atoi(p + j) == pkg.rel)
 			putpkg(&pkg, out);
-		continue;
 	}
 }
 

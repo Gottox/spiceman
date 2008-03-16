@@ -90,10 +90,10 @@ alternate(FILE *in, FILE *out) {
 			pos = ftell(db);
 			for(i = 0; i < fsize && found[i] != pos; i++);
 			if(fsize && i != fsize)
-				break;
+				continue;
 			if(strcmp(pkg.name, dbpkg.name) ||
 					strcmp(pkg.ver, dbpkg.ver))
-				break;
+				continue;
 			if(fsize % BUFSIZE == 0) {
 				found = erealloc(found, fsize + BUFSIZE);
 			}

@@ -134,20 +134,26 @@ getpkg(struct Package *pkg, FILE *in) {
 			case PROV:
 				pkg->prov = amemcpy(pkg->prov,b, sizeof(char) * l + 1);
 				break;
+			case PATH:
+				pkg->path = amemcpy(pkg->path,b, sizeof(char) * l + 1);
+				break;
 			case SIZE:
 				pkg->size = atoi(b);
 				break;
 			case MD5:
-				for(i = 0, l = 1; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->md5[i])
+				bzero(pkg->md5, sizeof(pkg->md5));
+				for(i = 0; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->md5[i])
 					 && i < LENGTH(pkg->md5);i++);
 				break;
 			case SHA1:
-				for(i = 0, l = 1; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->sha1[i])
+				bzero(pkg->sha1, sizeof(pkg->sha1));
+				for(i = 0; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->sha1[i])
 						&& i < LENGTH(pkg->sha1);i++);
 				break;
 			case KEY:
-				for(i = 0, l = 1; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->key[i])
-						&& i < LENGTH(pkg->key);i++);
+				bzero(pkg->key, sizeof(pkg->key));
+				for(i = 0; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->key[i])
+						&& i < LENGTH(pkg->key);i++)
 				break;
 			case RELTIME:
 				pkg->reltime = atol(b);

@@ -34,7 +34,7 @@
 typedef int (*Cmdfunction)(int, char *[], FILE *in, FILE *out);
 
 enum PkgEnt	{ TYPE, NAME, VER, REL, DESC, URL, USEF, REPO, DEP, CONFLICT,
-	PROV, SIZE, MD5, SHA1, KEY, RELTIME, INSTIME, NENTRIES };
+	PROV, PATH, SIZE, MD5, SHA1, KEY, RELTIME, INSTIME, NENTRIES };
 
 struct Cmd {
 	Cmdfunction function;
@@ -57,6 +57,9 @@ struct Package {
 	char *dep;			/* depencies */
 	char *conflict;			/* pkg conflicts with */
 	char *prov;			/* pkg provides */
+
+	/* get the package */
+	char *path;
 
 	/* pkg integrity */
 	unsigned int size;		/* time of release */
