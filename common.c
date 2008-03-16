@@ -143,17 +143,17 @@ getpkg(struct Package *pkg, FILE *in) {
 			case MD5:
 				bzero(pkg->md5, sizeof(pkg->md5));
 				for(i = 0; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->md5[i])
-					 && i < LENGTH(pkg->md5);i++);
+						&& i * 2 + 1 < l && i < LENGTH(pkg->md5); i++);
 				break;
 			case SHA1:
 				bzero(pkg->sha1, sizeof(pkg->sha1));
 				for(i = 0; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->sha1[i])
-						&& i < LENGTH(pkg->sha1);i++);
+						&& i * 2 + 1 < l && i < LENGTH(pkg->sha1); i++);
 				break;
 			case KEY:
 				bzero(pkg->key, sizeof(pkg->key));
 				for(i = 0; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->key[i])
-						&& i < LENGTH(pkg->key);i++)
+						&& i * 2 + 1 < l && i < LENGTH(pkg->key); i++);
 				break;
 			case RELTIME:
 				pkg->reltime = atol(b);

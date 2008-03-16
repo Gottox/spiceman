@@ -65,8 +65,8 @@ putdb(FILE *out, char action) {
 	bzero(&pkg, sizeof(pkg));
 	while((r = getpkg(&pkg, db) > 0)) {
 		putpkg(&pkg, out);
-		freepkg(&pkg);
 	}
+	freepkg(&pkg);
 	if(r < 0)
 		eprint(0, "You can start crying now.\nMalformed Package in Database: %s", "TODO");
 	fclose(db);
