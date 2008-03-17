@@ -23,13 +23,11 @@
 
 #include "common.h"
 
-
-
-/* common.c */
-void *
-amemcpy(void *d, void *s, size_t n) {
-	d = erealloc(d, n);
-	return memcpy(d, s, n);
+char *
+astrcpy(void *d, void *s, int l) {
+	if(!d || strlen(d) <= l)
+		d = erealloc(d, (l + 1) * sizeof(char));
+	return strcpy(d, s);
 }
 
 int
@@ -62,10 +60,8 @@ cmdchain(int cmdc, struct Cmd *cmd) {
 
 void *
 erealloc(void *p, size_t size) {
-	if(!(p = realloc(p, size))) {
-		perror("Cannot Malloc");
-		exit(EXIT_FAILURE);
-	}
+	if(!(p = realloc(p, size)))
+		eprint(0, "Cannot Malloc");
 	return p;
 }
 
@@ -105,37 +101,37 @@ getpkg(struct Package *pkg, FILE *in) {
 				pkg->type = b[0];
 				break;
 			case NAME:
-				pkg->name = amemcpy(pkg->name, b, sizeof(char) * l + 1);
+				pkg->name = astrcpy(pkg->name, b, l);
 				break;
 			case VER:
-				pkg->ver = amemcpy(pkg->ver, b, sizeof(char) * l + 1);
+				pkg->ver = astrcpy(pkg->ver, b, l);
 				break;
 			case REL:
 				pkg->rel = atoi(b);
 				break;
 			case DESC:
-				pkg->desc = amemcpy(pkg->desc, b, sizeof(char) * l + 1);
+				pkg->desc = astrcpy(pkg->desc, b, l);
 				break;
 			case URL:
-				pkg->url = amemcpy(pkg->url, b, sizeof(char) * l + 1);
+				pkg->url = astrcpy(pkg->url, b, l);
 				break;
 			case USEF:
-				pkg->usef = amemcpy(pkg->usef, b, sizeof(char) * l + 1);
+				pkg->usef = astrcpy(pkg->usef, b, l);
 				break;
 			case REPO:
-				pkg->repo = amemcpy(pkg->repo, b, sizeof(char) * l + 1);
+				pkg->repo = astrcpy(pkg->repo, b, l);
 				break;
 			case DEP:
-				pkg->dep = amemcpy(pkg->dep, b, sizeof(char) * l + 1);
+				pkg->dep = astrcpy(pkg->dep, b, l);
 				break;
 			case CONFLICT:
-				pkg->conflict = amemcpy(pkg->conflict,b, sizeof(char) * l + 1);
+				pkg->conflict = astrcpy(pkg->conflict, b, l);
 				break;
 			case PROV:
-				pkg->prov = amemcpy(pkg->prov,b, sizeof(char) * l + 1);
+				pkg->prov = astrcpy(pkg->prov, b, l);
 				break;
 			case PATH:
-				pkg->path = amemcpy(pkg->path,b, sizeof(char) * l + 1);
+				pkg->path = astrcpy(pkg->path,b, l);
 				break;
 			case SIZE:
 				pkg->size = atoi(b);
@@ -170,6 +166,8 @@ getpkg(struct Package *pkg, FILE *in) {
 		else
 			l++;
 	}
+	if(b)
+		free(b);
 	if(ent == 0) {
 		return 0;
 	}
@@ -269,11 +267,12 @@ void freepkg(struct Package *pkg) {
 		&pkg->dep,
 		&pkg->conflict,
 		&pkg->prov,
+		&pkg->path,
 	};
 	for(i = 0; i < LENGTH(l); i++)
 		if(*l[i] != NULL) {
 			free(*l[i]);
-			*l[i] = 0;
+			*l[i] = NULL;
 		}
 }
 
