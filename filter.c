@@ -50,6 +50,7 @@ void exactmatch(const char *s, FILE *in, FILE *out) {
 		if(atoi(p + j) == pkg.rel)
 			putpkg(&pkg, out);
 	}
+	freepkg(&pkg);
 }
 
 void repository(const char *s, FILE *in, FILE *out) {
@@ -59,6 +60,7 @@ void repository(const char *s, FILE *in, FILE *out) {
 	while(getpkg(&pkg, in) > 0)
 		if(!strcmp(pkg.repo, s))
 			putpkg(&pkg, out);
+	freepkg(&pkg);
 }
 
 void search(const char *s, FILE *in, FILE *out) {
@@ -72,6 +74,7 @@ void search(const char *s, FILE *in, FILE *out) {
 		if(!fnmatch(s, buf, 0))
 			putpkg(&pkg, out);
 	}
+	freepkg(&pkg);
 }
 
 void type(const char *s, FILE *in, FILE *out) {
@@ -81,6 +84,7 @@ void type(const char *s, FILE *in, FILE *out) {
 	while(getpkg(&pkg, in) > 0)
 		if(strchr(s, pkg.type))
 			putpkg(&pkg, out);
+	freepkg(&pkg);
 }
 
 void unique(FILE *in, FILE *out) {
@@ -90,6 +94,7 @@ void unique(FILE *in, FILE *out) {
 	while(getpkg(&pkg, in) > 0) {
 	
 	}
+	freepkg(&pkg);
 }
 
 void filter_help() {
@@ -102,11 +107,9 @@ void filter_help() {
 }
 
 int filter(int argc, char *argv[], FILE *in, FILE *out) {
-	struct Package pkg;
 	char action = 0;
 	char *arg = NULL;
 
-	bzero(&pkg, sizeof(pkg));
 	ARGBEGIN {
 	case 't':
 	case 'R':
@@ -143,6 +146,5 @@ int filter(int argc, char *argv[], FILE *in, FILE *out) {
 		unique(in, out);
 		break;
 	}
-	freepkg(&pkg);
 	return EXIT_SUCCESS;
 }

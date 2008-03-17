@@ -36,24 +36,29 @@ cmdchain(int cmdc, struct Cmd *cmd) {
 	int i, fd[2], pid, retval, status;
 
 	in = stdin;
-	for(i = 0; i < cmdc-1; i++) {
-		if(pipe(fd) != 0)
+	for(i = 0; i < cmdc - 1; i++) {
+		if(pipe(fd))
 			eprint(1, "Cannot create pipe: ");
 		if(!(out = fdopen(fd[1], "w")))
 			eprint(1, "Cannot open pipe for writing: ");
 		pid = fork();
 		if(pid < 0)
 			eprint(1, "Cannot fork: ");
-		else if(pid == 0)
-			exit(cmd[i].function(cmd[i].argc,cmd[i].argv,in,out));
-		fclose(out);
-		if(in != stdin)
+		else if(pid == 0) {
+			retval = cmd[i].function(cmd[i].argc,cmd[i].argv,in,out);
+			fclose(out);
 			fclose(in);
+			exit(retval);
+		}
+		fclose(out);
+		fclose(in);
 		if(!(in = fdopen(fd[0], "r")))
 			eprint(1, "Cannot open pipe for reading: ");
 	}
 	out = stdout;
 	retval = cmd[i].function(cmd[i].argc,cmd[i].argv,in,out);
+	fclose(out);
+	fclose(in);
 	while(wait(&status) != -1);
 	return retval;
 }
@@ -81,103 +86,98 @@ eprint(int pe, const char *format, ...) {
 
 int
 getpkg(struct Package *pkg, FILE *in) {
+	int i, n, start;
 	char c;
-	char *b;
-	int l, ent, i;
-	 
-	b = NULL;
-	for(c = ent = l = 0; c != seperator[1] && !feof(in) && (c = fgetc(in));) {
-		if(l % BUFFERSIZE == 0)
-			b = erealloc(b, sizeof(char) * BUFFERSIZE + l);
-		b[l] = c;
-		if(b[l] == '\\') {
-			b[l] = fgetc(in);
-			l++;
-		}
-		else if(b[l] == seperator[0] || b[l] == seperator[1]) {
-			b[l] = '\0';
-			switch(ent) {
-			case TYPE:
-				pkg->type = b[0];
-				break;
-			case NAME:
-				pkg->name = astrcpy(pkg->name, b, l);
-				break;
-			case VER:
-				pkg->ver = astrcpy(pkg->ver, b, l);
-				break;
-			case REL:
-				pkg->rel = atoi(b);
-				break;
-			case DESC:
-				pkg->desc = astrcpy(pkg->desc, b, l);
-				break;
-			case URL:
-				pkg->url = astrcpy(pkg->url, b, l);
-				break;
-			case USEF:
-				pkg->usef = astrcpy(pkg->usef, b, l);
-				break;
-			case REPO:
-				pkg->repo = astrcpy(pkg->repo, b, l);
-				break;
-			case DEP:
-				pkg->dep = astrcpy(pkg->dep, b, l);
-				break;
-			case CONFLICT:
-				pkg->conflict = astrcpy(pkg->conflict, b, l);
-				break;
-			case PROV:
-				pkg->prov = astrcpy(pkg->prov, b, l);
-				break;
-			case PATH:
-				pkg->path = astrcpy(pkg->path,b, l);
-				break;
-			case SIZE:
-				pkg->size = atoi(b);
-				break;
-			case MD5:
-				bzero(pkg->md5, sizeof(pkg->md5));
-				for(i = 0; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->md5[i])
-						&& i * 2 + 1 < l && i < LENGTH(pkg->md5); i++);
-				break;
-			case SHA1:
-				bzero(pkg->sha1, sizeof(pkg->sha1));
-				for(i = 0; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->sha1[i])
-						&& i * 2 + 1 < l && i < LENGTH(pkg->sha1); i++);
-				break;
-			case KEY:
-				bzero(pkg->key, sizeof(pkg->key));
-				for(i = 0; sscanf(b + i * 2, "%2x", (unsigned int *)&pkg->key[i])
-						&& i * 2 + 1 < l && i < LENGTH(pkg->key); i++);
-				break;
-			case RELTIME:
-				pkg->reltime = atol(b);
-				break;
-			case INSTIME:
-				pkg->instime = atol(b);
-				break;
-			default:
-				break;
-			}
-			l = 0;
-			ent++;
+	int fields[NENTRIES + 1];
+
+	bzero(fields, sizeof(fields));
+	for(n = i = c = 0; c != seperator[1] && !feof(in) && (c = fgetc(in)); i++) {
+		if(i % BUFFERSIZE == 0)
+			pkg->buf = erealloc(pkg->buf, sizeof(char) * BUFFERSIZE + i);
+		if((c == seperator[0] || c == seperator[1]) && n < LENGTH(fields)) {
+			pkg->buf[i] = 0;
+			fields[++n] = i + 1;
 		}
 		else
-			l++;
+			pkg->buf[i] = c == '\\' ? fgetc(in) : c;
 	}
-	if(b)
-		free(b);
-	if(ent == 0) {
+	pkg->buf[i] = 0;
+	if(i == 0) {
 		return 0;
 	}
-	else if(ent < NENTRIES) {
+	else if(n < NENTRIES) {
 		freepkg(pkg);
 		return -1;
 	}
-	else {
-		return 1;
+	for(i = 0; i < NENTRIES; i++) {
+		start = fields[i];
+		switch(i) {
+		case TYPE:
+			pkg->type = pkg->buf[start];
+			break;
+		case NAME:
+			pkg->name = &pkg->buf[start];
+			break;
+		case VER:
+			pkg->ver = &pkg->buf[start];
+			break;
+		case REL:
+			pkg->rel = atoi(&pkg->buf[start]);
+			break;
+		case DESC:
+			pkg->desc = &pkg->buf[start];
+			break;
+		case URL:
+			pkg->url = &pkg->buf[start];
+			break;
+		case USEF:
+			pkg->usef = &pkg->buf[start];
+			break;
+		case REPO:
+			pkg->repo = &pkg->buf[start];
+			break;
+		case DEP:
+			pkg->dep = &pkg->buf[start];
+			break;
+		case CONFLICT:
+			pkg->conflict = &pkg->buf[start];
+			break;
+		case PROV:
+			pkg->prov = &pkg->buf[start];
+			break;
+		case PATH:
+			pkg->path = &pkg->buf[start];
+			break;
+		case SIZE:
+			pkg->size = atoi(&pkg->buf[start]);
+			break;
+/*		case MD5:
+			bzero(pkg->md5, sizeof(pkg->md5));
+			for(i = 0; sscanf(b + start + i * 2, "%2x", (unsigned int *)&pkg->md5[i])
+					&& i * 2 + 1 < l && i < LENGTH(pkg->md5); i++);
+			break;
+		case SHA1:
+			bzero(pkg->sha1, sizeof(pkg->sha1));
+			for(i = 0; sscanf(b + start + i * 2, "%2x", (unsigned int *)&pkg->sha1[i])
+					&& i * 2 + 1 < l && i < LENGTH(pkg->sha1); i++);
+			break;
+		case KEY:
+			bzero(pkg->key, sizeof(pkg->key));
+			for(i = 0; sscanf(b + start + i * 2, "%2x", (unsigned int *)&pkg->key[i])
+					&& i * 2 + 1 < l && i < LENGTH(pkg->key); i++);
+		break;*/
+		case RELTIME:
+			pkg->reltime = atol(&pkg->buf[start]);
+			break;
+		case INSTIME:
+			pkg->instime = atol(&pkg->buf[start]);
+			break;
+		default:
+			break;
+		}
 	}
+
+	return 1;
 }
 
 void putpkg(const struct Package *pkg, FILE *out) {
@@ -256,24 +256,9 @@ void putpkg(const struct Package *pkg, FILE *out) {
 }
 
 void freepkg(struct Package *pkg) {
-	int i;
-	char **l[] = {
-		&pkg->name,
-		&pkg->ver,
-		&pkg->desc,
-		&pkg->url,
-		&pkg->usef,
-		&pkg->repo,
-		&pkg->dep,
-		&pkg->conflict,
-		&pkg->prov,
-		&pkg->path,
-	};
-	for(i = 0; i < LENGTH(l); i++)
-		if(*l[i] != NULL) {
-			free(*l[i]);
-			*l[i] = NULL;
-		}
+	if(pkg->buf)
+		free(pkg->buf);
+	pkg->buf = NULL;
 }
 
 void version() {

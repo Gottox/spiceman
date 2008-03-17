@@ -43,6 +43,7 @@ struct Cmd {
 };
 
 struct Package {
+	char *buf;
 	/* pkg information */
 	char type;
 	char *name;			/* name of pkg*/
