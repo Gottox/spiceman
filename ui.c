@@ -45,16 +45,20 @@ ui_help() {
 	fputs("	-m	medium output (default)\n", stderr);
 	fputs("	-f	full output\n", stderr);
 	fputs("	-w <w>	maximal text width (0 = no line wrapping)\n", stderr);
+	fputs("	-N	seperate pkg by 0-byte\n", stderr);
 }
 
 int
 ui(int argc, char *argv[], FILE *in, FILE *out) {
-	int width = 80;
-	char *arg;
+	int i, width = 80;
+	char *arg, seperator = '\n';
 	char action = 0;
 	struct Package pkg;
 
 	ARGBEGIN {
+	case 'N':
+		seperator = '\0';
+		break;
 	case 'w':
 		if(!(arg = ARGVAL()))
 			goto argerr;
@@ -74,8 +78,8 @@ ui(int argc, char *argv[], FILE *in, FILE *out) {
 	} ARGEND
 
 	bzero(&pkg, sizeof(pkg));
-	while(getpkg(&pkg, in) > 0) {
-		fprintf(stderr, "[%c] %s-%s-%i (%s)\n", pkg.type, pkg.name, pkg.ver, pkg.rel, pkg.repo);
+	for(i = 0; getpkg(&pkg, in) > 0; i++) {
+		fprintf(stderr, "%i. [%c] %s-%s-%i (%s)\n", i, pkg.type, pkg.name, pkg.ver, pkg.rel, pkg.repo);
 		if(action != 's') {
 			if(width)
 				wordwrap(pkg.desc, width);
@@ -91,7 +95,7 @@ ui(int argc, char *argv[], FILE *in, FILE *out) {
 				fputc('\n', stderr);
 			}
 		}
-		fputc('\n', stderr);
+		fputc(seperator, stderr);
 	}
 	freepkg(&pkg);
 	return EXIT_SUCCESS;
