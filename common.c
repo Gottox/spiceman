@@ -79,7 +79,7 @@ eprint(int pe, const char *format, ...) {
 
 int
 getpkg(struct Package *pkg, FILE *in) {
-	int i, n, start;
+	int i, j, n, start;
 	char c;
 	int fields[NENTRIES + 1];
 
@@ -144,21 +144,24 @@ getpkg(struct Package *pkg, FILE *in) {
 		case SIZE:
 			pkg->size = atoi(&pkg->buf[start]);
 			break;
-/*		case MD5:
+		case MD5:
 			bzero(pkg->md5, sizeof(pkg->md5));
-			for(i = 0; sscanf(b + start + i * 2, "%2x", (unsigned int *)&pkg->md5[i])
-					&& i * 2 + 1 < l && i < LENGTH(pkg->md5); i++);
+			for(j = 0; j < LENGTH(pkg->md5) &&
+					sscanf(&pkg->buf[start + j * 2], "%2x",
+						(unsigned int *)&pkg->md5[j]) > 0; j++);
 			break;
 		case SHA1:
 			bzero(pkg->sha1, sizeof(pkg->sha1));
-			for(i = 0; sscanf(b + start + i * 2, "%2x", (unsigned int *)&pkg->sha1[i])
-					&& i * 2 + 1 < l && i < LENGTH(pkg->sha1); i++);
+			for(j = 0; j < LENGTH(pkg->sha1) &&
+					sscanf(&pkg->buf[start + j * 2], "%2x",
+						(unsigned int *)&pkg->sha1[j]) > 0; j++);
 			break;
 		case KEY:
 			bzero(pkg->key, sizeof(pkg->key));
-			for(i = 0; sscanf(b + start + i * 2, "%2x", (unsigned int *)&pkg->key[i])
-					&& i * 2 + 1 < l && i < LENGTH(pkg->key); i++);
-		break;*/
+			for(j = 0; j < LENGTH(pkg->sha1) &&
+					sscanf(&pkg->buf[start + j * 2], "%2x",
+						(unsigned int *)&pkg->key[j]) > 0; j++);
+			break;
 		case RELTIME:
 			pkg->reltime = atol(&pkg->buf[start]);
 			break;
