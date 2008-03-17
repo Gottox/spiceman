@@ -19,7 +19,6 @@
 
 #define LENGTH(x)		sizeof(x)/sizeof(x[0])
 #define APPLETUSAGE(a)		fputs("sp-" a "\nspiceman " a "\n\t-h\thelp message\n", stderr);
-#define BUFFERSIZE		1024
 
 /* Plan9-style Argument parsing */
 #define ARGBEGIN int _c; { char *_a; int _b; \
@@ -33,8 +32,8 @@
 
 typedef int (*Cmdfunction)(int, char *[], FILE *in, FILE *out);
 
-enum PkgEnt	{ TYPE, NAME, VER, REL, DESC, URL, USEF, REPO, DEP, CONFLICT,
-	PROV, PATH, SIZE, MD5, SHA1, KEY, RELTIME, INSTIME, NENTRIES };
+enum PkgEnt	{ TYPE, NAME, VER, REL, DESC, URL, USEF, REPO, INFOURL, DEP,
+	CONFLICT, PROV, SIZE, MD5, SHA1, KEY, RELTIME, INSTIME, NENTRIES };
 
 struct Cmd {
 	Cmdfunction function;
@@ -54,14 +53,13 @@ struct Package {
 	char *url;			/* url of pkg */
 	char *usef;			/* useflags */
 	char *repo;			/* repository */
+	char *infourl;
 
 	/* to other packages */
 	char *dep;			/* depencies */
 	char *conflict;			/* pkg conflicts with */
 	char *prov;			/* pkg provides */
 
-	/* get the package */
-	char *path;
 
 	/* pkg integrity */
 	unsigned int size;		/* time of release */

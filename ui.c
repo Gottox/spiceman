@@ -85,6 +85,8 @@ ui(int argc, char *argv[], FILE *in, FILE *out) {
 				wordwrap(pkg.desc, width);
 			fputc('\n', stderr);
 			fputs(pkg.desc, stderr);
+			fputs("\nURL: ", stderr);
+			fputs(pkg.infourl, stderr);
 			fputc('\n', stderr);
 			if(action == 'f') {
 				fputs("Depencies: ", stderr);

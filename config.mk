@@ -2,7 +2,7 @@
 VERSION = 0.0
 
 # initial config:
-DEFREPO = "R:gtx-base:0.0:1:0::::gtx-base::::::::::http://s01.de/~gottox/rep/gtx-base"
+DEFREPO = "r:default-repository:0.0:1:0::::gtx-base::::::::::http://s01.de/~gottox/rep/gtx-base"
 
 # Customize below to fit your system
 

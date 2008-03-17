@@ -23,6 +23,8 @@
 
 #include "common.h"
 
+#define BUFFERSIZE		1024
+
 int
 cmdchain(int cmdc, struct Cmd *cmd) {
 	FILE *in, *out;
@@ -131,6 +133,9 @@ getpkg(struct Package *pkg, FILE *in) {
 		case REPO:
 			pkg->repo = &pkg->buf[start];
 			break;
+		case INFOURL:
+			pkg->infourl = &pkg->buf[start];
+			break;
 		case DEP:
 			pkg->dep = &pkg->buf[start];
 			break;
@@ -139,9 +144,6 @@ getpkg(struct Package *pkg, FILE *in) {
 			break;
 		case PROV:
 			pkg->prov = &pkg->buf[start];
-			break;
-		case PATH:
-			pkg->path = &pkg->buf[start];
 			break;
 		case SIZE:
 			pkg->size = atoi(&pkg->buf[start]);
@@ -209,6 +211,9 @@ void putpkg(const struct Package *pkg, FILE *out) {
 			break;
 		case REPO:
 			p = pkg->repo;
+			break;
+		case INFOURL:
+			p = pkg->infourl;
 			break;
 		case DEP:
 			p = pkg->dep;

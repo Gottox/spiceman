@@ -7,14 +7,14 @@ pkglist="bunzip2 -c /var/db/pkg/pkglist.bz2"
 $pkglist | while IFS=":" read $fields end; do
 	case $srcbin in
 		0|4)
-		echo "b:$pkgname:$pkgver:$pkgrel:$pkgdesc:$url:$useflags:$repositoy$repository:$depends:$conflicts:$provides:http\://s01.de:$bsize:$bmd5::$keyID:0:0:"
+		echo "b:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$bsize:$bmd5::$keyID:0:0:"
 		;;
 		2)
-		echo "p:$pkgname:$pkgver:$pkgrel:$pkgdesc:$url:$useflags:$repositoy$repository:$depends:$conflicts:$provides:http\://s01.de:$psize:$pmd5::$keyID:0:0:"
+		echo "p:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$psize:$pmd5::$keyID:0:0:"
 		;;
 		*)
-		echo "b:$pkgname:$pkgver:$pkgrel:$pkgdesc:$url:$useflags:$repositoy$repository:$depends:$conflicts:$provides:http\://s01.de:$bsize:$bmd5::$keyID:0:0:"
-		echo "p:$pkgname:$pkgver:$pkgrel:$pkgdesc:$url:$useflags:$repositoy$repository:$depends:$conflicts:$provides:http\://s01.de:$psize:$pmd5::$keyID:0:0:"
+		echo "b:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$bsize:$bmd5::$keyID:0:0:"
+		echo "p:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$psize:$pmd5::$keyID:0:0:"
 		;;
 	esac
 	unset $fields
