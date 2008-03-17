@@ -113,8 +113,6 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 	if(sync) {
 		printchain(LENGTH(syncchain), syncchain);
 		cmdchain(LENGTH(syncchain), syncchain);
-		if(!action)
-			return EXIT_SUCCESS;
 	}
 	switch(action) {
 	case 'u':
@@ -179,7 +177,6 @@ int main(int argc, char *argv[]) {
 	int applet, i;
 	char *bn;
 	unsigned int showhelp, retval;
-
 
 	showhelp = argc < 1;
 	bn = basename(argv[0]);
