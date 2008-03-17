@@ -136,6 +136,8 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 		printchain(LENGTH(rmchain), rmchain);
 		cmdchain(LENGTH(rmchain), rmchain);
 		break;
+	default:
+		goto argerr;
 	}
 	return EXIT_SUCCESS;
 }
