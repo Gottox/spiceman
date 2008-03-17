@@ -44,6 +44,7 @@ struct Cmd {
 
 struct Package {
 	char *buf;
+	unsigned int blen;
 	/* pkg information */
 	char type;
 	char *name;			/* name of pkg*/

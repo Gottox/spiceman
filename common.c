@@ -85,8 +85,10 @@ getpkg(struct Package *pkg, FILE *in) {
 
 	bzero(fields, sizeof(fields));
 	for(n = i = c = 0; c != seperator[1] && !feof(in) && (c = fgetc(in)); i++) {
-		if(i % BUFFERSIZE == 0)
-			pkg->buf = erealloc(pkg->buf, sizeof(char) * BUFFERSIZE + i);
+		if(i % BUFFERSIZE == 0 && i >= pkg->blen) {
+			pkg->blen = BUFFERSIZE + i;
+			pkg->buf = erealloc(pkg->buf, sizeof(char) * pkg->blen);
+		}
 		if((c == seperator[0] || c == seperator[1]) && n < LENGTH(fields)) {
 			pkg->buf[i] = 0;
 			fields[++n] = i + 1;
