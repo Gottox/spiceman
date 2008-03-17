@@ -23,13 +23,6 @@
 
 #include "common.h"
 
-char *
-astrcpy(void *d, void *s, int l) {
-	if(!d || strlen(d) <= l)
-		d = erealloc(d, (l + 1) * sizeof(char));
-	return strcpy(d, s);
-}
-
 int
 cmdchain(int cmdc, struct Cmd *cmd) {
 	FILE *in, *out;

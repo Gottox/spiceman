@@ -77,7 +77,6 @@ static const char seperator[] = ":\n";
 
 
 /* common.c */
-void *amemcpy(void *d, void *s, size_t n);	/* cpy memory to an allocated buffer */
 int cmdchain(int cmdc, struct Cmd *cmd);	/* executes a chain of commands */
 void *erealloc(void *p, size_t size);		/* remalloc + error testing */
 void eprint(int pe, const char *format, ...);	/* prints message and exits */
