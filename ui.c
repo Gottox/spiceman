@@ -42,41 +42,54 @@ void
 ui_help() {
 	APPLETUSAGE("db");
 	fputs("	-s	short output\n", stderr);
+	fputs("	-m	medium output (default)\n", stderr);
 	fputs("	-f	full output\n", stderr);
+	fputs("	-w <w>	maximal text width (0 = no line wrapping)\n", stderr);
 }
 
 int
 ui(int argc, char *argv[], FILE *in, FILE *out) {
-	char shortout = 0, fullout = 0;
+	int width = 80;
+	char *arg;
+	char action = 0;
 	struct Package pkg;
 
-	bzero(&pkg, sizeof(pkg));
-	if(argc > 0) {
-		if(argc == 1 && strcmp(argv[0], "-s") == 0)
-			shortout = 1;
-		else if(argc == 1 && strcmp(argv[0], "-f") == 0)
-			fullout = 1;
-		else {
-			ui_help();
-			return EXIT_FAILURE;
-		}
-	}
+	ARGBEGIN {
+	case 'w':
+		if(!(arg = ARGVAL()))
+			goto argerr;
+		width = atoi(arg);
+		break;
+	case 's':
+	case 'f':
+	case 'm':
+		if(action)
+			goto argerr;
+		action = ARGCHR();
+		break;
+	argerr:
+	default:
+		ui_help();
+		return EXIT_FAILURE;
+	} ARGEND
 
+	bzero(&pkg, sizeof(pkg));
 	while(getpkg(&pkg, in) > 0) {
 		fprintf(stderr, "[%c] %s-%s-%i (%s)\n", pkg.type, pkg.name, pkg.ver, pkg.rel, pkg.repo);
-		if(!shortout) {
-			wordwrap(pkg.desc, 40);
+		if(action != 's') {
+			if(width)
+				wordwrap(pkg.desc, width);
 			fputs(pkg.desc, stderr);
 			fputc('\n', stderr);
-		}
-		if(fullout) {
-			fputs("Depencies: ", stderr);
-			fputs(pkg.dep, stderr);
-			fputs("\nConflicts: ", stderr);
-			fputs(pkg.conflict, stderr);
-			fputs("\nProvides: ", stderr);
-			fputs(pkg.prov, stderr);
-			fputc('\n', stderr);
+			if(action == 'f') {
+				fputs("Depencies: ", stderr);
+				fputs(pkg.dep, stderr);
+				fputs("\nConflicts: ", stderr);
+				fputs(pkg.conflict, stderr);
+				fputs("\nProvides: ", stderr);
+				fputs(pkg.prov, stderr);
+				fputc('\n', stderr);
+			}
 		}
 		fputc('\n', stderr);
 	}
