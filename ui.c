@@ -50,7 +50,7 @@ ui_help() {
 
 int
 ui(int argc, char *argv[], FILE *in, FILE *out) {
-	int i, width = 80;
+	unsigned int i, width = 80;
 	char *arg, seperator = '\n';
 	char action = 0;
 	struct Package pkg;
@@ -78,11 +78,12 @@ ui(int argc, char *argv[], FILE *in, FILE *out) {
 	} ARGEND
 
 	bzero(&pkg, sizeof(pkg));
-	for(i = 0; getpkg(&pkg, in) > 0; i++) {
-		fprintf(stderr, "%i. [%c] %s-%s-%i (%s)\n", i, pkg.type, pkg.name, pkg.ver, pkg.rel, pkg.repo);
+	for(i = 1; getpkg(&pkg, in) > 0; i++) {
+		fprintf(stderr, "%i. [%c] %s-%s-%i (%s)", i, pkg.type, pkg.name, pkg.ver, pkg.rel, pkg.repo);
 		if(action != 's') {
 			if(width)
 				wordwrap(pkg.desc, width);
+			fputc('\n', stderr);
 			fputs(pkg.desc, stderr);
 			fputc('\n', stderr);
 			if(action == 'f') {
