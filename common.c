@@ -86,12 +86,12 @@ getpkg(struct Package *pkg, FILE *in) {
 	int fields[NENTRIES + 1];
 
 	bzero(fields, sizeof(fields));
-	for(n = i = c = 0; c != seperator[1] && !feof(in) && (c = fgetc(in)); i++) {
+	for(n = i = c = 0; c != '\n' && !feof(in) && (c = fgetc(in)); i++) {
 		if(i % BUFFERSIZE == 0 && i >= pkg->blen) {
 			pkg->blen = BUFFERSIZE + i;
 			pkg->buf = erealloc(pkg->buf, sizeof(char) * pkg->blen);
 		}
-		if((c == seperator[0] || c == seperator[1]) && n < LENGTH(fields)) {
+		if((c == ':' || c == '\n') && n < LENGTH(fields)) {
 			pkg->buf[i] = 0;
 			fields[++n] = i + 1;
 		}
@@ -248,13 +248,13 @@ void putpkg(const struct Package *pkg, FILE *out) {
 		}
 		if(p)
 			for(; *p != '\0'; p++) {
-				if(*p == seperator[0] || *p == seperator[1] || *p == '\\')
+				if(*p == '\n' || *p == FIELDSEPERATOR || *p == '\\')
 					fputc('\\',out);
 				fputc(*p,out);
 			}
-		fputc(seperator[0], out);
+		fputc(FIELDSEPERATOR, out);
 	}
-	fputc(seperator[1], out);
+	fputc('\n', out);
 	fflush(out);
 }
 

@@ -16,6 +16,7 @@
 #include <stdio.h>
 
 #define APPLETPREFIX "sp-"
+#define FIELDSEPERATOR ':'
 
 #define LENGTH(x)		sizeof(x)/sizeof(x[0])
 #define APPLETUSAGE(a)		fputs("sp-" a "\nspiceman " a "\n\t-h\thelp message\n", stderr);
@@ -29,6 +30,7 @@
 #define ARGCHR()		*_a
 #define ARGEND			}
 #define ARGC()		_c
+
 
 typedef int (*Cmdfunction)(int, char *[], FILE *in, FILE *out);
 
@@ -70,10 +72,6 @@ struct Package {
 	unsigned long reltime;		/* timestamp of release */
 	unsigned long instime;
 };
-
-/* seperators */
-static const char seperator[] = ":\n";
-
 
 /* common.c */
 int cmdchain(int cmdc, struct Cmd *cmd);	/* executes a chain of commands */
