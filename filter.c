@@ -24,6 +24,11 @@
 
 #define ARRAYSIZE 1
 
+struct Btree {
+	struct Package pkg;
+	struct Btree *next;
+};
+
 int exactmatch(const char *s, struct Package *pkg) {
 	int j;
 	const char *p;
@@ -54,13 +59,39 @@ int typematch(const char *s, struct Package *pkg) {
 }
 
 void unique(FILE *in, FILE *out) {
+	int cmp;
 	struct Package pkg;
+	struct Btree *n, *t, *tree = NULL, *prev;
 
 	bzero(&pkg, sizeof(pkg));
 	while(getpkg(&pkg, in) > 0) {
-	
+		for(t = tree, cmp = 1; t && (cmp = pkgcmp(&pkg, &t->pkg)) > 0;
+				t = t->next)
+			prev = t;
+		if(t && cmp == 0)
+			continue;
+		n = erealloc(0, sizeof(struct Btree));
+		memcpy(&n->pkg, &pkg, sizeof(struct Package));
+		if(tree == t) {
+			n->next = tree;
+			tree = n;
+		}
+		else {
+			n->next = prev->next;
+			prev->next = n;
+		}
+		pkg.buf = NULL;
+		pkg.blen = 0;
 	}
 	freepkg(&pkg);
+
+	while(tree) {
+		putpkg(&tree->pkg, out);
+		freepkg(&tree->pkg);
+		t = tree;
+		tree = t->next;
+		free(t);
+	}
 }
 
 int wildcardmatch(const char *s, struct Package *pkg) {
@@ -127,7 +158,7 @@ int filter(int argc, char *argv[], FILE *in, FILE *out) {
 			if(match)
 				putpkg(&pkg, out);
 		}
+		freepkg(&pkg);
 	}
-	freepkg(&pkg);
 	return EXIT_SUCCESS;
 }
