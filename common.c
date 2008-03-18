@@ -81,99 +81,97 @@ eprint(int pe, const char *format, ...) {
 
 int
 getpkg(struct Package *pkg, FILE *in) {
-	int i, j, n, start;
-	char c;
-	int fields[NENTRIES + 1];
+	int i, l, n;
+	char *s, *p, *q;
 
-	bzero(fields, sizeof(fields));
-	for(n = i = c = 0; c != '\n' && !feof(in) && (c = fgetc(in)); i++) {
-		if(i % BUFFERSIZE == 0 && i >= pkg->blen) {
-			pkg->blen = BUFFERSIZE + i;
+	l = 0;
+	do {
+		printf("%i %i\n", pkg->blen, l);
+		if(l + 1 >= pkg->blen) {
+			pkg->blen = l + 1 + BUFFERSIZE;
 			pkg->buf = erealloc(pkg->buf, sizeof(char) * pkg->blen);
 		}
-		if((c == ':' || c == '\n') && n < LENGTH(fields)) {
-			pkg->buf[i] = 0;
-			fields[++n] = i + 1;
-		}
-		else
-			pkg->buf[i] = c == '\\' ? fgetc(in) : c;
-	}
-	pkg->buf[i] = 0;
-	if(i == 0) {
+		if(fgets(pkg->buf + l, pkg->blen - l, in))
+			l += strlen(&pkg->buf[l]);
+	} while(l > 0 && !feof(in) && pkg->buf[l - 1] != '\n');
+	if(l == 0)
 		return 0;
-	}
-	else if(n < NENTRIES) {
-		freepkg(pkg);
-		return -1;
-	}
-	for(i = 0; i < NENTRIES; i++) {
-		start = fields[i];
-		switch(i) {
-		case TYPE:
-			pkg->type = pkg->buf[start];
-			break;
-		case NAME:
-			pkg->name = &pkg->buf[start];
-			break;
-		case VER:
-			pkg->ver = &pkg->buf[start];
-			break;
-		case REL:
-			pkg->rel = atoi(&pkg->buf[start]);
-			break;
-		case DESC:
-			pkg->desc = &pkg->buf[start];
-			break;
-		case URL:
-			pkg->url = &pkg->buf[start];
-			break;
-		case USEF:
-			pkg->usef = &pkg->buf[start];
-			break;
-		case REPO:
-			pkg->repo = &pkg->buf[start];
-			break;
-		case INFOURL:
-			pkg->infourl = &pkg->buf[start];
-			break;
-		case DEP:
-			pkg->dep = &pkg->buf[start];
-			break;
-		case CONFLICT:
-			pkg->conflict = &pkg->buf[start];
-			break;
-		case PROV:
-			pkg->prov = &pkg->buf[start];
-			break;
-		case SIZE:
-			pkg->size = atoi(&pkg->buf[start]);
-			break;
-		case MD5:
-			bzero(pkg->md5, sizeof(pkg->md5));
-			for(j = 0; j < LENGTH(pkg->md5) &&
-					sscanf(&pkg->buf[start + j * 2], "%2x",
-						(unsigned int *)&pkg->md5[j]) > 0; j++);
-			break;
-		case SHA1:
-			bzero(pkg->sha1, sizeof(pkg->sha1));
-			for(j = 0; j < LENGTH(pkg->sha1) &&
-					sscanf(&pkg->buf[start + j * 2], "%2x",
-						(unsigned int *)&pkg->sha1[j]) > 0; j++);
-			break;
-		case KEY:
-			bzero(pkg->key, sizeof(pkg->key));
-			for(j = 0; j < LENGTH(pkg->sha1) &&
-					sscanf(&pkg->buf[start + j * 2], "%2x",
-						(unsigned int *)&pkg->key[j]) > 0; j++);
-			break;
-		case RELTIME:
-			pkg->reltime = atol(&pkg->buf[start]);
-			break;
-		case INSTIME:
-			pkg->instime = atol(&pkg->buf[start]);
-			break;
-		default:
-			break;
+	for(s = p = pkg->buf, n = 0; *p; p++) {
+		if(*p == '\\') {
+			for(q = p; *q; q++)
+				q[0] = q[1];
+		}
+		else if(*p == FIELDSEPERATOR) {
+			*p = 0;
+			switch(n) {
+			case TYPE:
+				pkg->type = *s;
+				break;
+			case NAME:
+				pkg->name = s;
+				break;
+			case VER:
+				pkg->ver = s;
+				break;
+			case REL:
+				pkg->rel = atoi(s);
+				break;
+			case DESC:
+				pkg->desc = s;
+				break;
+			case URL:
+				pkg->url = s;
+				break;
+			case USEF:
+				pkg->usef = s;
+				break;
+			case REPO:
+				pkg->repo = s;
+				break;
+			case INFOURL:
+				pkg->infourl = s;
+				break;
+			case DEP:
+				pkg->dep = s;
+				break;
+			case CONFLICT:
+				pkg->conflict = s;
+				break;
+			case PROV:
+				pkg->prov = s;
+				break;
+			case SIZE:
+				pkg->size = atoi(s);
+				break;
+			case MD5:
+				bzero(pkg->md5, sizeof(pkg->md5));
+				for(i = 0; i < LENGTH(pkg->md5) &&
+						sscanf(s + i * 2, "%2x",
+							(unsigned int *)&pkg->md5[i]) > 0; i++);
+				break;
+			case SHA1:
+				bzero(pkg->sha1, sizeof(pkg->sha1));
+				for(i = 0; i < LENGTH(pkg->sha1) &&
+						sscanf(s+ i * 2, "%2x",
+							(unsigned int *)&pkg->sha1[i]) > 0; i++);
+				break;
+			case KEY:
+				bzero(pkg->key, sizeof(pkg->key));
+				for(i = 0; i < LENGTH(pkg->sha1) &&
+						sscanf(s + i * 2, "%2x",
+							(unsigned int *)&pkg->key[i]) > 0; i++);
+				break;
+			case RELTIME:
+				pkg->reltime = atol(s);
+				break;
+			case INSTIME:
+				pkg->instime = atol(s);
+				break;
+			default:
+				break;
+			}
+			s = p + 1;
+			n++;
 		}
 	}
 
@@ -262,6 +260,7 @@ void freepkg(struct Package *pkg) {
 	if(pkg->buf)
 		free(pkg->buf);
 	pkg->buf = NULL;
+	pkg->blen = 0;
 }
 
 void version() {
