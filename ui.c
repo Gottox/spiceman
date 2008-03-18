@@ -79,26 +79,26 @@ ui(int argc, char *argv[], FILE *in, FILE *out) {
 
 	bzero(&pkg, sizeof(pkg));
 	for(i = 1; getpkg(&pkg, in) > 0; i++) {
-		fprintf(stderr, "%i. [%c] %s-%s-%i (%s)", i, pkg.type, pkg.name, pkg.ver, pkg.rel, pkg.repo);
+		fprintf(stdout, "%i. [%c] %s-%s-%i (%s)", i, pkg.type, pkg.name, pkg.ver, pkg.rel, pkg.repo);
 		if(action != 's') {
 			if(width)
 				wordwrap(pkg.desc, width);
-			fputc('\n', stderr);
-			fputs(pkg.desc, stderr);
-			fputs("\nURL: ", stderr);
-			fputs(pkg.infourl, stderr);
-			fputc('\n', stderr);
+			fputc('\n', stdout);
+			fputs(pkg.desc, stdout);
+			fputs("\nURL: ", stdout);
+			fputs(pkg.infourl, stdout);
+			fputc('\n', stdout);
 			if(action == 'f') {
-				fputs("Depencies: ", stderr);
-				fputs(pkg.dep, stderr);
-				fputs("\nConflicts: ", stderr);
-				fputs(pkg.conflict, stderr);
-				fputs("\nProvides: ", stderr);
-				fputs(pkg.prov, stderr);
-				fputc('\n', stderr);
+				fputs("Depencies: ", stdout);
+				fputs(pkg.dep, stdout);
+				fputs("\nConflicts: ", stdout);
+				fputs(pkg.conflict, stdout);
+				fputs("\nProvides: ", stdout);
+				fputs(pkg.prov, stdout);
+				fputc('\n', stdout);
 			}
 		}
-		fputc(seperator, stderr);
+		fputc(seperator, stdout);
 	}
 	freepkg(&pkg);
 	return EXIT_SUCCESS;
