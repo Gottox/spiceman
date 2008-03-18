@@ -31,7 +31,6 @@
 #define ARGEND			}
 #define ARGC()		_c
 
-
 typedef int (*Cmdfunction)(int, char *[], FILE *in, FILE *out);
 
 enum PkgEnt	{ TYPE, NAME, VER, REL, DESC, URL, USEF, REPO, INFOURL, DEP,
@@ -72,6 +71,7 @@ struct Package {
 	unsigned long reltime;		/* timestamp of release */
 	unsigned long instime;
 };
+
 
 /* common.c */
 int cmdchain(int cmdc, struct Cmd *cmd);	/* executes a chain of commands */

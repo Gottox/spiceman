@@ -86,7 +86,6 @@ getpkg(struct Package *pkg, FILE *in) {
 
 	l = 0;
 	do {
-		printf("%i %i\n", pkg->blen, l);
 		if(l + 1 >= pkg->blen) {
 			pkg->blen = l + 1 + BUFFERSIZE;
 			pkg->buf = erealloc(pkg->buf, sizeof(char) * pkg->blen);
