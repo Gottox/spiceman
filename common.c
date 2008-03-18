@@ -262,6 +262,18 @@ void freepkg(struct Package *pkg) {
 	pkg->blen = 0;
 }
 
+int pkgcmp(const struct Package *p1, const struct Package *p2) {
+	int cmp;
+
+	if((cmp = strcmp(p1->name, p2->name)))
+		return cmp;
+	if((cmp = strcmp(p1->ver, p2->ver)))
+		return cmp;
+	if((cmp = (int)p1->rel - p2->rel))
+		return cmp;
+	return 0;
+}
+
 void version() {
 	fputs("spiceman-" VERSION " - distributed package management tools\n",stderr);
 }
