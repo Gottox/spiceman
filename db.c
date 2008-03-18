@@ -43,7 +43,11 @@ int db(int argc, char *argv[], FILE *in, FILE *out) {
 		action = 'p';
 	else if(argv[0][0] == '-')
 		action = argv[0][1];
-	switch(action) {
+	switch(argc <= 1 ? action : 0) {
+	case 'd':
+	case 't':
+	case 'r':
+
 	case 'i':
 	case 'p':
 		return putdb(out, action);
