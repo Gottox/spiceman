@@ -1,10 +1,9 @@
 # spiceman version
 VERSION = 0.0
 
-# initial config:
-DEFREPO = "r:default-repository:0.0:1:0::::gtx-base::::::::::http://s01.de/~gottox/rep/gtx-base"
-
-# Customize below to fit your system
+# builtin repository link:
+INITREPONAME="init-gottox"
+INITREPOADDR="http://s01.de/~gottox/repositories/init/repos.tar"
 
 # paths
 PREFIX = /usr/local
@@ -19,7 +18,7 @@ LIBS = -L/usr/lib -lc
 
 # flags
 #CFLAGS = -static -Os -g -Wall -Werror ${INCS} -DVERSION=\"${VERSION}\" -DDEFREPO="\"${DEFREPO}\"" -DDBPREFIX=\"${DBPREFIX}\"
-CFLAGS = -static -O0 -g -Wall -Werror ${INCS} -DVERSION=\"${VERSION}\" -DDEFREPO="\"${DEFREPO}\"" -DDBPREFIX=\"${DBPREFIX}\"
+CFLAGS = -static -O0 -g -Wall -Werror ${INCS} -DVERSION=\"${VERSION}\" -DDBPREFIX=\"${DBPREFIX}\" -DINITREPONAME=\"${INITREPONAME}\" -DINITREPOADDR=\"${INITREPOADDR}\"
 LDFLAGS = -g ${LIBS}
 
 # compiler and linker

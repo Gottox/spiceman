@@ -23,6 +23,9 @@
 
 #define BUFSIZE 128
 
+static struct Package initrepo = { NULL, 0, 'r', INITREPONAME, "0.0", 1, INITREPONAME,
+	INITREPOADDR, "", "builtin", "", "", "", "", 0, { 0 }, { 0 }, { 0 }, 0, 0 };
+
 void db_help() {
 	APPLETUSAGE("db");
 	fputs("	-i	list all installed packages\n", stderr);
@@ -62,6 +65,8 @@ putdb(FILE *out, char action) {
 	src = action == 'i' ? DBPREFIX "/installed" :  DBPREFIX "/packages";
 	if(!(db = fopen(src, "r")))
 		eprint(1, "Cannot open database `%s`: ", src);
+	if(action == 'p')
+		putpkg(&initrepo, out);
 	bzero(&pkg, sizeof(pkg));
 	while((r = getpkg(&pkg, db) > 0)) {
 		putpkg(&pkg, out);
