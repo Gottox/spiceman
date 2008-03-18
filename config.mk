@@ -18,8 +18,8 @@ LIBS = -L/usr/lib -lc
 
 # flags
 #CFLAGS = -static -Os -g -Wall -Werror ${INCS} -DVERSION=\"${VERSION}\" -DDEFREPO="\"${DEFREPO}\"" -DDBPREFIX=\"${DBPREFIX}\"
-CFLAGS = -static -O0 -g -Wall -Werror ${INCS} -DVERSION=\"${VERSION}\" -DDBPREFIX=\"${DBPREFIX}\" -DINITREPONAME=\"${INITREPONAME}\" -DINITREPOADDR=\"${INITREPOADDR}\"
-LDFLAGS = -g ${LIBS}
+CFLAGS = -O0 -g -Wall -Werror ${INCS} -DVERSION=\"${VERSION}\" -DDBPREFIX=\"${DBPREFIX}\" -DINITREPONAME=\"${INITREPONAME}\" -DINITREPOADDR=\"${INITREPOADDR}\"
+LDFLAGS = -static -g ${LIBS}
 
 # compiler and linker
 CC = cc

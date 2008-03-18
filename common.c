@@ -16,6 +16,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -23,7 +24,7 @@
 
 #include "common.h"
 
-#define BUFFERSIZE		1024
+#define BUFSIZE		1024
 
 int
 cmdchain(int cmdc, struct Cmd *cmd) {
@@ -87,7 +88,7 @@ getpkg(struct Package *pkg, FILE *in) {
 	l = 0;
 	do {
 		if(l + 1 >= pkg->blen) {
-			pkg->blen = l + 1 + BUFFERSIZE;
+			pkg->blen = l + 1 + BUFSIZE;
 			pkg->buf = erealloc(pkg->buf, sizeof(char) * pkg->blen);
 		}
 		if(fgets(pkg->buf + l, pkg->blen - l, in))
@@ -151,7 +152,7 @@ getpkg(struct Package *pkg, FILE *in) {
 			case SHA1:
 				bzero(pkg->sha1, sizeof(pkg->sha1));
 				for(i = 0; i < LENGTH(pkg->sha1) &&
-						sscanf(s+ i * 2, "%2x",
+						sscanf(s + i * 2, "%2x",
 							(unsigned int *)&pkg->sha1[i]) > 0; i++);
 				break;
 			case KEY:
@@ -173,7 +174,6 @@ getpkg(struct Package *pkg, FILE *in) {
 			n++;
 		}
 	}
-
 	return 1;
 }
 
