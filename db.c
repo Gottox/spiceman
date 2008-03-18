@@ -82,7 +82,7 @@ alternate(FILE *in, FILE *out) {
 	int fsize = 0, i;
 
 	bzero(&pkg, sizeof(pkg));
-	bzero(&dbpkg, sizeof(pkg));
+	bzero(&dbpkg, sizeof(dbpkg));
 	if(!(db = fopen(DBPREFIX "/packages", "r")))
 		eprint(1, "Cannot open database `" DBPREFIX "/packages`: ");
 	while(getpkg(&pkg, in) > 0) {
@@ -102,5 +102,10 @@ alternate(FILE *in, FILE *out) {
 		}
 		rewind(db);
 	}
+	fclose(db);
+	if(fsize)
+		free(found);
+	freepkg(&pkg);
+	freepkg(&dbpkg);
 	return EXIT_SUCCESS;
 }
