@@ -15,8 +15,9 @@
  * along with this program; if not, write to the Free Software */
 #include <stdio.h>
 
-#define APPLETPREFIX "sp-"
-#define FIELDSEPERATOR ':'
+#define APPLETPREFIX		"sp-"
+#define FIELDSEPERATOR		':'
+#define BUFSIZE			1024
 
 #define LENGTH(x)		sizeof(x)/sizeof(x[0])
 #define APPLETUSAGE(a)		fputs("sp-" a "\nspiceman " a "\n\t-h\thelp message\n", stderr);
@@ -82,6 +83,6 @@ int getpkg(struct Package *pkg, FILE *in);
 						/* reads a package from in */
 void putpkg(const struct Package *pkg, FILE *out);
 						/* puts a package to out */
-int pkgcmp(const struct Package *p1, const struct Package *p2);
+int pkgcmp(const struct Package *p1, const struct Package *p2, char how);
 						/* compares two packages */
 void version();

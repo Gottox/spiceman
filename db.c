@@ -21,8 +21,6 @@
 #include "common.h"
 #include "db.h"
 
-#define BUFSIZE		128
-
 static struct Package initrepo = { NULL, 0, 'r', INITREPONAME, "0.0", 1, INITREPONAME,
 	INITREPOADDR, "", "builtin", "", "", "", "", 0, { 0 }, { 0 }, { 0 }, 0, 0 };
 

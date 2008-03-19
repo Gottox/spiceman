@@ -24,8 +24,6 @@
 
 #include "common.h"
 
-#define BUFSIZE		1024
-
 int
 cmdchain(int cmdc, struct Cmd *cmd) {
 	FILE *in, *out;
@@ -262,7 +260,7 @@ void freepkg(struct Package *pkg) {
 	pkg->blen = 0;
 }
 
-int pkgcmp(const struct Package *p1, const struct Package *p2) {
+int pkgcmp(const struct Package *p1, const struct Package *p2, char how) {
 	int cmp;
 
 	if((cmp = strcmp(p1->name, p2->name)))

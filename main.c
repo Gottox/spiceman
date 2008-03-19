@@ -21,6 +21,7 @@
 #include "common.h"
 
 #include "db.h"
+#include "depency.h"
 #include "delete.h"
 #include "download.h"
 #include "filter.h"
@@ -42,6 +43,7 @@ struct Applet {
 static struct Applet applets[] = {
 	APPLET(db),
 	APPLET(delete),
+	APPLET(depency),
 	APPLET(download),
 	APPLET(filter),
 	APPLET(install),

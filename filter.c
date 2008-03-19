@@ -58,21 +58,22 @@ int typematch(const char *s, struct Package *pkg) {
 	return strchr(s, pkg->type) != 0;
 }
 
-void unique(FILE *in, FILE *out) {
+void unique(char action, FILE *in, FILE *out) {
 	int cmp;
 	struct Package pkg;
-	struct Btree *n, *t, *tree = NULL, *prev;
+	struct Btree *n, *t, *tree = NULL, *prev = NULL;
 
 	bzero(&pkg, sizeof(pkg));
 	while(getpkg(&pkg, in) > 0) {
-		for(t = tree, cmp = 1; t && (cmp = pkgcmp(&pkg, &t->pkg)) > 0;
+		for(t = tree, cmp = 1; t && (cmp =
+					pkgcmp(&pkg, &t->pkg, action)) > 0;
 				t = t->next)
 			prev = t;
 		if(t && cmp == 0)
 			continue;
 		n = erealloc(0, sizeof(struct Btree));
 		memcpy(&n->pkg, &pkg, sizeof(struct Package));
-		if(tree == t) {
+		if(prev == NULL) {
 			n->next = tree;
 			tree = n;
 		}
@@ -104,7 +105,9 @@ int wildcardmatch(const char *s, struct Package *pkg) {
 
 void filter_help() {
 	APPLETUSAGE("filter");
-	fputs("	-n	make packages unique, use newest\n", stderr);
+	fputs("	-n	make packages unique by name and version, use newest\n", stderr);
+	fputs("	-N	make packages unique by name, use newest\n", stderr);
+	fputs("	-v	make packages unique by version, use newest\n", stderr);
 	fputs("	-t <t>	filters for types\n", stderr);
 	fputs("	-R <r>	filter repository\n", stderr);
 	fputs("	-s <p>	search in package-name, -version and -release\n", stderr);
@@ -125,6 +128,8 @@ int filter(int argc, char *argv[], FILE *in, FILE *out) {
 		if(!(arg = ARGVAL()))
 			goto argerr;
 	case 'n':
+	case 'N':
+	case 'v':
 		if(action)
 			goto argerr;
 		action = ARGCHR();
@@ -136,8 +141,8 @@ int filter(int argc, char *argv[], FILE *in, FILE *out) {
 	} ARGEND;
 	if(argc <= 0 || argc != ARGC())
 		goto argerr;
-	if(action == 'n')
-		unique(in, out);
+	if(strchr("nNv", action))
+		unique(action, in, out);
 	else {
 		bzero(&pkg, sizeof(pkg));
 		while(getpkg(&pkg, in) > 0) {

@@ -16,7 +16,7 @@
 int exactmatch(const char *s, struct Package *pkg);
 int repomatch(const char *s, struct Package *pkg);
 int typematch(const char *s, struct Package *pkg);
-void unique(FILE *in, FILE *out);
+void unique(const char action, FILE *in, FILE *out);
 int wildcardmatch(const char *s, struct Package *pkg);
 int filter(int argc, char *argv[], FILE *in, FILE *out);
 void filter_help();
