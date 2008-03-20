@@ -21,12 +21,14 @@
 #include "common.h"
 #include "db.h"
 
-static struct Package initrepo = { NULL, 0, 'r', INITREPONAME, "0.0", 1, INITREPONAME,
-	INITREPOADDR, "", "builtin", "", "", "", "", 0, { 0 }, { 0 }, { 0 }, 0, 0 };
+static struct Package initpkg[] = {
+	{ NULL, 0, 'r', INITREPONAME, "0.0", 1, INITREPONAME, INITREPOADDR, "",
+		"builtin", "", "", "", "", 0, { 0 }, { 0 }, { 0 }, 0, 0 } };
 
 void db_help() {
 	APPLETUSAGE("db");
 	fputs("	-i	list all installed packages\n", stderr);
+	fputs("	-I	list builtin packages", stderr);
 	fputs("	-p	list all packages in database\n", stderr);
 	fputs("	-o	list other version of pkgs read from stdin\n", stderr);
 	fputs("	-d	show depencies\n", stderr);
@@ -47,6 +49,7 @@ int db(int argc, char *argv[], FILE *in, FILE *out) {
 	case 'r':
 
 	case 'i':
+	case 'I':
 	case 'p':
 		return putdb(out, action);
 	case 'o':
@@ -59,24 +62,29 @@ int db(int argc, char *argv[], FILE *in, FILE *out) {
 
 int
 putdb(FILE *out, char action) {
-	int r;
+	int r, i;
 	FILE *db;
 	char *src;
 	struct Package pkg;
 
-	src = action == 'i' ? DBPREFIX "/installed" :  DBPREFIX "/packages";
-	if(!(db = fopen(src, "r")))
-		eprint(1, "Cannot open database `%s`: ", src);
-	if(action == 'p')
-		putpkg(&initrepo, out);
-	bzero(&pkg, sizeof(pkg));
-	while((r = getpkg(&pkg, db) > 0)) {
-		putpkg(&pkg, out);
+	if(action == 'I') {
+		for(i = 0; i < LENGTH(initpkg); i++)
+			putpkg(&initpkg[i], out);
 	}
-	freepkg(&pkg);
-	if(r < 0)
-		eprint(0, "You can start crying now.\nMalformed Package in Database: %s", "TODO");
-	fclose(db);
+	else {
+		src = action == 'i' ? DBPREFIX "/installed" :  DBPREFIX "/packages";
+		if(!(db = fopen(src, "r")))
+			eprint(1, "Cannot open database `%s`: ", src);
+		bzero(&pkg, sizeof(pkg));
+		while((r = getpkg(&pkg, db) > 0)) {
+			putpkg(&pkg, out);
+		}
+		freepkg(&pkg);
+		if(r < 0)
+			eprint(0, "You can start crying now.\n"
+					"Malformed Package in Database: %s", "TODO");
+		fclose(db);
+	}
 	return EXIT_SUCCESS;
 }
 
