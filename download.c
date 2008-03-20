@@ -16,9 +16,72 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <socket.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 
 #include "common.h"
 #include "download.h"
+
+#define HTTPHEADER "GET /%s HTTP/1.0\r\n" \
+	"User-Agent: Wget/1.11\r\n" \
+	"Accept: */*\r\n" \
+	"Host: %s:%i\r\n" \
+	"Connection: Close\r\n\r\n"
+#define RESPONSE "HTTP/1.0 200 OK"
+
+
+FILE *fhttp(const char *url) {
+	int sock;
+	struct sockaddr_in sin;
+	struct hostent *host;
+	char *addr, *path, *port;
+	char buf[BUFSIZE], urlbuf[BUFSIZE],
+	     headerbuf[BUFSIZE * 2 + LENGTH(HTTPHEADER)];
+	unsigned int p = 80;
+	FILE *in;
+
+	strncpy(urlbuf, url, BUFSIZE);
+	if(!(addr = strchr(urlbuf, ':')))
+		return 0;
+	addr++;
+	for(; *addr == '/'; addr++);
+	if(!(path = strchr(addr,'/')))
+		return 0;
+	*path = 0;
+	path++;
+	if((port = strchr(addr, ':'))) {
+		*port = 0;
+		port++;
+		if(!(p = atoi(port)))
+			return 0;
+	}
+	if((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+		return 0;
+	bzero(&sin, sizeof(sin));
+	sin.sin_family = AF_INET;
+	if((sin.sin_addr.s_addr = inet_addr(addr)) == INADDR_NONE) {
+		host = gethostbyname(addr);
+		if(!host)
+			return 0;
+		memcpy((char *)&sin.sin_addr, host->h_addr, host->h_length);
+	}
+	sin.sin_port = htons(p);
+	if(connect(sock, (struct sockaddr *)&sin, sizeof(sin)) ||
+			(!(in = fdopen(sock, "r"))))
+		return 0;
+	snprintf(headerbuf, LENGTH(headerbuf), HTTPHEADER, path, addr, p);
+	send(sock, headerbuf, strlen(headerbuf), 0);
+	if(!fgets(buf, LENGTH(buf), in) ||
+			strncmp(buf, RESPONSE, LENGTH(RESPONSE) - 1)) {
+		fclose(in);
+		return 0;
+	}
+	while(fgets(buf, LENGTH(buf), in) && *buf != '\n' && *buf != '\r');
+	return in;
+}
 
 void download_help() {
 	APPLETUSAGE("download");
@@ -26,5 +89,14 @@ void download_help() {
 }
 
 int download(int argc, char *argv[], FILE *in, FILE *out) {
+	FILE *f;
+	char c;
+	if(!(f = fhttp("http://s01.de/index.cgi"))) {
+		eprint(0, "Cannot downloaad.");
+	}
+	while((c = fgetc(f)) > 0) {
+		fputc(c, stdout);
+	}
+	fclose(f);
 	return 0;
 }

@@ -1,1 +1,1 @@
-- Making spiceman ansi compatible (remove fdopen)
+- make pkgcmp more sane.
