@@ -34,6 +34,20 @@ puthex(const char *src, FILE* out, int l) {
 }
 
 static void
+putbslash(const char *str, const char *chrs, FILE *out) {
+	const char *p;
+
+	for(p = str; *p; p++) {
+		if(strchr(chrs, *p)) {
+			fwrite(str, sizeof(char), p - str, out);
+			fputc('\\', out);
+			str = p;
+		}
+	}
+	fwrite(str, sizeof(char), p - str, out);
+}
+
+static void
 str2hex(char *dst, const char *src, int l) {
 	unsigned int i;
 
@@ -187,76 +201,45 @@ getpkg(struct Package *pkg, FILE *in) {
 
 void
 putpkg(const struct Package *pkg, FILE *out) {
-	unsigned int i;
-	char *p;
+	char sep[3] = { FIELDSEPERATOR, '\n', 0 };
 	
-	for(i = 0; i < NENTRIES; i++) {
-		p = NULL;
-		switch(i) {
-		case TYPE:
-			if(pkg->type != '\0')
-				fputc(pkg->type, out);
-			break;
-		case NAME:
-			p = pkg->name;
-			break;
-		case VER:
-			p = pkg->ver;
-			break;
-		case REL:
-			fprintf(out,"%u", pkg->rel);
-			break;
-		case DESC:
-			p = pkg->desc;
-			break;
-		case URL:
-			p = pkg->url;
-			break;
-		case USEF:
-			p = pkg->usef;
-			break;
-		case REPO:
-			p = pkg->repo;
-			break;
-		case INFOURL:
-			p = pkg->infourl;
-			break;
-		case DEP:
-			p = pkg->dep;
-			break;
-		case CONFLICT:
-			p = pkg->conflict;
-			break;
-		case PROV:
-			p = pkg->prov;
-			break;
-		case SIZE:
-			fprintf(out,"%u", pkg->size);
-			break;
-		case MD5:
-			puthex(pkg->md5, out, LENGTH(pkg->md5));
-			break;
-		case SHA1:
-			puthex(pkg->sha1, out, LENGTH(pkg->md5));
-			break;
-		case KEY:
-			puthex(pkg->key, out, LENGTH(pkg->md5));
-			break;
-		case RELTIME:
-			fprintf(out,"%lu", pkg->reltime);
-			break;
-		case INSTIME:
-			fprintf(out,"%lu",pkg->instime);
-			break;
-		}
-		if(p)
-			for(; *p != '\0'; p++) {
-				if(*p == '\n' || *p == FIELDSEPERATOR || *p == '\\')
-					fputc('\\',out);
-				fputc(*p,out);
-			}
-		fputc(FIELDSEPERATOR, out);
-	}
+	if(pkg->type != '\0')
+		fputc(pkg->type, out);
+	fputc(FIELDSEPERATOR, out);
+	putbslash(pkg->name, sep, out);
+	fputc(FIELDSEPERATOR, out);
+	putbslash(pkg->ver, sep, out);
+	fputc(FIELDSEPERATOR, out);
+	fprintf(out,"%u", pkg->rel);
+	fputc(FIELDSEPERATOR, out);
+	putbslash(pkg->desc, sep, out);
+	fputc(FIELDSEPERATOR, out);
+	putbslash(pkg->url, sep, out);
+	fputc(FIELDSEPERATOR, out);
+	putbslash(pkg->usef, sep, out);
+	fputc(FIELDSEPERATOR, out);
+	putbslash(pkg->repo, sep, out);
+	fputc(FIELDSEPERATOR, out);
+	putbslash(pkg->infourl, sep, out);
+	fputc(FIELDSEPERATOR, out);
+	putbslash(pkg->dep, sep, out);
+	fputc(FIELDSEPERATOR, out);
+	putbslash(pkg->conflict, sep, out);
+	fputc(FIELDSEPERATOR, out);
+	putbslash(pkg->prov, sep, out);
+	fputc(FIELDSEPERATOR, out);
+	fprintf(out,"%u", pkg->size);
+	fputc(FIELDSEPERATOR, out);
+	puthex(pkg->md5, out, LENGTH(pkg->md5));
+	fputc(FIELDSEPERATOR, out);
+	puthex(pkg->sha1, out, LENGTH(pkg->sha1));
+	fputc(FIELDSEPERATOR, out);
+	puthex(pkg->key, out, LENGTH(pkg->key));
+	fputc(FIELDSEPERATOR, out);
+	fprintf(out,"%lu", pkg->reltime);
+	fputc(FIELDSEPERATOR, out);
+	fprintf(out,"%lu",pkg->instime);
+	fputc(FIELDSEPERATOR, out);
 	fputc('\n', out);
 	fflush(out);
 }
