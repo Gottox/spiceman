@@ -164,10 +164,10 @@ getpkg(struct Package *pkg, FILE *in) {
 				str2hex(pkg->md5, s, LENGTH(pkg->md5));
 				break;
 			case SHA1:
-				str2hex(pkg->sha1, s, LENGTH(pkg->md5));
+				str2hex(pkg->sha1, s, LENGTH(pkg->sha1));
 				break;
 			case KEY:
-				str2hex(pkg->key, s, LENGTH(pkg->md5));
+				str2hex(pkg->key, s, LENGTH(pkg->key));
 				break;
 			case RELTIME:
 				pkg->reltime = atol(s);
