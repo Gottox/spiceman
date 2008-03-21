@@ -18,4 +18,4 @@ $pkglist | while IFS=":" read $fields end; do
 		;;
 	esac
 	unset $fields
-done | sed 's/·/\\:/'
+done | sed 's/·/\\:/g'
