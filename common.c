@@ -185,7 +185,8 @@ getpkg(struct Package *pkg, FILE *in) {
 	return 1;
 }
 
-void putpkg(const struct Package *pkg, FILE *out) {
+void
+putpkg(const struct Package *pkg, FILE *out) {
 	unsigned int i;
 	char *p;
 	
@@ -260,14 +261,16 @@ void putpkg(const struct Package *pkg, FILE *out) {
 	fflush(out);
 }
 
-void freepkg(struct Package *pkg) {
+void
+freepkg(struct Package *pkg) {
 	if(pkg->buf)
 		free(pkg->buf);
 	pkg->buf = NULL;
 	pkg->blen = 0;
 }
 
-int pkgcmp(const struct Package *p1, const struct Package *p2, char how) {
+int
+pkgcmp(const struct Package *p1, const struct Package *p2, char how) {
 	int cmp;
 
 	if((cmp = strcmp(p1->name, p2->name)))
@@ -279,6 +282,7 @@ int pkgcmp(const struct Package *p1, const struct Package *p2, char how) {
 	return 0;
 }
 
-void version() {
+void
+version() {
 	fputs("spiceman-" VERSION " - distributed package management tools\n", stderr);
 }
