@@ -10,11 +10,11 @@ $pkglist | while IFS=":" read $fields end; do
 		echo "b:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$bsize:$bmd5::$keyID:0:0:"
 		;;
 		2)
-		echo "p:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$psize:$pmd5::$keyID:0:0:"
+		echo "s:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$psize:$pmd5::$keyID:0:0:"
 		;;
 		*)
 		echo "b:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$bsize:$bmd5::$keyID:0:0:"
-		echo "p:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$psize:$pmd5::$keyID:0:0:"
+		echo "s:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$psize:$pmd5::$keyID:0:0:"
 		;;
 	esac
 	unset $fields
