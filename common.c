@@ -24,6 +24,25 @@
 
 #include "common.h"
 
+/* static */
+static void
+puthex(const char *src, FILE* out, int l) {
+	unsigned int i;
+
+	for(i = 0; i < l; i++)
+		fprintf(out, "%02x", (unsigned int )src[i] % 256);
+}
+
+static void
+str2hex(char *dst, const char *src, int l) {
+	unsigned int i;
+
+	bzero(dst, sizeof(char) * l);
+	for(i = 0; i < l &&
+		sscanf(src + i * 2, "%2x",
+				(unsigned int *)&dst[i]) > 0; i++);
+}
+
 int
 cmdchain(int cmdc, struct Cmd *cmd) {
 	FILE *in, *out;
@@ -80,7 +99,7 @@ eprint(int pe, const char *format, ...) {
 
 int
 getpkg(struct Package *pkg, FILE *in) {
-	int i, l, n;
+	int l, n;
 	char *s, *p, *q;
 
 	l = 0;
@@ -142,22 +161,13 @@ getpkg(struct Package *pkg, FILE *in) {
 				pkg->size = atoi(s);
 				break;
 			case MD5:
-				bzero(pkg->md5, sizeof(pkg->md5));
-				for(i = 0; i < LENGTH(pkg->md5) &&
-						sscanf(s + i * 2, "%2x",
-							(unsigned int *)&pkg->md5[i]) > 0; i++);
+				str2hex(pkg->md5, s, LENGTH(pkg->md5));
 				break;
 			case SHA1:
-				bzero(pkg->sha1, sizeof(pkg->sha1));
-				for(i = 0; i < LENGTH(pkg->sha1) &&
-						sscanf(s + i * 2, "%2x",
-							(unsigned int *)&pkg->sha1[i]) > 0; i++);
+				str2hex(pkg->sha1, s, LENGTH(pkg->md5));
 				break;
 			case KEY:
-				bzero(pkg->key, sizeof(pkg->key));
-				for(i = 0; i < LENGTH(pkg->sha1) &&
-						sscanf(s + i * 2, "%2x",
-							(unsigned int *)&pkg->key[i]) > 0; i++);
+				str2hex(pkg->key, s, LENGTH(pkg->md5));
 				break;
 			case RELTIME:
 				pkg->reltime = atol(s);
@@ -176,7 +186,7 @@ getpkg(struct Package *pkg, FILE *in) {
 }
 
 void putpkg(const struct Package *pkg, FILE *out) {
-	unsigned int i, j;
+	unsigned int i;
 	char *p;
 	
 	for(i = 0; i < NENTRIES; i++) {
@@ -223,16 +233,13 @@ void putpkg(const struct Package *pkg, FILE *out) {
 			fprintf(out,"%u", pkg->size);
 			break;
 		case MD5:
-			for(j = 0; j < LENGTH(pkg->md5); j++)
-				fprintf(out, "%02x", (unsigned int )pkg->md5[j] % 256);
+			puthex(pkg->md5, out, LENGTH(pkg->md5));
 			break;
 		case SHA1:
-			for(j = 0; j < LENGTH(pkg->sha1); j++)
-				fprintf(out, "%02x", (unsigned int )pkg->sha1[j] % 256);
+			puthex(pkg->sha1, out, LENGTH(pkg->md5));
 			break;
 		case KEY:
-			for(j = 0; j < LENGTH(pkg->key); j++)
-				fprintf(out, "%02x", (unsigned int )pkg->key[j] % 256);
+			puthex(pkg->key, out, LENGTH(pkg->md5));
 			break;
 		case RELTIME:
 			fprintf(out,"%lu", pkg->reltime);
