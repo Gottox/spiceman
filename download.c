@@ -26,7 +26,7 @@
 #include "download.h"
 
 #define HTTPHEADER "GET /%s HTTP/1.0\r\n" \
-	"User-Agent: Wget/1.11\r\n" \
+	"User-Agent: spiceman/" VERSION "\r\n" \
 	"Accept: */*\r\n" \
 	"Host: %s:%i\r\n" \
 	"Connection: Close\r\n\r\n"
@@ -70,8 +70,10 @@ FILE *fhttp(const char *url) {
 	}
 	sin.sin_port = htons(p);
 	if(connect(sock, (struct sockaddr *)&sin, sizeof(sin)) ||
-			(!(in = fdopen(sock, "r"))))
+			(!(in = fdopen(sock, "r")))) {
+		shutdown(sock, SHUT_RDWR);
 		return 0;
+	}
 	snprintf(headerbuf, LENGTH(headerbuf), HTTPHEADER, path, addr, p);
 	send(sock, headerbuf, strlen(headerbuf), 0);
 	if(!fgets(buf, LENGTH(buf), in) ||
@@ -85,15 +87,22 @@ FILE *fhttp(const char *url) {
 
 void download_help() {
 	APPLETUSAGE("download");
-	fputs("	-f	force downloading. Do not use cache.\n", stderr);
+	fputs("	-n	force downloading. Do not use cache.\n", stderr);
 }
 
 int download(int argc, char *argv[], FILE *in, FILE *out) {
 	FILE *f;
 	char c;
-	if(!(f = fhttp("http://s01.de/index.cgi"))) {
-		eprint(0, "Cannot downloaad.");
+	int nocache = 0;
+
+	if(argc == 1 && strcmp("-n", argv[0]) == 0)
+		nocache = 1;
+	else if(argc >= 1) {
+		download_help();
+		return EXIT_FAILURE;
 	}
+	if(!(f = fhttp("http://s01.de/index.cgi")))
+		eprint(0, "Cannot downloaad.");
 	while((c = fgetc(f)) > 0) {
 		fputc(c, stdout);
 	}
