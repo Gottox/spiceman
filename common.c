@@ -273,5 +273,5 @@ int pkgcmp(const struct Package *p1, const struct Package *p2, char how) {
 }
 
 void version() {
-	fputs("spiceman-" VERSION " - distributed package management tools\n",stderr);
+	fputs("spiceman-" VERSION " - distributed package management tools\n", stderr);
 }
