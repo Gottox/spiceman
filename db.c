@@ -25,7 +25,8 @@ static struct Package initpkg[] = {
 	{ NULL, 0, 'r', INITREPONAME, "0.0", 1, INITREPONAME, INITREPOADDR, "",
 		"builtin", "", "", "", "", 0, { 0 }, { 0 }, { 0 }, 0, 0 } };
 
-void db_help() {
+void
+db_help() {
 	APPLETUSAGE("db");
 	fputs("	-i	list all installed packages\n", stderr);
 	fputs("	-I	list builtin packages", stderr);
@@ -36,7 +37,8 @@ void db_help() {
 	fputs("	-r	calculate reverse depencies\n", stderr);
 }
 
-int db(int argc, char *argv[], FILE *in, FILE *out) {
+int
+db(int argc, char *argv[], FILE *in, FILE *out) {
 	char action = 0;
 
 	if(argc == 0)
