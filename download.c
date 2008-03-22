@@ -47,7 +47,7 @@ FILE *fhttp(const char *url) {
 	if(!(addr = strchr(urlbuf, ':')))
 		return 0;
 	addr++;
-	for(; *addr == '/'; addr++);
+	for(; *addr && *addr == '/'; addr++);
 	if(!(path = strchr(addr,'/')))
 		return 0;
 	*path = 0;
