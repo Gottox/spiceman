@@ -22,8 +22,6 @@
 #include "common.h"
 #include "filter.h"
 
-#define ARRAYSIZE 1
-
 struct Pkglst{
 	struct Package pkg;
 	struct Pkglst *next;
