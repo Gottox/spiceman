@@ -1,21 +1,37 @@
 #!/bin/sh
+convertpkg () {
+	fields=`man pkglist | grep "^[\t ]\+[1-9][0-9]*:[a-z]\+\($\|[\t ]\+[1-9][0-9]*:[a-z]\+\)" | sed "s/[0-9]*://g"`
+	while IFS=":" read $fields end; do
+		case $srcbin in
+			0|4)
+			echo "b:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$bsize:$bmd5::$keyID:0:0:"
+			;;
+			2)
+			echo "s:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$psize:$pmd5::$keyID:0:0:"
+			;;
+			*)
+			echo "b:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$bsize:$bmd5::$keyID:0:0:"
+			echo "s:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$psize:$pmd5::$keyID:0:0:"
+			;;
+		esac
+	done | sed 's/·/\\:/g'
+}
 
-# reading availible pkglist-fields
-fields=`man pkglist | grep "^[\t ]\+[1-9][0-9]*:[a-z]\+\($\|[\t ]\+[1-9][0-9]*:[a-z]\+\)" | sed "s/[0-9]*://g"`
-pkglist="bunzip2 -c /var/db/pkg/pkglist.bz2"
+help() {
+	echo "space2spice - script to convert spaceman pkglist to spiceman packages"
+	echo "usage: space2spice <indir> <outdir>"
+	exit 1;
+}
 
-$pkglist | while IFS=":" read $fields end; do
-	case $srcbin in
-		0|4)
-		echo "b:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$bsize:$bmd5::$keyID:0:0:"
-		;;
-		2)
-		echo "s:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$psize:$pmd5::$keyID:0:0:"
-		;;
-		*)
-		echo "b:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$bsize:$bmd5::$keyID:0:0:"
-		echo "s:$pkgname:$pkgver:$pkgrel:$pkgdesc:some\://location:$useflags:$repositoy$repository:$url:$depends:$conflicts:$provides:$psize:$pmd5::$keyID:0:0:"
-		;;
-	esac
-	unset $fields
-done | sed 's/·/\\:/g'
+[ "$1" = "-h" ] && help;
+[ "$#" -eq "2" ] || help;
+
+indir=$1
+outdir=$2
+
+echo "Converting pkglist"
+bunzip2 -c $indir/pkglist.bz2 | convertpkg > $outdir/packages
+
+echo "Converting installed"
+bunzip2 -c $indir/installed.bz2 | convertpkg > $outdir/installed
+
