@@ -24,9 +24,9 @@
 
 #define ARRAYSIZE 1
 
-struct Btree {
+struct Pkglst{
 	struct Package pkg;
-	struct Btree *next;
+	struct Pkglst *next;
 };
 
 int exactmatch(const char *s, struct Package *pkg) {
@@ -61,21 +61,21 @@ int typematch(const char *s, struct Package *pkg) {
 void unique(char action, FILE *in, FILE *out) {
 	int cmp;
 	struct Package pkg;
-	struct Btree *n, *t, *tree = NULL, *prev = NULL;
+	struct Pkglst *n, *l, *list = NULL, *prev = NULL;
 
 	bzero(&pkg, sizeof(pkg));
 	while(getpkg(&pkg, in) > 0) {
-		for(t = tree, cmp = 1; t && (cmp =
-					pkgcmp(&pkg, &t->pkg, action)) > 0;
-				t = t->next)
-			prev = t;
-		if(t && cmp == 0)
+		for(l = list, cmp = 1; l && (cmp =
+					pkgcmp(&pkg, &l->pkg, action)) > 0;
+				l = l->next)
+			prev = l;
+		if(l && cmp == 0)
 			continue;
-		n = erealloc(0, sizeof(struct Btree));
+		n = erealloc(0, sizeof(struct Pkglst));
 		memcpy(&n->pkg, &pkg, sizeof(struct Package));
 		if(prev == NULL) {
-			n->next = tree;
-			tree = n;
+			n->next = list;
+			list = n;
 		}
 		else {
 			n->next = prev->next;
@@ -86,12 +86,12 @@ void unique(char action, FILE *in, FILE *out) {
 	}
 	freepkg(&pkg);
 
-	while(tree) {
-		putpkg(&tree->pkg, out);
-		freepkg(&tree->pkg);
-		t = tree;
-		tree = t->next;
-		free(t);
+	while(list) {
+		putpkg(&list->pkg, out);
+		freepkg(&list->pkg);
+		l = list;
+		list = l->next;
+		free(l);
 	}
 }
 

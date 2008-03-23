@@ -25,5 +25,5 @@ void delete_help() {
 }
 
 int delete(int argc, char *argv[], FILE *in, FILE *out) {
-	return 0;
+	return EXIT_FAILURE;
 }
