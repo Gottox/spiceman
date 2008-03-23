@@ -32,6 +32,9 @@
 	"Connection: Close\r\n\r\n"
 #define RESPONSE "HTTP/1.0 200 OK"
 
+FILE *fopenurl(const char *url) {
+	return fhttp(url);
+}
 
 FILE *fhttp(const char *url) {
 	int sock;
@@ -39,7 +42,7 @@ FILE *fhttp(const char *url) {
 	struct hostent *host;
 	char *addr, *path, *port;
 	char buf[BUFSIZE], urlbuf[BUFSIZE],
-	     headerbuf[BUFSIZE * 2 + LENGTH(HTTPHEADER)];
+		headerbuf[BUFSIZE * 2 + LENGTH(HTTPHEADER)];
 	unsigned int p = 80;
 	FILE *in;
 
@@ -91,9 +94,11 @@ void download_help() {
 }
 
 int download(int argc, char *argv[], FILE *in, FILE *out) {
-	FILE *f;
-	char c;
-	int nocache = 0;
+	FILE *f, *cache;
+	int nocache = 0, n;
+	struct Package pkg;
+	char namebuf[LENGTH(CACHEPREFIX) + BUFSIZE];
+	char buf[BUFSIZE];
 
 	if(argc == 1 && strcmp("-n", argv[0]) == 0)
 		nocache = 1;
@@ -101,11 +106,20 @@ int download(int argc, char *argv[], FILE *in, FILE *out) {
 		download_help();
 		return EXIT_FAILURE;
 	}
-	if(!(f = fhttp("http://s01.de/index.cgi")))
-		eprint(0, "Cannot downloaad.");
-	while((c = fgetc(f)) > 0) {
-		fputc(c, stdout);
+	bzero(&pkg,sizeof(pkg));
+	while(getpkg(&pkg, in) > 0) {
+		snprintf(namebuf, LENGTH(namebuf), CACHEPREFIX "/%s-%s-%u.tar",
+				pkg.name, pkg.ver, pkg.rel);
+		if(!(f = fopenurl(pkg.url)))
+			eprint(0, "Cannot download.");
+		if(!(cache = fopen(namebuf, "w")))
+			eprint(0, "Cannot open cache file.");
+		while((n = fread(buf, sizeof(char), LENGTH(buf), f)) > 0)
+			fwrite(buf, sizeof(char), LENGTH(buf), cache);
+		pkg.url = namebuf;
+		putpkg(&pkg, out);
+		fclose(cache);
+		fclose(f);
 	}
-	fclose(f);
-	return 0;
+	return EXIT_SUCCESS;
 }
