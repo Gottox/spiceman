@@ -32,9 +32,6 @@ db_help() {
 	fputs("	-I	list builtin packages", stderr);
 	fputs("	-p	list all packages in database\n", stderr);
 	fputs("	-o	list other version of pkgs read from stdin\n", stderr);
-	fputs("	-d	show depencies\n", stderr);
-	fputs("	-t	calculate recursive depencies\n", stderr);
-	fputs("	-r	calculate reverse depencies\n", stderr);
 }
 
 int
@@ -46,10 +43,6 @@ db(int argc, char *argv[], FILE *in, FILE *out) {
 	else if(argv[0][0] == '-')
 		action = argv[0][1];
 	switch(argc <= 1 ? action : 0) {
-	case 'd':
-	case 't':
-	case 'r':
-
 	case 'i':
 	case 'I':
 	case 'p':
