@@ -124,6 +124,7 @@ getpkg(struct Package *pkg, FILE *in) {
 		}
 		if(fgets(pkg->buf + l, pkg->blen - l, in))
 			l += strlen(&pkg->buf[l]);
+
 	} while(l > 0 && !feof(in) && pkg->buf[l - 1] != '\n');
 	if(l == 0)
 		return 0;
