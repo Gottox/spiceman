@@ -54,8 +54,7 @@ static struct Applet applets[] = {
 static struct Cmd syncchain[] = {
 	{ db,		1,	{ "-i" } },
 	{ filter,	1,	{ "-tr" } },
-	{ db,		1,	{ "-dr" } },
-	{ download,	0,	{ "-f" } },
+	{ download,	1,	{ "-n" } },
 	{ install,	1,	{ "-o" } },
 };
 static struct Cmd searchchain[] = {
@@ -66,9 +65,8 @@ static struct Cmd searchchain[] = {
 static struct Cmd installchain[] = {
 	{ db,		1,	{ "-p" } },
 	{ filter,	2,	{ "-e", NULL } },
-	{ db,		1,	{ "-dr" } },
 	{ download,	0,	{ NULL } },
-	{ install,	2,	{ "-f", "-p" } },
+	{ install,	2,	{ "-fp" } },
 };
 static struct Cmd rmchain[] = {
 	{ db,		1,	{ "-i" } },
@@ -79,7 +77,7 @@ static struct Cmd updatechain[] = {
 	{ db,		1,	{ "-i" } },
 	{ db,		1,	{ "-o" } },
 	{ filter,	1,	{ "-n" } },
-	{ db,		1,	{ "-dr" } },
+	{ filter,	1,	{ "-tr" } },
 	{ install,	0,	{ NULL } },
 };
 
@@ -138,8 +136,6 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 		printchain(LENGTH(rmchain), rmchain);
 		cmdchain(LENGTH(rmchain), rmchain);
 		break;
-	default:
-		goto argerr;
 	}
 	return EXIT_SUCCESS;
 }
@@ -148,14 +144,14 @@ void printchain(int cmdc, struct Cmd *cmd) {
 	int i, j;
 
 	for(i = 0; i < cmdc; i++) {
-		for(j = 0; j < LENGTH(applets)-1; j++) 
+		for(j = 0; j < LENGTH(applets) - 1; j++) 
 			if(applets[j].function == cmd[i].function)
 				break;
-		if(j == LENGTH(applets)-1)
+		if(j == LENGTH(applets) - 1)
 			fputs("<unknown>", stderr);
 		else
 			fprintf(stderr,APPLETPREFIX "%s", applets[j].name);
-		for(j = 0; j < cmd[i].argc;j++) {
+		for(j = 0; j < cmd[i].argc; j++) {
 			fprintf(stderr," \"%s\"",cmd[i].argv[j]);
 		}
 		if(i + 1 < cmdc)
