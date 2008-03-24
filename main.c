@@ -85,7 +85,7 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 	int action = 0, installed = 0, sync = 0;
 	char *arg = NULL;
 
-	ARGBEGIN {
+	ARG {
 	case 'r':
 	case 'i':
 	case 's':
@@ -107,7 +107,7 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 		version();
 		help();
 		return EXIT_FAILURE;
-	} ARGEND;
+	}
 	if(argc > 1 && argc != ARGC())
 		goto argerr;
 	if(sync) {
@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
 	argc--;
 	argv++;
 	/* global options */
-	ARGBEGIN {
+	ARG {
 	case 'v':
 		version();
 		exit(EXIT_FAILURE);
@@ -199,7 +199,7 @@ int main(int argc, char *argv[]) {
 	case 'H':
 		showhelp = 2;
 		break;
-	} ARGEND;
+	}
 	if(showhelp) {
 		version();
 		if(showhelp == 2 && applet == LENGTH(applets) - 1) {

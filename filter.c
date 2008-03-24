@@ -118,7 +118,7 @@ int filter(int argc, char *argv[], FILE *in, FILE *out) {
 	char *arg = NULL;
 	struct Package pkg;
 
-	ARGBEGIN {
+	ARG {
 	case 't':
 	case 'R':
 	case 's':
@@ -136,7 +136,7 @@ int filter(int argc, char *argv[], FILE *in, FILE *out) {
 	default:
 		filter_help();
 		return EXIT_FAILURE;
-	} ARGEND;
+	}
 	if(argc <= 0 || argc != ARGC())
 		goto argerr;
 	if(strchr("nNv", action))

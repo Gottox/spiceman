@@ -55,7 +55,7 @@ ui(int argc, char *argv[], FILE *in, FILE *out) {
 	char action = 0;
 	struct Package pkg;
 
-	ARGBEGIN {
+	ARG {
 	case 'N':
 		seperator = '\0';
 		break;
@@ -75,7 +75,7 @@ ui(int argc, char *argv[], FILE *in, FILE *out) {
 	default:
 		ui_help();
 		return EXIT_FAILURE;
-	} ARGEND
+	}
 
 	bzero(&pkg, sizeof(pkg));
 	for(i = 1; getpkg(&pkg, in) > 0; i++) {
