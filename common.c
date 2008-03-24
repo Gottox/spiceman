@@ -119,7 +119,7 @@ getpkg(struct Package *pkg, FILE *in) {
 	l = 0;
 	do {
 		if(l + 1 >= pkg->blen) {
-			pkg->blen = l + 1 + BUFSIZE;
+			pkg->blen = l + 1 + BUFSIZ;
 			pkg->buf = erealloc(pkg->buf, sizeof(char) * pkg->blen);
 		}
 		if(fgets(pkg->buf + l, pkg->blen - l, in))

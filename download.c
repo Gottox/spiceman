@@ -41,12 +41,12 @@ FILE *fhttp(const char *url) {
 	struct sockaddr_in sin;
 	struct hostent *host;
 	char *addr, *path, *port;
-	char buf[BUFSIZE], urlbuf[BUFSIZE],
-		headerbuf[BUFSIZE * 2 + LENGTH(HTTPHEADER)];
+	char buf[BUFSIZ], urlbuf[BUFSIZ],
+		headerbuf[BUFSIZ * 2 + LENGTH(HTTPHEADER)];
 	unsigned int p = 80;
 	FILE *in;
 
-	strncpy(urlbuf, url, BUFSIZE);
+	strncpy(urlbuf, url, BUFSIZ);
 	if(!(addr = strchr(urlbuf, ':')))
 		return 0;
 	addr++;
@@ -94,11 +94,11 @@ void download_help() {
 }
 
 int download(int argc, char *argv[], FILE *in, FILE *out) {
-	FILE *f, *cache;
+	FILE *url, *cache;
 	int nocache = 0, n;
 	struct Package pkg;
-	char namebuf[LENGTH(CACHEPREFIX) + BUFSIZE];
-	char buf[BUFSIZE];
+	char namebuf[LENGTH(CACHEPREFIX) + BUFSIZ];
+	char buf[BUFSIZ];
 
 	if(argc == 1 && strcmp("-n", argv[0]) == 0)
 		nocache = 1;
@@ -110,16 +110,17 @@ int download(int argc, char *argv[], FILE *in, FILE *out) {
 	while(getpkg(&pkg, in) > 0) {
 		snprintf(namebuf, LENGTH(namebuf), CACHEPREFIX "/%s-%s-%u.tar",
 				pkg.name, pkg.ver, pkg.rel);
-		if(!(f = fopenurl(pkg.url)))
+		if(!(url = fopenurl(pkg.url)))
 			eprint(0, "Cannot download.");
 		if(!(cache = fopen(namebuf, "w")))
 			eprint(0, "Cannot open cache file.");
-		while((n = fread(buf, sizeof(char), LENGTH(buf), f)) > 0)
+		while((n = fread(buf, sizeof(char), LENGTH(buf), url)) > 0)
 			fwrite(buf, sizeof(char), LENGTH(buf), cache);
 		pkg.url = namebuf;
 		putpkg(&pkg, out);
 		fclose(cache);
-		fclose(f);
+		fclose(url);
 	}
+	freepkg(&pkg);
 	return EXIT_SUCCESS;
 }

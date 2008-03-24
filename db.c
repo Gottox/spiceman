@@ -104,8 +104,8 @@ alternate(FILE *in, FILE *out) {
 			if(strcmp(pkg.name, dbpkg.name) ||
 					strcmp(pkg.ver, dbpkg.ver))
 				continue;
-			if(fsize % BUFSIZE == 0) {
-				found = erealloc(found, fsize + BUFSIZE);
+			if(fsize % BUFSIZ == 0) {
+				found = erealloc(found, fsize + BUFSIZ);
 			}
 			found[fsize++] = pos;
 			putpkg(&dbpkg, out);

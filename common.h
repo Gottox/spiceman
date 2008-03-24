@@ -17,7 +17,6 @@
 
 #define APPLETPREFIX		"sp-"
 #define FIELDSEPERATOR		':'
-#define BUFSIZE			1024
 
 #define LENGTH(x)		sizeof(x)/sizeof(x[0])
 #define APPLETUSAGE(a)		fputs("sp-" a "\nspiceman " a "\n\t-h\thelp message\n", stderr);
