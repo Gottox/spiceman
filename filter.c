@@ -64,7 +64,7 @@ void unique(char action, FILE *in, FILE *out) {
 	bzero(&pkg, sizeof(pkg));
 	while(getpkg(&pkg, in) > 0) {
 		for(l = list, cmp = 1; l && (cmp =
-					pkgcmp(&pkg, &l->pkg, action)) > 0;
+					pkgcmp(&pkg, &l->pkg)) > 0;
 				l = l->next)
 			prev = l;
 		if(l && cmp == 0)

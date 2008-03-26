@@ -26,14 +26,6 @@
 
 /* static */
 static void
-puthex(const char *src, FILE* out, int l) {
-	unsigned int i;
-
-	for(i = 0; i < l; i++)
-		fprintf(out, "%02x", (unsigned int )src[i] % 256);
-}
-
-static void
 putbslash(const char *str, const char *chrs, FILE *out) {
 	const char *p;
 
@@ -55,6 +47,14 @@ str2hex(char *dst, const char *src, int l) {
 	for(i = 0; i < l &&
 		sscanf(src + i * 2, "%2x",
 				(unsigned int *)&dst[i]) > 0; i++);
+}
+
+static void
+puthex(const char *src, FILE* out, int l) {
+	unsigned int i;
+
+	for(i = 0; i < l; i++)
+		fprintf(out, "%02x", (unsigned int )src[i] % 256);
 }
 
 int
@@ -252,7 +252,7 @@ freepkg(struct Package *pkg) {
 }
 
 int
-pkgcmp(const struct Package *p1, const struct Package *p2, char how) {
+pkgcmp(const struct Package *p1, const struct Package *p2) {
 	int cmp;
 
 	if((cmp = strcmp(p1->name, p2->name)))
@@ -264,6 +264,11 @@ pkgcmp(const struct Package *p1, const struct Package *p2, char how) {
 	return 0;
 }
 
+int
+vercmp(const char *v1, const char *v2) {
+
+	return 0;
+}
 void
 version() {
 	fputs("spiceman-" VERSION " - distributed package management tools\n", stderr);
