@@ -1,1 +1,2 @@
 - make pkgcmp more sane.
+- rename exactmatch to pkgmatch and implement things like '=', '<', and '>' for version matching.
