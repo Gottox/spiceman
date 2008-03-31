@@ -29,6 +29,9 @@ wordwrap(char *str, int width) {
 	for(p = str, i = 0; *p; p++, i++) {
 		if(*p == '\t' || *p == ' ')
 			lastblank = p;
+		else if(*p == '\n')
+			i = 0;
+
 		if(i > width && lastblank) {
 			p = lastblank;
 			lastblank = NULL;

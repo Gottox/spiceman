@@ -23,7 +23,8 @@
 
 static struct Package initpkg[] = {
 	{ NULL, 0, 'r', INITREPONAME, "0.0", 1, INITREPONAME, INITREPOADDR, "",
-		"builtin", "", "", "", "", 0, { 0 }, { 0 }, { 0 }, 0, 0 } };
+		"builtin", "", "", "", "", 0, { 0 }, { 0 }, { 0 }, 0, 0 }
+};
 
 void
 db_help() {
