@@ -108,7 +108,7 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 		help();
 		return EXIT_FAILURE;
 	}
-	if(argc > 1 && argc != ARGC())
+	if(argc < 1 || argc != ARGC())
 		goto argerr;
 	if(sync) {
 		printchain(LENGTH(syncchain), syncchain);
