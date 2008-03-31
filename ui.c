@@ -104,5 +104,8 @@ ui(int argc, char *argv[], FILE *in, FILE *out) {
 		fputc(seperator, stdout);
 	}
 	freepkg(&pkg);
+
+	fprintf(stderr, "%i packages\n", i - 1);
+
 	return EXIT_SUCCESS;
 }
