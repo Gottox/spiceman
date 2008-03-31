@@ -75,7 +75,9 @@ struct Package {
 
 
 /* common.c */
-int cmdchain(int cmdc, struct Cmd *cmd);	/* executes a chain of commands */
+int cmdchain(int cmdc, struct Cmd *cmd, FILE *in, FILE *out);
+						/* executes a chain of commands */
+void waitchain(FILE* out);			/* waits for childs and closes out */
 void *erealloc(void *p, size_t size);		/* remalloc + error testing */
 void eprint(int pe, const char *format, ...);	/* prints message and exits */
 void freepkg(struct Package *pkg);

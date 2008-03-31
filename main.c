@@ -112,29 +112,34 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 		goto argerr;
 	if(sync) {
 		printchain(LENGTH(syncchain), syncchain);
-		cmdchain(LENGTH(syncchain), syncchain);
+		cmdchain(LENGTH(syncchain), syncchain, stdin, stdout);
+		waitchain(stdout);
 	}
 	switch(action) {
 	case 'u':
 		printchain(LENGTH(updatechain), updatechain);
-		cmdchain(LENGTH(updatechain), updatechain);
+		cmdchain(LENGTH(updatechain), updatechain, stdin, stdout);
+		waitchain(stdout);
 		break;
 	case 's':
 		searchchain[0].argv[0] = installed ? "-i" : "-p";
 		searchchain[1].argv[1] = arg;
 		printchain(LENGTH(searchchain), searchchain);
-		cmdchain(LENGTH(searchchain), searchchain);
+		cmdchain(LENGTH(searchchain), searchchain, stdin, stdout);
+		waitchain(stdout);
 		break;
 	case 'i':
 		installchain[0].argv[0] = installed ? "-i" : "-p";
 		installchain[1].argv[1] = arg;
 		printchain(LENGTH(installchain), installchain);
-		cmdchain(LENGTH(installchain), installchain);
+		cmdchain(LENGTH(installchain), installchain, stdin, stdout);
+		waitchain(stdout);
 		break;
 	case 'r':
 		rmchain[1].argv[1] = arg;
 		printchain(LENGTH(rmchain), rmchain);
-		cmdchain(LENGTH(rmchain), rmchain);
+		cmdchain(LENGTH(rmchain), rmchain, stdin, stdout);
+		waitchain(stdout);
 		break;
 	}
 	return EXIT_SUCCESS;

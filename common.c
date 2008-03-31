@@ -58,36 +58,42 @@ puthex(const char *src, FILE* out, int l) {
 }
 
 int
-cmdchain(int cmdc, struct Cmd *cmd) {
+cmdchain(int cmdc, struct Cmd *cmd, FILE *pin, FILE *pout) {
 	FILE *in, *out;
-	int i, fd[2], pid, retval, status;
+	int i, fd[2], pid, retval;
 
-	in = stdin;
-	for(i = 0; i < cmdc - 1; i++) {
-		if(pipe(fd))
-			eprint(1, "Cannot create pipe: ");
-		if(!(out = fdopen(fd[1], "w")))
-			eprint(1, "Cannot open pipe for writing: ");
+	in = pin;
+	for(i = 0; i < cmdc; i++) {
+		if(i + 1 == cmdc)
+			out = pout;
+		else if(pipe(fd))
+			eprint(1, "Cannot create pipe");
+		else if(!(out = fdopen(fd[1], "w")))
+			eprint(1, "Cannot open pipe for writing");
 		pid = fork();
 		if(pid < 0)
-			eprint(1, "Cannot fork: ");
+			eprint(1, "Cannot fork");
 		else if(pid == 0) {
-			retval = cmd[i].function(cmd[i].argc,cmd[i].argv,in,out);
-			fclose(out);
+			retval = cmd[i].function(cmd[i].argc, cmd[i].argv, in, out);
 			fclose(in);
+			waitchain(out);
 			exit(retval);
 		}
-		fclose(out);
-		fclose(in);
-		if(!(in = fdopen(fd[0], "r")))
+		if(out != pout)
+			fclose(out);
+		if(in != pin)
+			fclose(in);
+		if(i + 1 != cmdc && !(in = fdopen(fd[0], "r")))
 			eprint(1, "Cannot open pipe for reading: ");
 	}
-	out = stdout;
-	retval = cmd[i].function(cmd[i].argc,cmd[i].argv,in,out);
-	fclose(out);
-	fclose(in);
-	while(wait(&status) != -1);
 	return retval;
+}
+
+void waitchain(FILE *out) {
+	int status;
+
+	fclose(out);
+	while(wait(&status) != -1);
 }
 
 void *
