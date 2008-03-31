@@ -94,7 +94,7 @@ void unique(char action, FILE *in, FILE *out) {
 }
 
 int wildcardmatch(const char *s, struct Package *pkg) {
-	char buf[128];
+	char buf[BUFSIZ];
 
 	snprintf(buf, LENGTH(buf), "%s-%s-%i",
 			pkg->name, pkg->ver, pkg->rel);
