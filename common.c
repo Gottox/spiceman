@@ -57,13 +57,14 @@ puthex(const char *src, FILE* out, int l) {
 		fprintf(out, "%02x", (unsigned int )src[i] % 256);
 }
 
-int
+void
 cmdchain(int cmdc, struct Cmd *cmd, FILE *pin, FILE *pout) {
-	FILE *in, *out;
+	FILE *in, *out, *fp[2];
 	int i, fd[2], pid, retval;
 
 	in = pin;
 	for(i = 0; i < cmdc; i++) {
+		fpipe(fp);
 		if(i + 1 == cmdc)
 			out = pout;
 		else if(pipe(fd))
@@ -86,7 +87,6 @@ cmdchain(int cmdc, struct Cmd *cmd, FILE *pin, FILE *pout) {
 		if(i + 1 != cmdc && !(in = fdopen(fd[0], "r")))
 			eprint(1, "Cannot open pipe for reading: ");
 	}
-	return retval;
 }
 
 void waitchain(FILE *out) {
@@ -115,6 +115,18 @@ eprint(int pe, const char *format, ...) {
 		fputc('\n',stderr);
 	va_end(ap);
 	exit(EXIT_FAILURE);
+}
+
+void
+fpipe(FILE **fp) {
+	int fd[2];
+
+	if(pipe(fd))
+		eprint(1, "cannot create pipe.");
+	if(!(fp[1] = fdopen(fd[1], "w")))
+		eprint(1, "cannot open pipe for writing.");
+	if(!(fp[0] = fdopen(fd[0], "r")))
+		eprint(1, "cannot open pipe for reading.");
 }
 
 int
