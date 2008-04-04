@@ -18,6 +18,7 @@
 #include <string.h>
 #include <strings.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -34,6 +35,14 @@ putbslash(const char *str, const char *chrs, FILE *out) {
 			fwrite(str, sizeof(char), p - str, out);
 			fputc('\\', out);
 			str = p;
+			if(*p == '\n') {
+				fputc('n',out);
+				str++;
+			}
+			else if(*p == '\t') {
+				fputc('t',out);
+				str++;
+			}
 		}
 	}
 	fwrite(str, sizeof(char), p - str, out);
@@ -149,6 +158,14 @@ getpkg(struct Package *pkg, FILE *in) {
 		if(*p == '\\') {
 			for(q = p; *q; q++)
 				q[0] = q[1];
+			switch(*p) {
+			case 'n':
+				*p = '\n';
+				break;
+			case 't':
+				*p = '\t';
+				break;
+			}
 		}
 		else if(*p == FIELDSEPERATOR) {
 			*p = 0;
@@ -219,7 +236,7 @@ getpkg(struct Package *pkg, FILE *in) {
 
 void
 putpkg(const struct Package *pkg, FILE *out) {
-	char sep[3] = { FIELDSEPERATOR, '\n', 0 };
+	char sep[] = { FIELDSEPERATOR, '\n', '\t', 0 };
 	
 	if(pkg->type != '\0')
 		fputc(pkg->type, out);
@@ -270,22 +287,58 @@ freepkg(struct Package *pkg) {
 }
 
 int
-pkgcmp(const struct Package *p1, const struct Package *p2) {
+pkgcmp(const struct Package *p1, const struct Package *p2, const char action) {
 	int cmp;
 
 	if((cmp = strcmp(p1->name, p2->name)))
 		return cmp;
-	if((cmp = strcmp(p1->ver, p2->ver)))
-		return cmp;
-	if((cmp = (int)p1->rel - p2->rel))
-		return cmp;
+	if(action != 'N') {
+		if((cmp = vercmp(p1->ver, p2->ver)))
+			return cmp;
+		if((cmp = (int)p1->rel - p2->rel))
+			return cmp;
+	}
 	return 0;
 }
 
 int
 vercmp(const char *v1, const char *v2) {
+	const char *p;
+	int isdig1, isdig2, dig1, dig2, retval = 0;
 
-	return 0;
+	for(; *v1 && *v2 && retval == 0; v1++, v2++) {
+		if(*v1 != *v2) {
+			isdig1 = isdigit(*v1);
+			isdig2 = isdigit(*v2);
+			if(isdig1 && isdig2) {
+				dig1 = atoi(v1);
+				dig2 = atoi(v2);
+				if(dig1 > dig2)
+					retval = 1;
+				else if(dig2 > dig1)
+					retval = -1;
+				else {
+					for(; isdigit(*v1); v1++);
+					for(; isdigit(*v2); v2++);
+				}
+			}
+			else if(isdig1)
+				retval = 1;
+			else if(isdig2)
+				retval = -1;
+			else if((*v1 == '-' || *v1 == '.') && (*v2 == '-' || *v2 == '.'))
+				return *v1 == '.' ? 1 : -1;
+			else
+				retval = strcmp(v1, v2);
+		}
+	}
+	for(p = *v1 ? v1 : v2; *p && retval == 0; p++) {
+		if(isalpha(*p))
+			retval = *v1 ? -1 : 1;
+		else if(!strchr("-.0", *p))
+			retval = *v1 ? 1 : -1;
+	}
+	return retval;
 }
 void
 version() {

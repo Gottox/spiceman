@@ -64,7 +64,7 @@ void unique(char action, FILE *in, FILE *out) {
 	bzero(&pkg, sizeof(pkg));
 	while(getpkg(&pkg, in) > 0) {
 		for(l = list, cmp = 1; l && (cmp =
-					pkgcmp(&pkg, &l->pkg)) > 0;
+				pkgcmp(&pkg, &l->pkg, action)) > 0;
 				l = l->next)
 			prev = l;
 		if(l && cmp == 0)
@@ -103,9 +103,8 @@ int wildcardmatch(const char *s, struct Package *pkg) {
 
 void filter_help() {
 	APPLETUSAGE("filter");
-	fputs("	-n	make packages unique by name and version, use newest\n", stderr);
-	fputs("	-N	make packages unique by name, use newest\n", stderr);
-	fputs("	-v	make packages unique by version, use newest\n", stderr);
+	fputs("	-n	make packages unique name and version, use newest\n", stderr);
+	fputs("	-N	make packages unique name, use newest\n", stderr);
 	fputs("	-t <t>	filters for types\n", stderr);
 	fputs("	-R <r>	filter repository\n", stderr);
 	fputs("	-s <p>	search in package-name, -version and -release\n", stderr);
@@ -127,7 +126,6 @@ int filter(int argc, char *argv[], FILE *in, FILE *out) {
 			goto argerr;
 	case 'n':
 	case 'N':
-	case 'v':
 		if(action)
 			goto argerr;
 		action = ARGCHR();

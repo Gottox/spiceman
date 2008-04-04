@@ -86,7 +86,7 @@ int getpkg(struct Package *pkg, FILE *in);
 						/* reads a package from in */
 void putpkg(const struct Package *pkg, FILE *out);
 						/* puts a package to out */
-int pkgcmp(const struct Package *p1, const struct Package *p2);
+int pkgcmp(const struct Package *p1, const struct Package *p2, const char action);
 						/* compares two packages */
 int vercmp(const char *v1, const char *v2);
 void version();
