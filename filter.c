@@ -93,11 +93,15 @@ void unique(char action, FILE *in, FILE *out) {
 	}
 }
 
-int wildcardmatch(const char *s, struct Package *pkg) {
+int wildcardmatch(const char *s, struct Package *pkg, int fulltext) {
 	char buf[BUFSIZ];
 
-	snprintf(buf, LENGTH(buf), "%s-%s-%i",
-			pkg->name, pkg->ver, pkg->rel);
+	if(fulltext)
+		snprintf(buf, LENGTH(buf), "%s-%s-%i\n%s",
+				pkg->name, pkg->ver, pkg->rel,pkg->desc);
+	else
+		snprintf(buf, LENGTH(buf), "%s-%s-%i",
+				pkg->name, pkg->ver, pkg->rel);
 	return fnmatch(s, buf, 0) == 0;
 }
 
@@ -108,6 +112,7 @@ void filter_help() {
 	fputs("	-t <t>	filters for types\n", stderr);
 	fputs("	-R <r>	filter repository\n", stderr);
 	fputs("	-s <p>	search in package-name, -version and -release\n", stderr);
+	fputs("	-S <p>	search in package-name, -version, -release and -description\n", stderr);
 	fputs("	-e <p>	exact match\n", stderr);
 }
 
@@ -121,6 +126,7 @@ int filter(int argc, char *argv[], FILE *in, FILE *out) {
 	case 't':
 	case 'R':
 	case 's':
+	case 'S':
 	case 'e':
 		if(!(arg = ARGVAL()))
 			goto argerr;
@@ -150,7 +156,8 @@ int filter(int argc, char *argv[], FILE *in, FILE *out) {
 				match = repomatch(arg, &pkg);
 				break;
 			case 's':
-				match = wildcardmatch(arg, &pkg);
+			case 'S':
+				match = wildcardmatch(arg, &pkg, action == 'S');
 				break;
 			case 'e':
 				match = exactmatch(arg, &pkg);
