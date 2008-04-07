@@ -85,8 +85,9 @@ cmdchain(int cmdc, struct Cmd *cmd, FILE *pin, FILE *pout) {
 			eprint(1, "Cannot fork");
 		else if(pid == 0) {
 			retval = cmd[i].function(cmd[i].argc, cmd[i].argv, in, out);
+			fflush(NULL);
 			fclose(in);
-			waitchain(out);
+			fclose(out);
 			exit(retval);
 		}
 		if(out != pout)
@@ -100,7 +101,6 @@ cmdchain(int cmdc, struct Cmd *cmd, FILE *pin, FILE *pout) {
 
 void waitchain(FILE *out) {
 	int status;
-
 	fclose(out);
 	while(wait(&status) != -1);
 }
@@ -340,6 +340,7 @@ vercmp(const char *v1, const char *v2) {
 	}
 	return retval;
 }
+
 void
 version() {
 	fputs("spiceman-" VERSION " - distributed package management tools\n", stderr);
