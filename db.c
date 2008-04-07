@@ -43,20 +43,17 @@ db(int argc, char *argv[], FILE *in, FILE *out) {
 		action = 'p';
 	else if(argv[0][0] == '-')
 		action = argv[0][1];
-	switch(argc <= 1 ? action : 0) {
-	case 'i':
-	case 'I':
-	case 'p':
-		return putdb(out, action);
-	case 'o':
-		return alternate(in, out);
-	default:
+	if(argc <= 1 && strchr("iIp", action)) {
+		putdb(out, action);
+		return EXIT_SUCCESS;
+	}
+	else {
 		db_help();
 		return EXIT_FAILURE;
 	}
 }
 
-int
+void
 putdb(FILE *out, char action) {
 	int r, i;
 	FILE *db;
@@ -81,42 +78,5 @@ putdb(FILE *out, char action) {
 					"Malformed Package in Database: %s", "TODO");
 		fclose(db);
 	}
-	return EXIT_SUCCESS;
 }
 
-int
-alternate(FILE *in, FILE *out) {
-	FILE *db;
-	struct Package pkg;
-	struct Package dbpkg;
-	long *found = 0, pos;
-	int fsize = 0, i;
-
-	bzero(&pkg, sizeof(pkg));
-	bzero(&dbpkg, sizeof(dbpkg));
-	if(!(db = fopen(DBPREFIX "/packages", "r")))
-		eprint(1, "Cannot open database `" DBPREFIX "/packages`: ");
-	while(getpkg(&pkg, in) > 0) {
-		while(getpkg(&dbpkg, db) > 0) {
-			pos = ftell(db);
-			for(i = 0; i < fsize && found[i] != pos; i++);
-			if(fsize && i != fsize)
-				continue;
-			if(strcmp(pkg.name, dbpkg.name) ||
-					strcmp(pkg.ver, dbpkg.ver))
-				continue;
-			if(fsize % BUFSIZ == 0) {
-				found = erealloc(found, fsize + BUFSIZ);
-			}
-			found[fsize++] = pos;
-			putpkg(&dbpkg, out);
-		}
-		rewind(db);
-	}
-	fclose(db);
-	if(fsize)
-		free(found);
-	freepkg(&pkg);
-	freepkg(&dbpkg);
-	return EXIT_SUCCESS;
-}
