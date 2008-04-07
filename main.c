@@ -60,7 +60,6 @@ static struct Cmd syncchain[] = {
 static struct Cmd searchchain[] = {
 	{ db,		1,	{ "-p" } },
 	{ filter,	2,	{ "-s", NULL } },
-	{ ui,		0,	{ NULL } },
 };
 static struct Cmd installchain[] = {
 	{ db,		1,	{ "-p" } },
@@ -84,6 +83,7 @@ static struct Cmd updatechain[] = {
 int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 	int action = 0, installed = 0, sync = 0;
 	char *arg = NULL;
+	FILE *fp[2];
 
 	ARG {
 	case 'r':
@@ -115,33 +115,33 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 		cmdchain(LENGTH(syncchain), syncchain, stdin, stdout);
 		waitchain(stdout);
 	}
+	fpipe(fp);
 	switch(action) {
 	case 'u':
 		printchain(LENGTH(updatechain), updatechain);
-		cmdchain(LENGTH(updatechain), updatechain, stdin, stdout);
-		waitchain(stdout);
+		cmdchain(LENGTH(updatechain), updatechain, stdin, fp[1]);
 		break;
 	case 's':
 		searchchain[0].argv[0] = installed ? "-i" : "-p";
 		searchchain[1].argv[1] = arg;
 		printchain(LENGTH(searchchain), searchchain);
-		cmdchain(LENGTH(searchchain), searchchain, stdin, stdout);
-		waitchain(stdout);
+		cmdchain(LENGTH(searchchain), searchchain, stdin, fp[1]);
 		break;
 	case 'i':
 		installchain[0].argv[0] = installed ? "-i" : "-p";
 		installchain[1].argv[1] = arg;
 		printchain(LENGTH(installchain), installchain);
-		cmdchain(LENGTH(installchain), installchain, stdin, stdout);
-		waitchain(stdout);
+		cmdchain(LENGTH(installchain), installchain, stdin, fp[1]);
 		break;
 	case 'r':
 		rmchain[1].argv[1] = arg;
 		printchain(LENGTH(rmchain), rmchain);
-		cmdchain(LENGTH(rmchain), rmchain, stdin, stdout);
-		waitchain(stdout);
+		cmdchain(LENGTH(rmchain), rmchain, stdin, fp[1]);
 		break;
 	}
+	fclose(fp[1]);
+	ui(0, NULL, fp[0], stdout);
+	waitchain(stdout);
 	return EXIT_SUCCESS;
 }
 
