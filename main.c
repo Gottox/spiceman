@@ -21,11 +21,11 @@
 #include "common.h"
 
 #include "db.h"
-#include "depency.h"
 #include "delete.h"
 #include "download.h"
 #include "filter.h"
 #include "install.h"
+#include "relate.h"
 #include "ui.h"
 
 #define APPLET(x) { x, x ## _help, #x }
@@ -43,10 +43,10 @@ struct Applet {
 static struct Applet applets[] = {
 	APPLET(db),
 	APPLET(delete),
-	APPLET(depency),
 	APPLET(download),
 	APPLET(filter),
 	APPLET(install),
+	APPLET(relate),
 	APPLET(ui),
 	{ main_applet, help, NULL },
 };
@@ -159,10 +159,9 @@ void printchain(int cmdc, struct Cmd *cmd) {
 		for(j = 0; j < cmd[i].argc; j++) {
 			fprintf(stderr," \"%s\"",cmd[i].argv[j]);
 		}
-		if(i + 1 < cmdc)
-			fputs(" | ",stderr);
+		fputs(" | ",stderr);
 	}
-	fputc('\n',stderr);
+	fputs("sp-ui\n",stderr);
 }
 
 void help() {
