@@ -13,5 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software */
+
 int depency(int argc, char *argv[], FILE *in, FILE *out);
 void depency_help();
+int alternate(FILE *in, FILE *out);

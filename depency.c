@@ -16,6 +16,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <strings.h>
 
 #include "common.h"
 #include "depency.h"
@@ -23,11 +25,39 @@
 #include "filter.h"
 #include "db.h"
 
+static struct Cmd dbchain[] = {
+	{ db,		0,	{ NULL } },
+};
+
+int
+alternate(FILE *in, FILE *out) {
+	struct Package pkg;
+	struct Package dbpkg;
+	FILE *db[2];
+
+	bzero(&pkg, sizeof(pkg));
+	bzero(&dbpkg, sizeof(dbpkg));
+
+	while(getpkg(&pkg, in) > 0) {
+		fpipe(db);
+		cmdchain(LENGTH(dbchain), dbchain, NULL, db[1]);
+		fclose(db[1]);
+		while(getpkg(&dbpkg, db[0]) > 0)
+			if(!strcmp(pkg.name, dbpkg.name) && !vercmp(pkg.ver, dbpkg.ver))
+				putpkg(&dbpkg, out);
+		waitchain(db[0]);
+	}
+	freepkg(&pkg);
+	freepkg(&dbpkg);
+	return EXIT_SUCCESS;
+}
+
 void depency_help() {
 	APPLETUSAGE("depency");
 	fputs("	-d	show depencies\n", stderr);
 	fputs("	-t	calculate recursive depencies\n", stderr);
 	fputs("	-r	calculate reverse depencies\n", stderr);
+	fputs("	-o	finds other versions of the same program\n", stderr);
 }
 
 int depency(int argc, char *argv[], FILE *in, FILE *out) {
@@ -37,6 +67,7 @@ int depency(int argc, char *argv[], FILE *in, FILE *out) {
 	case 'd':
 	case 't':
 	case 'r':
+	case 'o':
 		if(!action) {
 			action = ARGCHR();
 			break;
@@ -49,5 +80,10 @@ int depency(int argc, char *argv[], FILE *in, FILE *out) {
 	}
 	if(argc > 1 || argc != ARGC())
 		goto argerr;
+	switch(action) {
+	case 'o':
+		alternate(in, out);
+		break;
+	}
 	return EXIT_SUCCESS;
 }
