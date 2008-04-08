@@ -20,7 +20,8 @@
 
 /* LENGTH macro copied from dwm. */
 #define LENGTH(x)		sizeof(x)/sizeof(x[0])
-#define APPLETUSAGE(a)		fputs("sp-" a "\nspiceman " a "\n\t-h\thelp message\n", stderr);
+#define APPLETUSAGE(a)		fputs("sp-" a "\nspiceman " a \
+		"\n\t-h\thelp message\n", stderr);
 
 /* Plan9-style Argument parsing */
 /* Vars: _c -> count; _b -> break; _a -> argument */
@@ -28,7 +29,8 @@
 	for(_c = 0; _c < argc && argv[_c][0] == '-' && argv[_c][1]; _c++) \
 		for(_a = &argv[_c][1], _b = 0; !_b && *_a; _a++ ) \
 			switch(*_a)
-#define ARGVAL()	(!_b && _a[1] && (_b = 1) ? &_a[1] : _c + 1 == argc ? 0 : argv[++_c])
+#define ARGVAL()	(!_b && _a[1] && (_b = 1) ? &_a[1] : _c + 1 == argc ? \
+		0 : argv[++_c])
 #define ARGCHR()	(*_a)
 #define ARGC()		_c
 
@@ -76,17 +78,18 @@ struct Package {
 
 /* common.c */
 void cmdchain(int cmdc, struct Cmd *cmd, FILE *in, FILE *out);
-						/* executes a chain of commands */
-void waitchain(FILE* out);			/* waits for childs and closes out */
-void *erealloc(void *p, size_t size);		/* remalloc + error testing */
-void eprint(int pe, const char *format, ...);	/* prints message and exits */
+					/* executes a chain of commands */
+void *erealloc(void *p, size_t size);	/* remalloc + error testing */
+void eprint(int pe, const char *format, ...);
+					/* prints message and exits */
 void freepkg(struct Package *pkg);
 void fpipe(FILE **fp);
 int getpkg(struct Package *pkg, FILE *in);
-						/* reads a package from in */
+					/* reads a package from in */
 void putpkg(const struct Package *pkg, FILE *out);
-						/* puts a package to out */
-int pkgcmp(const struct Package *p1, const struct Package *p2, const char action);
-						/* compares two packages */
+					/* puts a package to out */
+int pkgcmp(const struct Package *p1, const struct Package *p2,
+		const char action);
+					/* compares two packages */
 int vercmp(const char *v1, const char *v2);
 void version();

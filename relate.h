@@ -16,4 +16,4 @@
 
 int relate(int argc, char *argv[], FILE *in, FILE *out);
 void relate_help();
-int alternate(FILE *in, FILE *out);
+int alternate(FILE *in, FILE *out);	/* Finds alternative versions */

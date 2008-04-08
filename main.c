@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <libgen.h>
+#include <sys/wait.h>
 
 #include "common.h"
 
@@ -51,6 +52,7 @@ static struct Applet applets[] = {
 	{ main_applet, help, NULL },
 };
 
+/* chains */
 static struct Cmd syncchain[] = {
 	{ db,		1,	{ "-i" } },
 	{ filter,	1,	{ "-tr" } },
@@ -80,17 +82,21 @@ static struct Cmd updatechain[] = {
 	{ install,	0,	{ NULL } },
 };
 
+/* fallback applet if no other fits */
 int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
-	int action = 0, installed = 0, sync = 0;
+	int status, action = 0, installed = 0, sync = 0;
 	char *arg = NULL;
 	FILE *fp[2];
 
 	ARG {
+		/* Arguments with parameters */
 	case 'r':
 	case 'i':
 	case 's':
 		if(!(arg = ARGVAL()))
 			goto argerr;
+		/* No break here, action need to be set*/
+		/* Arguments without parameters */
 	case 'u':
 		if(action != 0) 
 			goto argerr;
@@ -113,9 +119,9 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 	if(sync) {
 		printchain(LENGTH(syncchain), syncchain);
 		cmdchain(LENGTH(syncchain), syncchain, stdin, stdout);
-		waitchain(stdout);
 	}
 	fpipe(fp);
+	/* calling cmdchain */
 	switch(action) {
 	case 'u':
 		printchain(LENGTH(updatechain), updatechain);
@@ -139,9 +145,11 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 		cmdchain(LENGTH(rmchain), rmchain, stdin, fp[1]);
 		break;
 	}
+	/* formating human readable output of cmdchain . */
 	fclose(fp[1]);
 	ui(0, NULL, fp[0], stdout);
-	waitchain(stdout);
+	fclose(fp[0]);
+	while(wait(&status) != -1);
 	return EXIT_SUCCESS;
 }
 
@@ -180,10 +188,12 @@ void help() {
 int main(int argc, char *argv[]) {
 	int applet, i;
 	char *bn;
-	unsigned int showhelp, retval;
+	unsigned int showhelp;
 
 	showhelp = argc < 1;
 	bn = basename(argv[0]);
+	/* finding the right applet if none is found use the fallback applet
+	 * (the last one) I'm so sorry for this :/ */
 	for(applet = 0; applet < LENGTH(applets) - 1; applet++)
 		if((strncmp(bn, APPLETPREFIX, LENGTH(APPLETPREFIX) - 1) == 0 &&
 				strcmp(bn + LENGTH(APPLETPREFIX) - 1, applets[applet].name) == 0) ||
@@ -215,10 +225,12 @@ int main(int argc, char *argv[]) {
 			applets[applet].help();
 		return EXIT_FAILURE;
 	}
+	/* if spiceman is called with the appletname as first argument
+	 * shift Arguments */
 	else if(argc && applets[applet].name &&
-			!strcmp(applets[applet].name, argv[0]))
-		return applets[applet].function(argc-1, argv+1, stdin, stdout);
-	else
-		return applets[applet].function(argc, argv, stdin, stdout);
-	return retval;
+			!strcmp(applets[applet].name, argv[0])) {
+		argc--;
+		argv++;
+	}
+	return applets[applet].function(argc, argv, stdin, stdout);
 }

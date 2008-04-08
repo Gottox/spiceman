@@ -82,7 +82,8 @@ ui(int argc, char *argv[], FILE *in, FILE *out) {
 
 	bzero(&pkg, sizeof(pkg));
 	for(i = 1; getpkg(&pkg, in) > 0; i++) {
-		fprintf(out, "%i. [%c] %s-%s-%i (%s)", i, pkg.type, pkg.name, pkg.ver, pkg.rel, pkg.repo);
+		fprintf(out, "%i. [%c] %s-%s-%i (%s)", i, pkg.type, pkg.name,
+				pkg.ver, pkg.rel, pkg.repo);
 		if(action != 's') {
 			if(width)
 				wordwrap(pkg.desc, width);

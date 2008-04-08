@@ -69,40 +69,38 @@ puthex(const char *src, FILE* out, int l) {
 void
 cmdchain(int cmdc, struct Cmd *cmd, FILE *pin, FILE *pout) {
 	FILE *in, *out, *fp[2];
-	int i, fd[2], pid, retval;
+	int i, pid, retval;
 
 	in = pin;
 	for(i = 0; i < cmdc; i++) {
-		fpipe(fp);
-		if(i + 1 == cmdc)
+		if(i + 1 == cmdc) {
 			out = pout;
-		else if(pipe(fd))
-			eprint(1, "Cannot create pipe");
-		else if(!(out = fdopen(fd[1], "w")))
-			eprint(1, "Cannot open pipe for writing");
+		}
+		else {
+			fpipe(fp);
+			out = fp[1];
+		}
+		fflush(NULL);
 		pid = fork();
 		if(pid < 0)
 			eprint(1, "Cannot fork");
 		else if(pid == 0) {
-			retval = cmd[i].function(cmd[i].argc, cmd[i].argv, in, out);
-			fflush(NULL);
+			retval = cmd[i].function(cmd[i].argc, cmd[i].argv,
+					in, out);
+			if(in != pin)
+				fclose(pin);
+			if(out != pout)
+				fclose(pout);
 			fclose(in);
 			fclose(out);
 			exit(retval);
 		}
-		if(out != pout)
-			fclose(out);
 		if(in != pin)
 			fclose(in);
-		if(i + 1 != cmdc && !(in = fdopen(fd[0], "r")))
-			eprint(1, "Cannot open pipe for reading: ");
+		if(out != pout)
+			fclose(out);
+		in = fp[0];
 	}
-}
-
-void waitchain(FILE *out) {
-	int status;
-	fclose(out);
-	while(wait(&status) != -1);
 }
 
 void *
@@ -343,5 +341,6 @@ vercmp(const char *v1, const char *v2) {
 
 void
 version() {
-	fputs("spiceman-" VERSION " - distributed package management tools\n", stderr);
+	fputs("spiceman-" VERSION " - distributed package management tools\n",
+			stderr);
 }

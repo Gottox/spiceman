@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include <sys/wait.h>
 
 #include "common.h"
 #include "relate.h"
@@ -31,6 +32,7 @@ static struct Cmd alternatechain[] = {
 
 int
 alternate(FILE *in, FILE *out) {
+	int status;
 	struct Package pkg;
 	struct Package dbpkg;
 	FILE *db[2];
@@ -45,7 +47,7 @@ alternate(FILE *in, FILE *out) {
 			if(!strcmp(pkg.name, dbpkg.name) &&
 					!vercmp(pkg.ver, dbpkg.ver))
 				putpkg(&dbpkg, out);
-		waitchain(db[0]);
+		while(wait(&status) != -1);
 	}
 	freepkg(&pkg);
 	freepkg(&dbpkg);
