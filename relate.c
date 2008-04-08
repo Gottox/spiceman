@@ -28,29 +28,24 @@
 
 static struct Cmd alternatechain[] = {
 	{ db,		0,	{ NULL } },
+	{ filter,	2,	{ "-e", NULL } },
 };
 
 int
 alternate(FILE *in, FILE *out) {
 	int status;
+	char buf[BUFSIZ];
 	struct Package pkg;
-	struct Package dbpkg;
-	FILE *db[2];
 
 	bzero(&pkg, sizeof(pkg));
-	bzero(&dbpkg, sizeof(dbpkg));
 	while(getpkg(&pkg, in) > 0) {
-		fpipe(db);
-		cmdchain(LENGTH(alternatechain), alternatechain, NULL, db[1]);
-		fclose(db[1]);
-		while(getpkg(&dbpkg, db[0]) > 0)
-			if(!strcmp(pkg.name, dbpkg.name) &&
-					!vercmp(pkg.ver, dbpkg.ver))
-				putpkg(&dbpkg, out);
+		snprintf(buf, sizeof(buf), "%s-%s-", pkg.name, pkg.ver);
+		puts(buf);
+		alternatechain[1].argv[1] = buf;
+		cmdchain(LENGTH(alternatechain), alternatechain, NULL, out);
 		while(wait(&status) != -1);
 	}
 	freepkg(&pkg);
-	freepkg(&dbpkg);
 	return EXIT_SUCCESS;
 }
 
