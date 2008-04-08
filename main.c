@@ -61,7 +61,7 @@ static struct Cmd syncchain[] = {
 };
 static struct Cmd searchchain[] = {
 	{ db,		1,	{ "-p" } },
-	{ filter,	2,	{ "-s", NULL } },
+	{ filter,	2,	{ NULL, NULL } },
 };
 static struct Cmd installchain[] = {
 	{ db,		1,	{ "-p" } },
@@ -93,6 +93,7 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 	case 'r':
 	case 'i':
 	case 's':
+	case 'S':
 		if(!(arg = ARGVAL()))
 			goto argerr;
 		/* No break here, action need to be set*/
@@ -128,7 +129,9 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 		cmdchain(LENGTH(updatechain), updatechain, stdin, fp[1]);
 		break;
 	case 's':
+	case 'S':
 		searchchain[0].argv[0] = installed ? "-i" : "-p";
+		searchchain[1].argv[0] = action == 's' ? "-s" : "-S";
 		searchchain[1].argv[1] = arg;
 		printchain(LENGTH(searchchain), searchchain);
 		cmdchain(LENGTH(searchchain), searchchain, stdin, fp[1]);
@@ -180,6 +183,7 @@ void help() {
 	fputs("	-i <p>	Install packages\n", stderr);
 	fputs("	-r <p>	Remove packages\n", stderr);
 	fputs("	-s <p>	search package\n", stderr);
+	fputs("	-S <p>	search package by description too.\n", stderr);
 	fputs("	-y	sync with repositories\n", stderr);
 	fputs("	-u	Update system\n", stderr);
 	fputs("	-v	Version\n", stderr);
