@@ -44,13 +44,13 @@ int exactmatch(const char *s, FILE *in, FILE *out) {
 			continue;
 		for(p = s + j, j = 0; p[j] && pkg.ver[j] && 
 				p[j] == pkg.ver[j]; j++);
-		if(p[j] == 0 && p[j] == pkg.ver[j]) {
+		if(p[j] == 0 || p[j] == pkg.ver[j]) {
 			putpkg(&pkg, out);
 			continue;
 		}
 		else if(p[j] != '-' || pkg.ver[j++] != 0)
 			continue;
-		if(atoi(p + j) == pkg.rel)
+		if(p[j] == 0 || atoi(p + j) == pkg.rel)
 			putpkg(&pkg, out);
 	}
 	freepkg(&pkg);
