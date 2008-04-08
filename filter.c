@@ -27,33 +27,58 @@ struct Pkglst{
 	struct Pkglst *next;
 };
 
-int exactmatch(const char *s, struct Package *pkg) {
+int exactmatch(const char *s, FILE *in, FILE *out) {
 	int j;
 	const char *p;
+	struct Package pkg;
 
-	for(j = 0; s[j] && pkg->name[j] &&
-		s[j] == pkg->name[j]; j++);
-	if(s[j] == 0 && s[j] == pkg->name[j])
-		return 1;
-	else if(s[j] != '-' || pkg->name[j++] != 0)
-		return 0;
-	for(p = s + j, j = 0; p[j] && pkg->ver[j] && 
-			p[j] == pkg->ver[j]; j++);
-	if(p[j] == 0 && p[j] == pkg->ver[j])
-		return 1;
-	else if(p[j] != '-' || pkg->ver[j++] != 0)
-		return 0;
-	if(atoi(p + j) == pkg->rel)
-		return 1;
+	bzero(&pkg, sizeof(pkg));
+	while(getpkg(&pkg, in) > 0) {
+		for(j = 0; s[j] && pkg.name[j] &&
+			s[j] == pkg.name[j]; j++);
+		if(s[j] == 0 && s[j] == pkg.name[j]) {
+			putpkg(&pkg, out);
+			continue;
+		}
+		else if(s[j] != '-' || pkg.name[j++] != 0)
+			continue;
+		for(p = s + j, j = 0; p[j] && pkg.ver[j] && 
+				p[j] == pkg.ver[j]; j++);
+		if(p[j] == 0 && p[j] == pkg.ver[j]) {
+			putpkg(&pkg, out);
+			continue;
+		}
+		else if(p[j] != '-' || pkg.ver[j++] != 0)
+			continue;
+		if(atoi(p + j) == pkg.rel)
+			putpkg(&pkg, out);
+	}
+	freepkg(&pkg);
 	return 0;
 }
 
-int repomatch(const char *s, struct Package *pkg) {
-	return strcmp(pkg->repo, s) == 0;
+int repomatch(const char *s, FILE *in, FILE *out) {
+	struct Package pkg;
+
+	bzero(&pkg, sizeof(pkg));
+	while(getpkg(&pkg, in))
+		if(strcmp(pkg.repo, s) == 0)
+			putpkg(&pkg, out);
+	freepkg(&pkg);
+
+	return EXIT_SUCCESS;
 }
 
-int typematch(const char *s, struct Package *pkg) {
-	return strchr(s, pkg->type) != 0;
+int typematch(const char *s, FILE *in, FILE *out) {
+	struct Package pkg;
+
+	bzero(&pkg, sizeof(pkg));
+	while(getpkg(&pkg, in))
+		if(strchr(s, pkg.type));
+			putpkg(&pkg, out);
+	freepkg(&pkg);
+
+	return EXIT_SUCCESS;
 }
 
 void unique(char action, FILE *in, FILE *out) {
@@ -93,16 +118,34 @@ void unique(char action, FILE *in, FILE *out) {
 	}
 }
 
-int wildcardmatch(const char *s, struct Package *pkg, int fulltext) {
-	char buf[BUFSIZ];
+int wildcardmatch(const char *p, int fulltext, FILE *in, FILE *out) {
+	unsigned int len;
+	char buf[BUFSIZ], patternbuf[BUFSIZ] = "*";
+	struct Package pkg;
 
-	if(fulltext)
-		snprintf(buf, LENGTH(buf), "%s-%s-%i\n%s",
-				pkg->name, pkg->ver, pkg->rel,pkg->desc);
+	if(p[0] == '^')
+		strncpy(patternbuf, p + 1, LENGTH(patternbuf));
 	else
-		snprintf(buf, LENGTH(buf), "%s-%s-%i",
-				pkg->name, pkg->ver, pkg->rel);
-	return fnmatch(s, buf, 0) == 0;
+		strncat(patternbuf, p, LENGTH(patternbuf));
+	len = strlen(patternbuf);
+	if(patternbuf[len - 1] == '$')
+		patternbuf[len - 1] = 0;
+	else if(len + 2 < BUFSIZ) {
+		patternbuf[len++] = '*';
+		patternbuf[len] = 0;
+	}
+
+	bzero(&pkg, sizeof(pkg));
+	while(getpkg(&pkg, in) > 0) {
+		snprintf(buf, LENGTH(buf), "%s-%s-%i", pkg.name,
+				pkg.ver, pkg.rel);
+		if(fnmatch(patternbuf, buf, 0) == 0)
+			putpkg(&pkg, out);
+		else if(fulltext && fnmatch(patternbuf, pkg.desc, 0) == 0)
+			putpkg(&pkg, out);
+	}
+	freepkg(&pkg);
+	return EXIT_SUCCESS;
 }
 
 void filter_help() {
@@ -112,15 +155,14 @@ void filter_help() {
 	fputs("	-t <t>	filters for types\n", stderr);
 	fputs("	-R <r>	filter repository\n", stderr);
 	fputs("	-s <p>	search in package-name, -version and -release\n", stderr);
-	fputs("	-S <p>	search in package-name, -version, -release and -description\n", stderr);
+	fputs("	-S <p>	search in package-name, -version, -release and "
+			"-description\n", stderr);
 	fputs("	-e <p>	exact match\n", stderr);
 }
 
 int filter(int argc, char *argv[], FILE *in, FILE *out) {
-	int match = 0;
 	char action = 0;
 	char *arg = NULL;
-	struct Package pkg;
 
 	ARG {
 	case 't':
@@ -146,27 +188,21 @@ int filter(int argc, char *argv[], FILE *in, FILE *out) {
 	if(strchr("nNv", action))
 		unique(action, in, out);
 	else {
-		bzero(&pkg, sizeof(pkg));
-		while(getpkg(&pkg, in) > 0) {
-			switch(action) {
-			case 't':
-				match = typematch(arg, &pkg);
-				break;
-			case 'R':
-				match = repomatch(arg, &pkg);
-				break;
-			case 's':
-			case 'S':
-				match = wildcardmatch(arg, &pkg, action == 'S');
-				break;
-			case 'e':
-				match = exactmatch(arg, &pkg);
-				break;
-			}
-			if(match)
-				putpkg(&pkg, out);
+		switch(action) {
+		case 't':
+			return typematch(arg, in, out);
+			break;
+		case 'R':
+			return repomatch(arg, in, out);
+			break;
+		case 's':
+		case 'S':
+			return wildcardmatch(arg, action == 'S', in, out);
+			break;
+		case 'e':
+			return exactmatch(arg, in, out);
+			break;
 		}
-		freepkg(&pkg);
 	}
 	return EXIT_SUCCESS;
 }

@@ -13,10 +13,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software */
-int exactmatch(const char *s, struct Package *pkg);
-int repomatch(const char *s, struct Package *pkg);
-int typematch(const char *s, struct Package *pkg);
+int exactmatch(const char *p, FILE *in, FILE *out);
+int repomatch(const char *p, FILE *in, FILE *out);
+int typematch(const char *p, FILE *in, FILE *out);
 void unique(const char action, FILE *in, FILE *out);
-int wildcardmatch(const char *s, struct Package *pkg, int fulltext);
+int wildcardmatch(const char *s, int fulltext, FILE *in, FILE *out);
 int filter(int argc, char *argv[], FILE *in, FILE *out);
 void filter_help();
