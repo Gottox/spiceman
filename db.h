@@ -16,4 +16,3 @@
 
 int db(int argc, char *argv[], FILE *in, FILE *out);
 void db_help();
-void putdb(FILE *out, char opt);

@@ -38,33 +38,20 @@ db_help() {
 int
 db(int argc, char *argv[], FILE *in, FILE *out) {
 	char action = 0;
-
-	if(argc == 0)
-		action = 'p';
-	else if(argv[0][0] == '-')
-		action = argv[0][1];
-	if(argc <= 1 && strchr("iIp", action)) {
-		putdb(out, action);
-		return EXIT_SUCCESS;
-	}
-	else {
-		db_help();
-		return EXIT_FAILURE;
-	}
-}
-
-void
-putdb(FILE *out, char action) {
 	int r, i;
 	FILE *db;
 	char *src;
 	struct Package pkg;
 
+	if(argc == 0)
+		action = 'p';
+	else if(argv[0][0] == '-')
+		action = argv[0][1];
 	if(action == 'I') {
 		for(i = 0; i < LENGTH(initpkg); i++)
 			putpkg(&initpkg[i], out);
 	}
-	else {
+	else if (action == 'i' || action == 'p'){
 		src = action == 'i' ? DBPREFIX "/installed" :  DBPREFIX "/packages";
 		if(!(db = fopen(src, "r")))
 			eprint(1, "Cannot open database `%s`: ", src);
@@ -78,5 +65,10 @@ putdb(FILE *out, char action) {
 					"Malformed Package in Database: %s", "TODO");
 		fclose(db);
 	}
+	else {
+		db_help();
+		return EXIT_FAILURE;
+	}
+	return EXIT_SUCCESS;
 }
 
