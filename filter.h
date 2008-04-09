@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software */
-int exactmatch(const char *p, FILE *in, FILE *out);
+int operatormatch(const char *p, FILE *in, FILE *out);
 int repomatch(const char *p, FILE *in, FILE *out);
 int typematch(const char *p, FILE *in, FILE *out);
 void unique(const char action, FILE *in, FILE *out);

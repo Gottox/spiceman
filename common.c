@@ -285,56 +285,55 @@ freepkg(struct Package *pkg) {
 }
 
 int
-pkgcmp(const struct Package *p1, const struct Package *p2, const char action) {
-	int cmp;
+pkgcmp(const char *name1, const char *ver1, const int rel1,
+		const char *name2, const char *ver2, const int rel2) {
+	int cmp = 0;
 
-	if((cmp = strcmp(p1->name, p2->name)))
+	if(name1 != name2 && (cmp = strcmp(name1, name2)))
 		return cmp;
-	if(action != 'N') {
-		if((cmp = vercmp(p1->ver, p2->ver)))
-			return cmp;
-		if((cmp = (int)p1->rel - p2->rel))
-			return cmp;
-	}
+	if(ver1 != ver2 && (cmp = vercmp(ver1, ver2)))
+		return cmp;
+	if((cmp = (int)rel1 - rel2))
+		return cmp;
 	return 0;
 }
 
 int
 vercmp(const char *v1, const char *v2) {
-	const char *p;
+	const char *p, *p1, *p2;
 	int isdig1, isdig2, dig1, dig2, retval = 0;
 
-	for(; *v1 && *v2 && retval == 0; v1++, v2++) {
-		if(*v1 != *v2) {
-			isdig1 = isdigit(*v1);
-			isdig2 = isdigit(*v2);
+	for(p1 = v1, p2 = v2; *p1 && *p2 && retval == 0; p1++, p2++) {
+		if(*p1 != *p2) {
+			isdig1 = isdigit(*p1);
+			isdig2 = isdigit(*p2);
 			if(isdig1 && isdig2) {
-				dig1 = atoi(v1);
-				dig2 = atoi(v2);
-				if(dig1 > dig2)
-					retval = 1;
-				else if(dig2 > dig1)
-					retval = -1;
-				else {
-					for(; isdigit(*v1); v1++);
-					for(; isdigit(*v2); v2++);
+				dig1 = atoi(p1);
+				dig2 = atoi(p2);
+				if (dig1 == dig2) {
+					for(; p1[1] && isdigit(p1[1]); p1++);
+					for(; p2[1] && isdigit(p2[1]); p2++);
 				}
+				else if(dig1 > dig2)
+					retval = 1;
+				else
+					retval = -1;
 			}
 			else if(isdig1)
 				retval = 1;
 			else if(isdig2)
 				retval = -1;
-			else if((*v1 == '-' || *v1 == '.') && (*v2 == '-' || *v2 == '.'))
-				return *v1 == '.' ? 1 : -1;
+			else if((*p1 == '-' || *p1 == '.') && (*p2 == '-' || *p2 == '.'))
+				return *p1 == '.' ? 1 : -1;
 			else
-				retval = strcmp(v1, v2);
+				retval = strcmp(p1, p2);
 		}
 	}
-	for(p = *v1 ? v1 : v2; *p && retval == 0; p++) {
+	for(p = *p1 ? p1 : p2; *p && retval == 0; p++) {
 		if(isalpha(*p))
-			retval = *v1 ? -1 : 1;
+			retval = *p1 ? -1 : 1;
 		else if(!strchr("-.0", *p))
-			retval = *v1 ? 1 : -1;
+			retval = *p1 ? 1 : -1;
 	}
 	return retval;
 }

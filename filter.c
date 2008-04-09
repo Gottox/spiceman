@@ -27,30 +27,85 @@ struct Pkglst{
 	struct Pkglst *next;
 };
 
-int exactmatch(const char *s, FILE *in, FILE *out) {
-	int j;
-	const char *p;
+enum Operator {
+	EQUAL, UNEQUAL, LESSER, GREATER, LESSEREQUAL, GREATEREQUAL
+};
+
+int operatormatch(const char *s, FILE *in, FILE *out) {
+	int i, result;
+	int operator;
 	struct Package pkg;
+	const char *release;
+	char buf[BUFSIZ];
 
 	bzero(&pkg, sizeof(pkg));
 	while(getpkg(&pkg, in) > 0) {
-		for(j = 0; s[j] && pkg.name[j] &&
-			s[j] == pkg.name[j]; j++);
-		if(s[j] == 0 && s[j] == pkg.name[j]) {
+		for(i = 0; pkg.name[i] && pkg.name[i] == s[i]; i++);
+		if(pkg.name[i] != 0)
+			continue;
+		switch(s[i]) {
+		case '=':
+		case '-':
+			operator = EQUAL;
+			break;
+		case '<':
+			operator = LESSER;
+			break;
+		case '>':
+			operator = GREATER;
+			break;
+		case '!':
+			operator = UNEQUAL;
+			break;
+		case 0:
 			putpkg(&pkg, out);
+			/* No break here */
+		default:
 			continue;
 		}
-		else if(s[j] != '-' || pkg.name[j++] != 0)
-			continue;
-		for(p = s + j, j = 0; p[j] && pkg.ver[j] && 
-				p[j] == pkg.ver[j]; j++);
-		if(p[j] == 0 || p[j] == pkg.ver[j]) {
-			putpkg(&pkg, out);
-			continue;
+		if(s[i] != '-' && s[i + 1] == '=') {
+			switch(operator) {
+			case LESSER:
+				operator = LESSEREQUAL;
+				break;
+			case GREATER:
+				operator = GREATEREQUAL;
+				break;
+			}
+			i++;
 		}
-		else if(p[j] != '-' || pkg.ver[j++] != 0)
-			continue;
-		if(p[j] == 0 || atoi(p + j) == pkg.rel)
+		i++;
+		if((release = strchr(&s[i], '-'))) {
+			strncpy(buf, &s[i], BUFSIZ > release - &s[i] ? BUFSIZ : release - &s[i]);
+			result = pkgcmp(NULL, buf, atoi(release),
+					NULL, pkg.ver, pkg.rel);
+			if(strchr(buf, '-'))
+				continue;
+		}
+		else
+			result = pkgcmp(NULL, &s[i], 0,
+					NULL, pkg.ver, 0);
+		switch(operator) {
+		case EQUAL:
+			result = result == 0;
+			break;
+		case UNEQUAL:
+			result = result != 0;
+			break;
+		case LESSER:
+			result = result > 0;
+			break;
+		case GREATER:
+			result = result < 0;
+			break;
+		case LESSEREQUAL:
+			result = result >= 0;
+			break;
+		case GREATEREQUAL:
+			result = result <= 0;
+			break;
+		}
+		if(result)
 			putpkg(&pkg, out);
 	}
 	freepkg(&pkg);
@@ -88,8 +143,10 @@ void unique(char action, FILE *in, FILE *out) {
 
 	bzero(&pkg, sizeof(pkg));
 	while(getpkg(&pkg, in) > 0) {
-		for(l = list, cmp = 1; l && (cmp =
-				pkgcmp(&pkg, &l->pkg, action)) > 0;
+		for(l = list, cmp = 1; l && (cmp = (action == 'N' &&
+				strcmp(l->pkg.name, pkg.name)) ||
+				pkgcmp(l->pkg.name, l->pkg.ver, l->pkg.rel,
+					pkg.name, pkg.ver, pkg.rel)) > 0;
 				l = l->next)
 			prev = l;
 		if(l && cmp == 0)
@@ -157,7 +214,7 @@ void filter_help() {
 	fputs("	-s <p>	search in package-name, -version and -release\n", stderr);
 	fputs("	-S <p>	search in package-name, -version, -release and "
 			"-description\n", stderr);
-	fputs("	-e <p>	exact match\n", stderr);
+	fputs("	-e <p>	match using operators (e.g. spiceman>" VERSION ")\n", stderr);
 }
 
 int filter(int argc, char *argv[], FILE *in, FILE *out) {
@@ -200,7 +257,7 @@ int filter(int argc, char *argv[], FILE *in, FILE *out) {
 			return wildcardmatch(arg, action == 'S', in, out);
 			break;
 		case 'e':
-			return exactmatch(arg, in, out);
+			return operatormatch(arg, in, out);
 			break;
 		}
 	}

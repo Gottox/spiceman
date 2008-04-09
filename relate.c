@@ -39,7 +39,7 @@ alternate(FILE *in, FILE *out) {
 
 	bzero(&pkg, sizeof(pkg));
 	while(getpkg(&pkg, in) > 0) {
-		snprintf(buf, sizeof(buf), "%s-%s-", pkg.name, pkg.ver);
+		snprintf(buf, sizeof(buf), "%s==%s", pkg.name, pkg.ver);
 		puts(buf);
 		alternatechain[1].argv[1] = buf;
 		cmdchain(LENGTH(alternatechain), alternatechain, NULL, out);
