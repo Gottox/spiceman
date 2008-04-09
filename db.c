@@ -30,7 +30,7 @@ void
 db_help() {
 	APPLETUSAGE("db");
 	fputs("	-i	list all installed packages\n", stderr);
-	fputs("	-I	list builtin packages", stderr);
+	fputs("	-I	list builtin packages\n", stderr);
 	fputs("	-p	list all packages in database\n", stderr);
 	fputs("	-o	list other version of pkgs read from stdin\n", stderr);
 }
