@@ -214,7 +214,7 @@ void filter_help() {
 	fputs("	-s <p>	search in package-name, -version and -release\n", stderr);
 	fputs("	-S <p>	search in package-name, -version, -release and "
 			"-description\n", stderr);
-	fputs("	-e <p>	match using operators (e.g. spiceman>" VERSION ")\n", stderr);
+	fputs("	-o <p>	match using operators (e.g. spiceman>" VERSION ")\n", stderr);
 }
 
 int filter(int argc, char *argv[], FILE *in, FILE *out) {
@@ -226,7 +226,7 @@ int filter(int argc, char *argv[], FILE *in, FILE *out) {
 	case 'R':
 	case 's':
 	case 'S':
-	case 'e':
+	case 'o':
 		if(!(arg = ARGVAL()))
 			goto argerr;
 	case 'n':
@@ -256,7 +256,7 @@ int filter(int argc, char *argv[], FILE *in, FILE *out) {
 		case 'S':
 			return wildcardmatch(arg, action == 'S', in, out);
 			break;
-		case 'e':
+		case 'o':
 			return operatormatch(arg, in, out);
 			break;
 		}

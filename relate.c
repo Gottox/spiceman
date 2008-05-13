@@ -28,7 +28,7 @@
 
 static struct Cmd alternatechain[] = {
 	{ db,		0,	{ NULL } },
-	{ filter,	2,	{ "-e", NULL } },
+	{ filter,	2,	{ "-o", NULL } },
 };
 
 int
