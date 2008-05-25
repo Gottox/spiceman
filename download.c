@@ -33,10 +33,23 @@
 	"Connection: Close\r\n\r\n"
 #define RESPONSE "HTTP/1.0 200 OK"
 
-FILE *fopenurl(const char *url) {
-	return fhttp(url);
+/* open URL */
+FILE *
+fopenurl(const struct Package *pkg, int *isprocess) {
+	int i;
+	char protofile[BUFSIZ];
+	int len = LENGTH(DBPREFIX "/dl/") - 1;
+	FILE *p;
+	
+	strncpy(protofile, DBPREFIX "/dl/", BUFSIZ);
+	for(i = 0; i < BUFSIZ - len && pkg->repo[i]; i++)
+		protofile[len + i] = isalnum(pkg->url[i]) ? pkg->url[i] : '_';
+
+	return fhttp(pkg->url);
 }
 
+/* builtin http download
+ * only as fallback */
 FILE *fhttp(const char *url) {
 	int sock;
 	struct sockaddr_in sin;
@@ -94,9 +107,10 @@ void download_help() {
 	fputs("	-n	force downloading. Do not use cache.\n", stderr);
 }
 
+/* download a Package */
 int download(int argc, char *argv[], FILE *in, FILE *out) {
 	FILE *url, *cache;
-	int nocache = 0, n;
+	int nocache = 0, n, isprocess;
 	struct Package pkg;
 	char namebuf[LENGTH(CACHEPREFIX) + BUFSIZ];
 	char buf[BUFSIZ];
@@ -111,7 +125,7 @@ int download(int argc, char *argv[], FILE *in, FILE *out) {
 	while(getpkg(&pkg, in) > 0) {
 		snprintf(namebuf, LENGTH(namebuf), CACHEPREFIX "/%s-%s-%u.tar",
 				pkg.name, pkg.ver, pkg.rel);
-		if(!(url = fopenurl(pkg.url)))
+		if(!(url = fopenurl(&pkg, &isprocess)))
 			eprint(0, "Cannot download.");
 		if(!(cache = fopen(namebuf, "w")))
 			eprint(0, "Cannot open cache file.");
