@@ -67,39 +67,29 @@ puthex(const char *src, FILE* out, int l) {
 }
 
 void
-cmdchain(int cmdc, struct Cmd *cmd, FILE *pin, FILE *pout) {
-	FILE *in, *out, *fp[2];
-	int i, pid, retval;
+cmdchain(int cmdc, struct Cmd *cmd) {
+	int fd[2], in, out , pid, i;
 
-	in = pin;
+	in = STDIN_FILENO;
 	for(i = 0; i < cmdc; i++) {
-		if(i + 1 == cmdc) {
-			out = pout;
-		}
-		else {
-			fpipe(fp);
-			out = fp[1];
-		}
+		pipe(fd);
+		out = i + 1 == cmdc ? STDOUT_FILENO : fd[1];
 		fflush(NULL);
 		pid = fork();
 		if(pid < 0)
 			eprint(1, "Cannot fork");
 		else if(pid == 0) {
-			retval = cmd[i].function(cmd[i].argc, cmd[i].argv,
-					in, out);
-			if(in != pin)
-				fclose(pin);
-			if(out != pout)
-				fclose(pout);
-			fclose(in);
-			fclose(out);
-			exit(retval);
+			if(out != STDOUT_FILENO)
+				dup2(out, STDOUT_FILENO);
+			if(in != STDIN_FILENO)
+				dup2(in, STDIN_FILENO);
+			exit(cmd[i].function(cmd[i].argc, cmd[i].argv));
 		}
-		if(in != pin)
-			fclose(in);
-		if(out != pout)
-			fclose(out);
-		in = fp[0];
+		else {
+			close(in);
+			close(out);
+		}
+		in = fd[0];
 	}
 }
 
@@ -137,7 +127,7 @@ fpipe(FILE **fp) {
 }
 
 int
-getpkg(struct Package *pkg, FILE *in) {
+getpkg(struct Package *pkg) {
 	int l, n;
 	char *s, *p, *q;
 
@@ -147,9 +137,9 @@ getpkg(struct Package *pkg, FILE *in) {
 			pkg->blen = l + 1 + BUFSIZ;
 			pkg->buf = erealloc(pkg->buf, sizeof(char) * pkg->blen);
 		}
-		if(fgets(pkg->buf + l, pkg->blen - l, in))
+		if(fgets(pkg->buf + l, pkg->blen - l, stdin))
 			l += strlen(&pkg->buf[l]);
-	} while(l > 0 && !feof(in) && pkg->buf[l - 1] != '\n');
+	} while(l > 0 && !feof(stdin) && pkg->buf[l - 1] != '\n');
 	if(l == 0)
 		return 0;
 	for(s = p = pkg->buf, n = 0; *p; p++) {
@@ -233,47 +223,47 @@ getpkg(struct Package *pkg, FILE *in) {
 }
 
 void
-putpkg(const struct Package *pkg, FILE *out) {
+putpkg(const struct Package *pkg) {
 	char sep[] = { FIELDSEPERATOR, '\n', '\t', 0 };
 	
 	if(pkg->type != '\0')
-		fputc(pkg->type, out);
-	fputc(FIELDSEPERATOR, out);
-	putbslash(pkg->name, sep, out);
-	fputc(FIELDSEPERATOR, out);
-	putbslash(pkg->ver, sep, out);
-	fputc(FIELDSEPERATOR, out);
-	fprintf(out,"%u", pkg->rel);
-	fputc(FIELDSEPERATOR, out);
-	putbslash(pkg->desc, sep, out);
-	fputc(FIELDSEPERATOR, out);
-	putbslash(pkg->url, sep, out);
-	fputc(FIELDSEPERATOR, out);
-	putbslash(pkg->usef, sep, out);
-	fputc(FIELDSEPERATOR, out);
-	putbslash(pkg->repo, sep, out);
-	fputc(FIELDSEPERATOR, out);
-	putbslash(pkg->infourl, sep, out);
-	fputc(FIELDSEPERATOR, out);
-	putbslash(pkg->dep, sep, out);
-	fputc(FIELDSEPERATOR, out);
-	putbslash(pkg->conflict, sep, out);
-	fputc(FIELDSEPERATOR, out);
-	putbslash(pkg->prov, sep, out);
-	fputc(FIELDSEPERATOR, out);
-	fprintf(out,"%u", pkg->size);
-	fputc(FIELDSEPERATOR, out);
-	puthex(pkg->md5, out, LENGTH(pkg->md5));
-	fputc(FIELDSEPERATOR, out);
-	puthex(pkg->sha1, out, LENGTH(pkg->sha1));
-	fputc(FIELDSEPERATOR, out);
-	puthex(pkg->key, out, LENGTH(pkg->key));
-	fputc(FIELDSEPERATOR, out);
-	fprintf(out,"%lu", pkg->reltime);
-	fputc(FIELDSEPERATOR, out);
-	fprintf(out,"%lu",pkg->instime);
-	fputc('\n', out);
-	fflush(out);
+		fputc(pkg->type, stdout);
+	fputc(FIELDSEPERATOR, stdout);
+	putbslash(pkg->name, sep, stdout);
+	fputc(FIELDSEPERATOR, stdout);
+	putbslash(pkg->ver, sep, stdout);
+	fputc(FIELDSEPERATOR, stdout);
+	fprintf(stdout,"%u", pkg->rel);
+	fputc(FIELDSEPERATOR, stdout);
+	putbslash(pkg->desc, sep, stdout);
+	fputc(FIELDSEPERATOR, stdout);
+	putbslash(pkg->url, sep, stdout);
+	fputc(FIELDSEPERATOR, stdout);
+	putbslash(pkg->usef, sep, stdout);
+	fputc(FIELDSEPERATOR, stdout);
+	putbslash(pkg->repo, sep, stdout);
+	fputc(FIELDSEPERATOR, stdout);
+	putbslash(pkg->infourl, sep, stdout);
+	fputc(FIELDSEPERATOR, stdout);
+	putbslash(pkg->dep, sep, stdout);
+	fputc(FIELDSEPERATOR, stdout);
+	putbslash(pkg->conflict, sep, stdout);
+	fputc(FIELDSEPERATOR, stdout);
+	putbslash(pkg->prov, sep, stdout);
+	fputc(FIELDSEPERATOR, stdout);
+	fprintf(stdout,"%u", pkg->size);
+	fputc(FIELDSEPERATOR, stdout);
+	puthex(pkg->md5, stdout, LENGTH(pkg->md5));
+	fputc(FIELDSEPERATOR, stdout);
+	puthex(pkg->sha1, stdout, LENGTH(pkg->sha1));
+	fputc(FIELDSEPERATOR, stdout);
+	puthex(pkg->key, stdout, LENGTH(pkg->key));
+	fputc(FIELDSEPERATOR, stdout);
+	fprintf(stdout,"%lu", pkg->reltime);
+	fputc(FIELDSEPERATOR, stdout);
+	fprintf(stdout,"%lu",pkg->instime);
+	fputc('\n', stdout);
+	fflush(stdout);
 }
 
 void

@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <strings.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "common.h"
 #include "db.h"
@@ -36,7 +37,7 @@ db_help() {
 }
 
 int
-db(int argc, char *argv[], FILE *in, FILE *out) {
+db(int argc, char *argv[]) {
 	char action = 0;
 	int r, i;
 	FILE *db;
@@ -49,15 +50,16 @@ db(int argc, char *argv[], FILE *in, FILE *out) {
 		action = argv[0][1];
 	if(action == 'I') {
 		for(i = 0; i < LENGTH(initpkg); i++)
-			putpkg(&initpkg[i], out);
+			putpkg(&initpkg[i]);
 	}
 	else if (action == 'i' || action == 'p'){
 		src = action == 'i' ? DBPREFIX "/installed" :  DBPREFIX "/packages";
 		if(!(db = fopen(src, "r")))
 			eprint(1, "Cannot open database `%s`: ", src);
+		dup2(fileno(db), STDIN_FILENO);
 		bzero(&pkg, sizeof(pkg));
-		while((r = getpkg(&pkg, db) > 0)) {
-			putpkg(&pkg, out);
+		while((r = getpkg(&pkg) > 0)) {
+			putpkg(&pkg);
 		}
 		freepkg(&pkg);
 		if(r < 0)

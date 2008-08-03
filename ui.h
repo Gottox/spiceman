@@ -15,5 +15,5 @@
  * along with this program; if not, write to the Free Software */
 
 void wordwrap(char *str, int width);
-int ui(int argc, char *argv[], FILE *in, FILE *out);
+int ui(int argc, char *argv[]);
 void ui_help();

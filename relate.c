@@ -32,17 +32,17 @@ static struct Cmd alternatechain[] = {
 };
 
 int
-alternate(FILE *in, FILE *out) {
+alternate() {
 	int status;
 	char buf[BUFSIZ];
 	struct Package pkg;
 
 	bzero(&pkg, sizeof(pkg));
-	while(getpkg(&pkg, in) > 0) {
+	while(getpkg(&pkg) > 0) {
 		snprintf(buf, sizeof(buf), "%s==%s", pkg.name, pkg.ver);
 		puts(buf);
 		alternatechain[1].argv[1] = buf;
-		cmdchain(LENGTH(alternatechain), alternatechain, NULL, out);
+		cmdchain(LENGTH(alternatechain), alternatechain);
 		while(wait(&status) != -1);
 	}
 	freepkg(&pkg);
@@ -52,12 +52,12 @@ alternate(FILE *in, FILE *out) {
 void relate_help() {
 	APPLETUSAGE("relate");
 	fputs("	-d	show depencies\n", stderr);
-	fputs("	-t	calculate recursive depencies\n", stderr);
+	fputs("	-t	calculate depency tree\n", stderr);
 	fputs("	-r	calculate reverse depencies\n", stderr);
 	fputs("	-o	finds other versions of the same program\n", stderr);
 }
 
-int relate(int argc, char *argv[], FILE *in, FILE *out) {
+int relate(int argc, char *argv[]) {
 	char action = 0;
 
 	ARG {
@@ -83,7 +83,7 @@ int relate(int argc, char *argv[], FILE *in, FILE *out) {
 	case 'r':
 		break;
 	case 'o':
-		alternate(in, out);
+		alternate();
 		break;
 	}
 	return EXIT_SUCCESS;

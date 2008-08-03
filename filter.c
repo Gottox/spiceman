@@ -31,7 +31,7 @@ enum Operator {
 	EQUAL, UNEQUAL, LESSER, GREATER, LESSEREQUAL, GREATEREQUAL
 };
 
-int operatormatch(const char *s, FILE *in, FILE *out) {
+int operatormatch(const char *s) {
 	int i, result;
 	int operator;
 	struct Package pkg;
@@ -39,7 +39,7 @@ int operatormatch(const char *s, FILE *in, FILE *out) {
 	char buf[BUFSIZ];
 
 	bzero(&pkg, sizeof(pkg));
-	while(getpkg(&pkg, in) > 0) {
+	while(getpkg(&pkg) > 0) {
 		for(i = 0; pkg.name[i] && pkg.name[i] == s[i]; i++);
 		if(pkg.name[i] != 0)
 			continue;
@@ -58,7 +58,7 @@ int operatormatch(const char *s, FILE *in, FILE *out) {
 			operator = UNEQUAL;
 			break;
 		case 0:
-			putpkg(&pkg, out);
+			putpkg(&pkg);
 			/* No break here */
 		default:
 			continue;
@@ -106,43 +106,43 @@ int operatormatch(const char *s, FILE *in, FILE *out) {
 			break;
 		}
 		if(result)
-			putpkg(&pkg, out);
+			putpkg(&pkg);
 	}
 	freepkg(&pkg);
 	return 0;
 }
 
-int repomatch(const char *s, FILE *in, FILE *out) {
+int repomatch(const char *s) {
 	struct Package pkg;
 
 	bzero(&pkg, sizeof(pkg));
-	while(getpkg(&pkg, in))
+	while(getpkg(&pkg))
 		if(strcmp(pkg.repo, s) == 0)
-			putpkg(&pkg, out);
+			putpkg(&pkg);
 	freepkg(&pkg);
 
 	return EXIT_SUCCESS;
 }
 
-int typematch(const char *s, FILE *in, FILE *out) {
+int typematch(const char *s) {
 	struct Package pkg;
 
 	bzero(&pkg, sizeof(pkg));
-	while(getpkg(&pkg, in))
+	while(getpkg(&pkg))
 		if(strchr(s, pkg.type));
-			putpkg(&pkg, out);
+			putpkg(&pkg);
 	freepkg(&pkg);
 
 	return EXIT_SUCCESS;
 }
 
-void unique(char action, FILE *in, FILE *out) {
+void unique(char action) {
 	int cmp;
 	struct Package pkg;
 	struct Pkglst *n, *l, *list = NULL, *prev = NULL;
 
 	bzero(&pkg, sizeof(pkg));
-	while(getpkg(&pkg, in) > 0) {
+	while(getpkg(&pkg) > 0) {
 		for(l = list, cmp = 1; l && (cmp = (action == 'N' &&
 				strcmp(l->pkg.name, pkg.name)) ||
 				pkgcmp(l->pkg.name, l->pkg.ver, l->pkg.rel,
@@ -167,7 +167,7 @@ void unique(char action, FILE *in, FILE *out) {
 	freepkg(&pkg);
 
 	while(list) {
-		putpkg(&list->pkg, out);
+		putpkg(&list->pkg);
 		freepkg(&list->pkg);
 		l = list;
 		list = l->next;
@@ -175,7 +175,7 @@ void unique(char action, FILE *in, FILE *out) {
 	}
 }
 
-int wildcardmatch(const char *p, int fulltext, FILE *in, FILE *out) {
+int wildcardmatch(const char *p, int fulltext) {
 	unsigned int len;
 	char buf[BUFSIZ], patternbuf[BUFSIZ] = "*";
 	struct Package pkg;
@@ -193,13 +193,13 @@ int wildcardmatch(const char *p, int fulltext, FILE *in, FILE *out) {
 	}
 
 	bzero(&pkg, sizeof(pkg));
-	while(getpkg(&pkg, in) > 0) {
+	while(getpkg(&pkg) > 0) {
 		snprintf(buf, LENGTH(buf), "%s-%s-%i", pkg.name,
 				pkg.ver, pkg.rel);
 		if(fnmatch(patternbuf, buf, 0) == 0)
-			putpkg(&pkg, out);
+			putpkg(&pkg);
 		else if(fulltext && fnmatch(patternbuf, pkg.desc, 0) == 0)
-			putpkg(&pkg, out);
+			putpkg(&pkg);
 	}
 	freepkg(&pkg);
 	return EXIT_SUCCESS;
@@ -217,7 +217,7 @@ void filter_help() {
 	fputs("	-o <p>	match using operators (e.g. spiceman>" VERSION ")\n", stderr);
 }
 
-int filter(int argc, char *argv[], FILE *in, FILE *out) {
+int filter(int argc, char *argv[]) {
 	char action = 0;
 	char *arg = NULL;
 
@@ -243,21 +243,21 @@ int filter(int argc, char *argv[], FILE *in, FILE *out) {
 	if(argc <= 0 || argc != ARGC())
 		goto argerr;
 	if(strchr("nNv", action))
-		unique(action, in, out);
+		unique(action);
 	else {
 		switch(action) {
 		case 't':
-			return typematch(arg, in, out);
+			return typematch(arg);
 			break;
 		case 'R':
-			return repomatch(arg, in, out);
+			return repomatch(arg);
 			break;
 		case 's':
 		case 'S':
-			return wildcardmatch(arg, action == 'S', in, out);
+			return wildcardmatch(arg, action == 'S');
 			break;
 		case 'o':
-			return operatormatch(arg, in, out);
+			return operatormatch(arg);
 			break;
 		}
 	}

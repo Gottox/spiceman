@@ -24,6 +24,6 @@ void delete_help() {
 	fputs("	-f	force remove (even if db says it's not installed)\n", stderr);
 }
 
-int delete(int argc, char *argv[], FILE *in, FILE *out) {
+int delete(int argc, char *argv[]) {
 	return EXIT_FAILURE;
 }

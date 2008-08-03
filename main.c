@@ -32,7 +32,7 @@
 #define APPLET(x) { x, x ## _help, #x }
 
 void help();
-int main_applet(int argc, char *argv[], FILE *in, FILE *out);
+int main_applet(int argc, char *argv[]);
 void printchain(int cmdc, struct Cmd *cmd);
 
 struct Applet {
@@ -58,21 +58,25 @@ static struct Cmd syncchain[] = {
 	{ filter,	1,	{ "-tr" } },
 	{ download,	1,	{ "-n" } },
 	{ install,	1,	{ "-o" } },
+	{ ui,		0,	{ NULL } },
 };
 static struct Cmd searchchain[] = {
 	{ db,		1,	{ "-p" } },
 	{ filter,	2,	{ NULL, NULL } },
+	{ ui,		0,	{ NULL } },
 };
 static struct Cmd installchain[] = {
 	{ db,		1,	{ "-p" } },
 	{ filter,	2,	{ "-e", NULL } },
 	{ download,	0,	{ NULL } },
 	{ install,	2,	{ "-fp" } },
+	{ ui,		0,	{ NULL } },
 };
 static struct Cmd rmchain[] = {
 	{ db,		1,	{ "-i" } },
 	{ filter,	2,	{ "-e", NULL } },
 	{ delete,	0,	{ NULL } },
+	{ ui,		0,	{ NULL } },
 };
 static struct Cmd updatechain[] = {
 	{ db,		1,	{ "-i" } },
@@ -80,13 +84,13 @@ static struct Cmd updatechain[] = {
 	{ filter,	1,	{ "-n" } },
 	{ filter,	1,	{ "-tr" } },
 	{ install,	0,	{ NULL } },
+	{ ui,		0,	{ NULL } },
 };
 
 /* fallback applet if no other fits */
-int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
+int main_applet(int argc, char *argv[]) {
 	int status, action = 0, installed = 0, sync = 0;
 	char *arg = NULL;
-	FILE *fp[2];
 
 	ARG {
 		/* Arguments with parameters */
@@ -119,14 +123,13 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 		goto argerr;
 	if(sync) {
 		printchain(LENGTH(syncchain), syncchain);
-		cmdchain(LENGTH(syncchain), syncchain, stdin, stdout);
+		cmdchain(LENGTH(syncchain), syncchain);
 	}
-	fpipe(fp);
 	/* calling cmdchain */
 	switch(action) {
 	case 'u':
 		printchain(LENGTH(updatechain), updatechain);
-		cmdchain(LENGTH(updatechain), updatechain, stdin, fp[1]);
+		cmdchain(LENGTH(updatechain), updatechain);
 		break;
 	case 's':
 	case 'S':
@@ -134,24 +137,21 @@ int main_applet(int argc, char *argv[], FILE *in, FILE *out) {
 		searchchain[1].argv[0] = action == 's' ? "-s" : "-S";
 		searchchain[1].argv[1] = arg;
 		printchain(LENGTH(searchchain), searchchain);
-		cmdchain(LENGTH(searchchain), searchchain, stdin, fp[1]);
+		cmdchain(LENGTH(searchchain), searchchain);
 		break;
 	case 'i':
 		installchain[0].argv[0] = installed ? "-i" : "-p";
 		installchain[1].argv[1] = arg;
 		printchain(LENGTH(installchain), installchain);
-		cmdchain(LENGTH(installchain), installchain, stdin, fp[1]);
+		cmdchain(LENGTH(installchain), installchain);
 		break;
 	case 'r':
 		rmchain[1].argv[1] = arg;
 		printchain(LENGTH(rmchain), rmchain);
-		cmdchain(LENGTH(rmchain), rmchain, stdin, fp[1]);
+		cmdchain(LENGTH(rmchain), rmchain);
 		break;
 	}
 	/* formating human readable output of cmdchain . */
-	fclose(fp[1]);
-	ui(0, NULL, fp[0], stdout);
-	fclose(fp[0]);
 	while(wait(&status) != -1);
 	return EXIT_SUCCESS;
 }
@@ -236,5 +236,5 @@ int main(int argc, char *argv[]) {
 		argc--;
 		argv++;
 	}
-	return applets[applet].function(argc, argv, stdin, stdout);
+	return applets[applet].function(argc, argv);
 }

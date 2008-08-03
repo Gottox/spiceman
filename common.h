@@ -34,7 +34,7 @@
 #define ARGCHR()	(*_a)
 #define ARGC()		_c
 
-typedef int (*Cmdfunction)(int, char *[], FILE *in, FILE *out);
+typedef int (*Cmdfunction)(int, char *[]);
 
 enum PkgEnt	{ TYPE, NAME, VER, REL, DESC, URL, USEF, REPO, INFOURL, DEP,
 	CONFLICT, PROV, SIZE, MD5, SHA1, KEY, RELTIME, INSTIME, NENTRIES };
@@ -64,7 +64,6 @@ struct Package {
 	char *conflict;			/* pkg conflicts with */
 	char *prov;			/* pkg provides */
 
-
 	/* pkg integrity */
 	unsigned int size;		/* time of release */
 	char md5[16];
@@ -77,16 +76,16 @@ struct Package {
 
 
 /* common.c */
-void cmdchain(int cmdc, struct Cmd *cmd, FILE *in, FILE *out);
+void cmdchain(int cmdc, struct Cmd *cmd);
 					/* executes a chain of commands */
 void *erealloc(void *p, size_t size);	/* remalloc + error testing */
 void eprint(int pe, const char *format, ...);
 					/* prints message and exits */
 void freepkg(struct Package *pkg);
 void fpipe(FILE **fp);
-int getpkg(struct Package *pkg, FILE *in);
+int getpkg(struct Package *pkg);
 					/* reads a package from in */
-void putpkg(const struct Package *pkg, FILE *out);
+void putpkg(const struct Package *pkg);
 					/* puts a package to out */
 int pkgcmp(const char *name1, const char *ver1, const int rel1,
 		const char *name2, const char *ver2, const int rel2);

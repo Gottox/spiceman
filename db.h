@@ -14,5 +14,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software */
 
-int db(int argc, char *argv[], FILE *in, FILE *out);
+int db(int argc, char *argv[]);
 void db_help();

@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include <ctype.h>
 #include <socket.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -39,12 +40,11 @@ fopenurl(const struct Package *pkg, int *isprocess) {
 	int i;
 	char protofile[BUFSIZ];
 	int len = LENGTH(DBPREFIX "/dl/") - 1;
-	FILE *p;
+	//FILE *p;
 	
 	strncpy(protofile, DBPREFIX "/dl/", BUFSIZ);
 	for(i = 0; i < BUFSIZ - len && pkg->repo[i]; i++)
 		protofile[len + i] = isalnum(pkg->url[i]) ? pkg->url[i] : '_';
-
 	return fhttp(pkg->url);
 }
 
@@ -108,7 +108,7 @@ void download_help() {
 }
 
 /* download a Package */
-int download(int argc, char *argv[], FILE *in, FILE *out) {
+int download(int argc, char *argv[]) {
 	FILE *url, *cache;
 	int nocache = 0, n, isprocess;
 	struct Package pkg;
@@ -122,7 +122,7 @@ int download(int argc, char *argv[], FILE *in, FILE *out) {
 		return EXIT_FAILURE;
 	}
 	bzero(&pkg,sizeof(pkg));
-	while(getpkg(&pkg, in) > 0) {
+	while(getpkg(&pkg) > 0) {
 		snprintf(namebuf, LENGTH(namebuf), CACHEPREFIX "/%s-%s-%u.tar",
 				pkg.name, pkg.ver, pkg.rel);
 		if(!(url = fopenurl(&pkg, &isprocess)))
@@ -132,7 +132,7 @@ int download(int argc, char *argv[], FILE *in, FILE *out) {
 		while((n = fread(buf, sizeof(char), LENGTH(buf), url)) > 0)
 			fwrite(buf, sizeof(char), LENGTH(buf), cache);
 		pkg.url = namebuf;
-		putpkg(&pkg, out);
+		putpkg(&pkg);
 		fclose(cache);
 		fclose(url);
 	}

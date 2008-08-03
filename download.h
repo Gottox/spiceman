@@ -15,5 +15,5 @@
  * along with this program; if not, write to the Free Software */
 FILE *fopenurl(const struct Package *pkg, int *isprocess);
 FILE *fhttp(const char *url);
-int download(int argc, char *argv[], FILE *in, FILE *out);
+int download(int argc, char *argv[]);
 void download_help();

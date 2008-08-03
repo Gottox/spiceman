@@ -25,6 +25,6 @@ void install_help() {
 	fputs("	-o	overwrite files\n", stderr);
 }
 
-int install(int argc, char *argv[], FILE *in, FILE *out) {
+int install(int argc, char *argv[]) {
 	return 0;
 }

@@ -13,10 +13,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software */
-int operatormatch(const char *p, FILE *in, FILE *out);
-int repomatch(const char *p, FILE *in, FILE *out);
-int typematch(const char *p, FILE *in, FILE *out);
-void unique(const char action, FILE *in, FILE *out);
-int wildcardmatch(const char *s, int fulltext, FILE *in, FILE *out);
-int filter(int argc, char *argv[], FILE *in, FILE *out);
+int operatormatch(const char *p);
+int repomatch(const char *p);
+int typematch(const char *p);
+void unique(const char action);
+int wildcardmatch(const char *s, int fulltext);
+int filter(int argc, char *argv[]);
 void filter_help();

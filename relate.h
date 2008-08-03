@@ -14,6 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software */
 
-int relate(int argc, char *argv[], FILE *in, FILE *out);
+int relate(int argc, char *argv[]);
 void relate_help();
-int alternate(FILE *in, FILE *out);	/* Finds alternative versions */
+int alternate();		/* Finds alternative versions */
