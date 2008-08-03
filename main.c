@@ -87,6 +87,8 @@ static struct Cmd updatechain[] = {
 	{ ui,		0,	{ NULL } },
 };
 
+static char *progname;
+
 /* fallback applet if no other fits */
 int main_applet(int argc, char *argv[]) {
 	int status, action = 0, installed = 0, sync = 0;
@@ -165,14 +167,17 @@ void printchain(int cmdc, struct Cmd *cmd) {
 				break;
 		if(j == LENGTH(applets) - 1)
 			fputs("<unknown>", stderr);
-		else
-			fprintf(stderr,APPLETPREFIX "%s", applets[j].name);
+		else {
+			fputs(progname, stderr);
+			fputc(' ', stderr);
+			fputs(applets[j].name, stderr);
+		}
 		for(j = 0; j < cmd[i].argc; j++) {
 			fprintf(stderr," \"%s\"",cmd[i].argv[j]);
 		}
-		fputs(" | ",stderr);
+		if(i + 1 != cmdc)
+			fputs(" | ",stderr);
 	}
-	fputs("sp-ui\n",stderr);
 }
 
 void help() {
@@ -194,6 +199,7 @@ int main(int argc, char *argv[]) {
 	char *bn;
 	unsigned int showhelp;
 
+	progname = argv[0];
 	showhelp = argc < 1;
 	bn = basename(argv[0]);
 	/* finding the right applet if none is found use the fallback applet
