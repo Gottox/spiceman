@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include <ctype.h>
 
 #include "common.h"
 #include "relate.h"
@@ -25,26 +26,10 @@
 #include "filter.h"
 #include "db.h"
 
-static struct Cmd alternatechain[] = {
+static struct Cmd filterchain[] = {
 	{ db,		0,	{ NULL } },
 	{ filter,	2,	{ "-o", NULL } },
 };
-
-int
-alternate() {
-	char buf[BUFSIZ];
-	struct Package pkg;
-
-	bzero(&pkg, sizeof(pkg));
-	while(getpkg(&pkg) > 0) {
-		snprintf(buf, sizeof(buf), "%s==%s", pkg.name, pkg.ver);
-		puts(buf);
-		alternatechain[1].argv[1] = buf;
-		cmdchain(LENGTH(alternatechain), alternatechain);
-	}
-	freepkg(&pkg);
-	return EXIT_SUCCESS;
-}
 
 void relate_help() {
 	APPLETUSAGE("relate");
@@ -55,7 +40,11 @@ void relate_help() {
 }
 
 int relate(int argc, char *argv[]) {
+	int i;
 	char action = 0;
+	char buf[BUFSIZ];
+	char *p;
+	struct Package pkg;
 
 	ARG {
 	case 'd':
@@ -74,14 +63,32 @@ int relate(int argc, char *argv[]) {
 	}
 	if(argc > 1 || argc != ARGC())
 		goto argerr;
-	switch(action) {
-	case 'd':
-	case 't':
-	case 'r':
-		break;
-	case 'o':
-		alternate();
-		break;
+	bzero(&pkg, sizeof(pkg));
+	while(getpkg(&pkg) > 0) {
+		switch(action) {
+		case 'd':
+			for(p = pkg.dep; *p && !isalnum(*p); p++);
+			while(*p) {
+				for(i = 0; *p && isalnum(*p) && i < BUFSIZ; p++, i++)
+					buf[i] = *p;
+				buf[i] = 0;
+				puts(buf);
+				fflush(NULL);
+				filterchain[1].argv[1] = buf;
+				cmdchain(LENGTH(filterchain), filterchain);
+				for(; *p && !isalnum(*p); p++);
+			}
+			break;
+		case 't':
+		case 'r':
+			break;
+		case 'o':
+			snprintf(buf, sizeof(buf), "%s==%s", pkg.name, pkg.ver);
+			filterchain[1].argv[1] = buf;
+			cmdchain(LENGTH(filterchain), filterchain);
+			break;
+		}
 	}
+	freepkg(&pkg);
 	return EXIT_SUCCESS;
 }

@@ -18,7 +18,6 @@
 #include <string.h>
 #include <strings.h>
 #include <ctype.h>
-#include <socket.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
