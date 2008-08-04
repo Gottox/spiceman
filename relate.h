@@ -16,4 +16,3 @@
 
 int relate(int argc, char *argv[]);
 void relate_help();
-int alternate();		/* Finds alternative versions */
