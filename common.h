@@ -92,3 +92,5 @@ int pkgcmp(const char *name1, const char *ver1, const int rel1,
 					/* compares two packages */
 int vercmp(const char *v1, const char *v2);
 void version();
+
+

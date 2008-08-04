@@ -33,7 +33,6 @@ db_help() {
 	fputs("	-i	list all installed packages\n", stderr);
 	fputs("	-I	list builtin packages\n", stderr);
 	fputs("	-p	list all packages in database\n", stderr);
-	fputs("	-o	list other version of pkgs read from stdin\n", stderr);
 }
 
 int
@@ -48,11 +47,13 @@ db(int argc, char *argv[]) {
 		action = 'p';
 	else if(argv[0][0] == '-')
 		action = argv[0][1];
-	if(action == 'I') {
+	switch(action) {
+	case 'I':
 		for(i = 0; i < LENGTH(initpkg); i++)
 			putpkg(&initpkg[i]);
-	}
-	else if (action == 'i' || action == 'p'){
+		break;
+	case 'i':
+	case 'p':
 		src = action == 'i' ? DBPREFIX "/installed" :  DBPREFIX "/packages";
 		if(!(db = fopen(src, "r")))
 			eprint(1, "Cannot open database `%s`: ", src);
@@ -66,8 +67,8 @@ db(int argc, char *argv[]) {
 			eprint(0, "You can start crying now.\n"
 					"Malformed Package in Database: %s", "TODO");
 		fclose(db);
-	}
-	else {
+		break;
+	default:
 		db_help();
 		return EXIT_FAILURE;
 	}

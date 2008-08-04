@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
-#include <sys/wait.h>
 
 #include "common.h"
 #include "relate.h"
@@ -33,7 +32,6 @@ static struct Cmd alternatechain[] = {
 
 int
 alternate() {
-	int status;
 	char buf[BUFSIZ];
 	struct Package pkg;
 
@@ -43,7 +41,6 @@ alternate() {
 		puts(buf);
 		alternatechain[1].argv[1] = buf;
 		cmdchain(LENGTH(alternatechain), alternatechain);
-		while(wait(&status) != -1);
 	}
 	freepkg(&pkg);
 	return EXIT_SUCCESS;

@@ -17,7 +17,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <libgen.h>
-#include <sys/wait.h>
 
 #include "common.h"
 
@@ -90,8 +89,9 @@ static struct Cmd updatechain[] = {
 static char *progname;
 
 /* fallback applet if no other fits */
-int main_applet(int argc, char *argv[]) {
-	int status, action = 0, installed = 0, sync = 0;
+int
+main_applet(int argc, char *argv[]) {
+	int action = 0, installed = 0, sync = 0;
 	char *arg = NULL;
 
 	ARG {
@@ -154,11 +154,11 @@ int main_applet(int argc, char *argv[]) {
 		break;
 	}
 	/* formating human readable output of cmdchain . */
-	while(wait(&status) != -1);
 	return EXIT_SUCCESS;
 }
 
-void printchain(int cmdc, struct Cmd *cmd) {
+void
+printchain(int cmdc, struct Cmd *cmd) {
 	int i, j;
 
 	for(i = 0; i < cmdc; i++) {
@@ -173,15 +173,17 @@ void printchain(int cmdc, struct Cmd *cmd) {
 			fputs(applets[j].name, stderr);
 		}
 		for(j = 0; j < cmd[i].argc; j++) {
-			fprintf(stderr," \"%s\"",cmd[i].argv[j]);
+			fprintf(stderr, " \"%s\"",cmd[i].argv[j]);
 		}
 		if(i + 1 != cmdc)
-			fputs(" | ",stderr);
+			fputs(" | ", stderr);
 	}
+	fputc('\n', stderr);
 }
 
-void help() {
-	fputs("spiceman\n", stderr);
+void
+help() {
+	fputs("spaceman\n", stderr);
 	fputs("	-H	help message for all applets\n", stderr);
 	fputs("	-I	use installed packages as db source.\n", stderr);
 	fputs("	-h	help message\n", stderr);

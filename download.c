@@ -38,11 +38,9 @@
 FILE *
 fopenurl(const struct Package *pkg, int *isprocess) {
 	int i;
-	char protofile[BUFSIZ];
-	int len = LENGTH(DBPREFIX "/dl/") - 1;
-	//FILE *p;
+	char protofile[BUFSIZ] = DBPREFIX "/dl/";
+	int len = LENGTH(DBPREFIX "/dl");
 	
-	strncpy(protofile, DBPREFIX "/dl/", BUFSIZ);
 	for(i = 0; i < BUFSIZ - len && pkg->repo[i]; i++)
 		protofile[len + i] = isalnum(pkg->url[i]) ? pkg->url[i] : '_';
 	return fhttp(pkg->url);

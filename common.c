@@ -68,7 +68,7 @@ puthex(const char *src, FILE* out, int l) {
 
 void
 cmdchain(int cmdc, struct Cmd *cmd) {
-	int fd[2], in, out , pid, i;
+	int fd[2], in, out , pid, i, status;
 
 	in = STDIN_FILENO;
 	for(i = 0; i < cmdc; i++) {
@@ -91,6 +91,7 @@ cmdchain(int cmdc, struct Cmd *cmd) {
 		}
 		in = fd[0];
 	}
+	while(wait(&status) != -1);
 }
 
 void *
