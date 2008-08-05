@@ -72,9 +72,12 @@ cmdchain(int cmdc, struct Cmd *cmd) {
 
 	in = STDIN_FILENO;
 	for(i = 0; i < cmdc; i++) {
-		pipe(fd);
-		out = i + 1 == cmdc ? STDOUT_FILENO : fd[1];
-		fflush(NULL);
+		if(i + 1 == cmdc)
+			out = STDOUT_FILENO;
+		else {
+			pipe(fd);
+			out = i + 1 == cmdc ? STDOUT_FILENO : fd[1];
+		}
 		pid = fork();
 		if(pid < 0)
 			eprint(1, "Cannot fork");
@@ -85,10 +88,8 @@ cmdchain(int cmdc, struct Cmd *cmd) {
 				dup2(in, STDIN_FILENO);
 			exit(cmd[i].function(cmd[i].argc, cmd[i].argv));
 		}
-		else {
-			close(in);
-			close(out);
-		}
+		close(in);
+		close(out);
 		in = fd[0];
 	}
 	while(wait(&status) != -1);
