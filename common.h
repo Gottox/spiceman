@@ -82,7 +82,6 @@ void *erealloc(void *p, size_t size);	/* remalloc + error testing */
 void eprint(int pe, const char *format, ...);
 					/* prints message and exits */
 void freepkg(struct Package *pkg);
-void fpipe(FILE **fp);
 int getpkg(struct Package *pkg);
 					/* reads a package from in */
 void putpkg(const struct Package *pkg);

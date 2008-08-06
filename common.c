@@ -116,22 +116,10 @@ eprint(int pe, const char *format, ...) {
 	exit(EXIT_FAILURE);
 }
 
-void
-fpipe(FILE **fp) {
-	int fd[2];
-
-	if(pipe(fd))
-		eprint(1, "cannot create pipe.");
-	if(!(fp[1] = fdopen(fd[1], "w")))
-		eprint(1, "cannot open pipe for writing.");
-	if(!(fp[0] = fdopen(fd[0], "r")))
-		eprint(1, "cannot open pipe for reading.");
-}
-
 int
 getpkg(struct Package *pkg) {
 	int l, n;
-	char *s, *p, *q;
+	char *s, *p;
 
 	l = 0;
 	do {
@@ -139,15 +127,14 @@ getpkg(struct Package *pkg) {
 			pkg->blen = l + 1 + BUFSIZ;
 			pkg->buf = erealloc(pkg->buf, sizeof(char) * pkg->blen);
 		}
-		if(fgets(pkg->buf + l, pkg->blen - l, stdin))
+		if(fgets(&pkg->buf[l], pkg->blen - l, stdin))
 			l += strlen(&pkg->buf[l]);
 	} while(l > 0 && !feof(stdin) && pkg->buf[l - 1] != '\n');
 	if(l == 0)
 		return 0;
 	for(s = p = pkg->buf, n = 0; *p; p++) {
 		if(*p == '\\') {
-			for(q = p; *q; q++)
-				q[0] = q[1];
+			memmove(p, p + 1, l - (p - pkg->buf));
 			switch(*p) {
 			case 'n':
 				*p = '\n';
