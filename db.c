@@ -65,7 +65,7 @@ db(int argc, char *argv[]) {
 		freepkg(&pkg);
 		if(r < 0)
 			eprint(0, "You can start crying now.\n"
-					"Malformed Package in Database: %s", "TODO");
+					"Malformed Package in Database: ´%s´\n", src);
 		fclose(db);
 		break;
 	default:
