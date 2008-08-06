@@ -34,14 +34,11 @@ putbslash(const char *str, const char *chrs, FILE *out) {
 		if(strchr(chrs, *p)) {
 			fwrite(str, sizeof(char), p - str, out);
 			fputc('\\', out);
-			str = p;
-			if(*p == '\n') {
-				fputc('n',out);
-				str++;
-			}
-			else if(*p == '\t') {
-				fputc('t',out);
-				str++;
+			str = p + 1;
+			switch(*p) {
+				case '\n': fputc('n', out); break;
+				case '\t': fputc('t', out); break;
+				default: str--;
 			}
 		}
 	}
