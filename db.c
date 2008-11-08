@@ -56,13 +56,13 @@ db(int argc, char *argv[]) {
 	case 'p':
 		src = action == 'i' ? DBPREFIX "/installed" :  DBPREFIX "/packages";
 		if(!(db = fopen(src, "r")))
-			eprint(1, "Cannot open database `%s`: ", src);
+			die(1, "Cannot open database `%s`: ", src);
 		dup2(fileno(db), STDIN_FILENO);
 		bzero(&pkg, sizeof(pkg));
 		while((r = getfreepkg(&pkg) > 0))
 			putpkg(&pkg);
 		if(r < 0)
-			eprint(0, "You can start crying now.\n"
+			die(0, "You can start crying now.\n"
 					"Malformed Package in Database: ´%s´\n", src);
 		fclose(db);
 		break;

@@ -16,7 +16,7 @@
 int operatormatch(const char *p);
 int repomatch(const char *p);
 int typematch(const char *p);
-void unique(const char action);
+int unique(const int vercmp);
 int wildcardmatch(const char *s, int fulltext);
 int filter(int argc, char *argv[]);
 void filter_help();

@@ -79,11 +79,12 @@ struct Package {
 void cmdchain(int cmdc, struct Cmd *cmd);
 					/* executes a chain of commands */
 void *erealloc(void *p, size_t size);	/* remalloc + error testing */
-void eprint(int pe, const char *format, ...);
+void die(int pe, const char *format, ...);
 					/* prints message and exits */
 void freepkg(struct Package *pkg);
 int getfreepkg(struct Package *pkg);	/* like getpkg but frees the pkg if getting fails */
 int getpkg(struct Package *pkg);	/* reads a package from in */
+int mkdirhier(char *path);
 void putpkg(const struct Package *pkg);
 					/* puts a package to out */
 int pkgcmp(const char *name1, const char *ver1, const int rel1,

@@ -21,7 +21,9 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
+#include <errno.h>
 
 #include "common.h"
 
@@ -77,7 +79,7 @@ cmdchain(int cmdc, struct Cmd *cmd) {
 		}
 		pid = fork();
 		if(pid < 0)
-			eprint(1, "Cannot fork");
+			die(1, "Cannot fork");
 		else if(pid == 0) {
 			if(out != STDOUT_FILENO)
 				dup2(out, STDOUT_FILENO);
@@ -95,12 +97,12 @@ cmdchain(int cmdc, struct Cmd *cmd) {
 void *
 erealloc(void *p, size_t size) {
 	if(!(p = realloc(p, size)))
-		eprint(0, "Cannot Malloc");
+		die(0, "Cannot Malloc");
 	return p;
 }
 
 void
-eprint(int pe, const char *format, ...) {
+die(int pe, const char *format, ...) {
 	va_list ap;
 
 	va_start(ap, format);
@@ -110,7 +112,7 @@ eprint(int pe, const char *format, ...) {
 	else
 		fputc('\n',stderr);
 	va_end(ap);
-	exit(EXIT_FAILURE);
+	exit(EXIT_SUCCESS);
 }
 
 void
@@ -222,6 +224,22 @@ getpkg(struct Package *pkg) {
 		}
 	}
 	return 1;
+}
+
+int
+mkdirhier(char *path) {
+	int i, rc;
+	char tmp;
+	struct stat st = { .st_mode = 0700 };
+	
+	for(i = 0; path[i] != 0; i++)
+		if((tmp = path[i]) == '/' && stat(path, &st) != 0) {
+			path[i] = 0;
+			mkdir(path, st.st_mode);
+			path[i] = tmp;
+		}
+	rc = mkdir(path, st.st_mode);
+	return errno == EEXIST ? 0 : rc;
 }
 
 void

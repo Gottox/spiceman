@@ -104,8 +104,6 @@ ui(int argc, char *argv[]) {
 		}
 		fputc(seperator, stdout);
 	}
-
 	fprintf(stderr, "%i packages\n", i - 1);
-
 	return EXIT_SUCCESS;
 }

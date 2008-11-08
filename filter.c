@@ -22,7 +22,7 @@
 #include "common.h"
 #include "filter.h"
 
-struct Pkglst{
+struct Pkglst {
 	struct Package pkg;
 	struct Pkglst *next;
 };
@@ -133,17 +133,18 @@ int typematch(const char *s) {
 	return EXIT_SUCCESS;
 }
 
-void unique(char action) {
+int
+unique(int vercmp) {
 	int cmp;
 	struct Package pkg;
 	struct Pkglst *n, *l, *list = NULL, *prev = NULL;
 
 	bzero(&pkg, sizeof(pkg));
 	while(getfreepkg(&pkg) > 0) {
-		for(l = list, cmp = 1; l && (cmp = (action == 'N' &&
-				strcmp(l->pkg.name, pkg.name)) ||
+		for(l = list, cmp = 1; l && (cmp = (vercmp &&
 				pkgcmp(l->pkg.name, l->pkg.ver, l->pkg.rel,
-					pkg.name, pkg.ver, pkg.rel)) > 0;
+					pkg.name, pkg.ver, pkg.rel)) != 0 ||
+				strcmp(l->pkg.name, pkg.name));
 				l = l->next)
 			prev = l;
 		if(l && cmp == 0)
@@ -169,6 +170,7 @@ void unique(char action) {
 		list = l->next;
 		free(l);
 	}
+	return EXIT_SUCCESS;
 }
 
 int wildcardmatch(const char *p, int fulltext) {
@@ -237,24 +239,24 @@ int filter(int argc, char *argv[]) {
 	}
 	if(argc <= 0 || argc != ARGC())
 		goto argerr;
-	if(strchr("nNv", action))
-		unique(action);
-	else {
-		switch(action) {
-		case 't':
-			return typematch(arg);
-			break;
-		case 'R':
-			return repomatch(arg);
-			break;
-		case 's':
-		case 'S':
-			return wildcardmatch(arg, action == 'S');
-			break;
-		case 'o':
-			return operatormatch(arg);
-			break;
-		}
+	switch(action) {
+	case 't':
+		return typematch(arg);
+		break;
+	case 'R':
+		return repomatch(arg);
+		break;
+	case 's':
+	case 'S':
+		return wildcardmatch(arg, action == 'S');
+		break;
+	case 'o':
+		return operatormatch(arg);
+		break;
+	case 'n':
+	case 'N':
+		return unique(action != 'N');
+		break;
 	}
 	return EXIT_SUCCESS;
 }

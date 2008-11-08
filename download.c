@@ -37,11 +37,16 @@
 FILE *
 fopenurl(const struct Package *pkg, int *isprocess) {
 	int i;
-	char protofile[BUFSIZ] = DBPREFIX "/dl/";
+	char path[BUFSIZ] = DBPREFIX "/dl/";
 	int len = LENGTH(DBPREFIX "/dl");
 	
-	for(i = 0; i < BUFSIZ - len && pkg->repo[i]; i++)
-		protofile[len + i] = isalnum(pkg->url[i]) ? pkg->url[i] : '_';
+	*isprocess = 1;
+	for(i = 0; i < BUFSIZ - len && pkg->url[i] && pkg->url[i] != ':'; i++)
+		path[len + i] = isalnum(pkg->url[i]) ? pkg->url[i] : '_';
+	path[len + i] = 0;
+	fputs(path, stderr);
+	fflush(NULL);
+	*isprocess = 0;
 	return fhttp(pkg->url);
 }
 
@@ -108,8 +113,8 @@ void download_help() {
 int download(int argc, char *argv[]) {
 	FILE *url, *cache;
 	int nocache = 0, n, isprocess;
-	struct Package pkg;
-	char namebuf[LENGTH(CACHEPREFIX) + BUFSIZ];
+	struct Package pkg = { 0 };
+	char path[LENGTH(CACHEPREFIX) + BUFSIZ];
 	char buf[BUFSIZ];
 
 	if(argc == 1 && strcmp("-n", argv[0]) == 0)
@@ -118,17 +123,22 @@ int download(int argc, char *argv[]) {
 		download_help();
 		return EXIT_FAILURE;
 	}
-	bzero(&pkg,sizeof(pkg));
 	while(getfreepkg(&pkg) > 0) {
-		snprintf(namebuf, LENGTH(namebuf), CACHEPREFIX "/%s-%s-%u.tar",
-				pkg.name, pkg.ver, pkg.rel);
+		snprintf(path, LENGTH(path), CACHEPREFIX "/%s",
+				pkg.repo);
+		if(mkdirhier(path)) {
+			die(1, "Cannot create dir `%s`");
+			continue;
+		}
+		snprintf(path, LENGTH(path), CACHEPREFIX "/%s/%s-%s-%u.tar",
+				pkg.repo, pkg.name, pkg.ver, pkg.rel);
 		if(!(url = fopenurl(&pkg, &isprocess)))
-			eprint(0, "Cannot download.");
-		if(!(cache = fopen(namebuf, "w")))
-			eprint(0, "Cannot open cache file.");
+			die(1, "Cannot download: ");
+		if(!(cache = fopen(path, "w")))
+			die(0, "Cannot open cache file: ");
 		while((n = fread(buf, sizeof(char), LENGTH(buf), url)) > 0)
 			fwrite(buf, sizeof(char), LENGTH(buf), cache);
-		pkg.url = namebuf;
+		pkg.url = path;
 		putpkg(&pkg);
 		fclose(cache);
 		fclose(url);
