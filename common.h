@@ -65,7 +65,7 @@ struct Package {
 	char *prov;			/* pkg provides */
 
 	/* pkg integrity */
-	unsigned int size;		/* time of release */
+	unsigned int size;		/* size of package */
 	char md5[16];
 	char sha1[20];
 	char key[4];
@@ -82,8 +82,8 @@ void *erealloc(void *p, size_t size);	/* remalloc + error testing */
 void eprint(int pe, const char *format, ...);
 					/* prints message and exits */
 void freepkg(struct Package *pkg);
-int getpkg(struct Package *pkg);
-					/* reads a package from in */
+int getfreepkg(struct Package *pkg);	/* like getpkg but frees the pkg if getting fails */
+int getpkg(struct Package *pkg);	/* reads a package from in */
 void putpkg(const struct Package *pkg);
 					/* puts a package to out */
 int pkgcmp(const char *name1, const char *ver1, const int rel1,

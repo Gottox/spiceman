@@ -81,7 +81,7 @@ ui(int argc, char *argv[]) {
 	}
 
 	bzero(&pkg, sizeof(pkg));
-	for(i = 1; getpkg(&pkg) > 0; i++) {
+	for(i = 1; getfreepkg(&pkg) > 0; i++) {
 		fprintf(stdout, "%i. [%c] %s-%s-%i (%s)", i, pkg.type, pkg.name,
 				pkg.ver, pkg.rel, pkg.repo);
 		if(action != 's') {
@@ -104,7 +104,6 @@ ui(int argc, char *argv[]) {
 		}
 		fputc(seperator, stdout);
 	}
-	freepkg(&pkg);
 
 	fprintf(stderr, "%i packages\n", i - 1);
 

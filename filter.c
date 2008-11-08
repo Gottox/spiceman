@@ -28,7 +28,7 @@ struct Pkglst{
 };
 
 enum Operator {
-	EQUAL, UNEQUAL, LESSER, GREATER, LESSEREQUAL, GREATEREQUAL
+	EQUAL, NOTEQUAL, LESSER, GREATER, LESSEREQUAL, GREATEREQUAL
 };
 
 int operatormatch(const char *s) {
@@ -39,7 +39,7 @@ int operatormatch(const char *s) {
 	char buf[BUFSIZ];
 
 	bzero(&pkg, sizeof(pkg));
-	while(getpkg(&pkg) > 0) {
+	while(getfreepkg(&pkg) > 0) {
 		for(i = 0; pkg.name[i] && pkg.name[i] == s[i]; i++);
 		if(pkg.name[i] != 0)
 			continue;
@@ -55,7 +55,7 @@ int operatormatch(const char *s) {
 			operator = GREATER;
 			break;
 		case '!':
-			operator = UNEQUAL;
+			operator = NOTEQUAL;
 			break;
 		case 0:
 			putpkg(&pkg);
@@ -89,7 +89,7 @@ int operatormatch(const char *s) {
 		case EQUAL:
 			result = result == 0;
 			break;
-		case UNEQUAL:
+		case NOTEQUAL:
 			result = result != 0;
 			break;
 		case LESSER:
@@ -108,7 +108,6 @@ int operatormatch(const char *s) {
 		if(result)
 			putpkg(&pkg);
 	}
-	freepkg(&pkg);
 	return 0;
 }
 
@@ -116,10 +115,9 @@ int repomatch(const char *s) {
 	struct Package pkg;
 
 	bzero(&pkg, sizeof(pkg));
-	while(getpkg(&pkg))
+	while(getfreepkg(&pkg))
 		if(strcmp(pkg.repo, s) == 0)
 			putpkg(&pkg);
-	freepkg(&pkg);
 
 	return EXIT_SUCCESS;
 }
@@ -128,10 +126,9 @@ int typematch(const char *s) {
 	struct Package pkg;
 
 	bzero(&pkg, sizeof(pkg));
-	while(getpkg(&pkg))
+	while(getfreepkg(&pkg))
 		if(strchr(s, pkg.type));
 			putpkg(&pkg);
-	freepkg(&pkg);
 
 	return EXIT_SUCCESS;
 }
@@ -142,7 +139,7 @@ void unique(char action) {
 	struct Pkglst *n, *l, *list = NULL, *prev = NULL;
 
 	bzero(&pkg, sizeof(pkg));
-	while(getpkg(&pkg) > 0) {
+	while(getfreepkg(&pkg) > 0) {
 		for(l = list, cmp = 1; l && (cmp = (action == 'N' &&
 				strcmp(l->pkg.name, pkg.name)) ||
 				pkgcmp(l->pkg.name, l->pkg.ver, l->pkg.rel,
@@ -164,7 +161,6 @@ void unique(char action) {
 		pkg.buf = NULL;
 		pkg.blen = 0;
 	}
-	freepkg(&pkg);
 
 	while(list) {
 		putpkg(&list->pkg);
@@ -185,7 +181,7 @@ int wildcardmatch(const char *p, int fulltext) {
 	else
 		strncat(patternbuf, p, LENGTH(patternbuf));
 	len = strlen(patternbuf);
-	if(patternbuf[len - 1] == '$')
+	if(len < LENGTH(patternbuf) - 1 && patternbuf[len - 1] == '$')
 		patternbuf[len - 1] = 0;
 	else if(len + 2 < BUFSIZ) {
 		patternbuf[len++] = '*';
@@ -193,7 +189,7 @@ int wildcardmatch(const char *p, int fulltext) {
 	}
 
 	bzero(&pkg, sizeof(pkg));
-	while(getpkg(&pkg) > 0) {
+	while(getfreepkg(&pkg) > 0) {
 		snprintf(buf, LENGTH(buf), "%s-%s-%i", pkg.name,
 				pkg.ver, pkg.rel);
 		if(fnmatch(patternbuf, buf, 0) == 0)
@@ -201,7 +197,6 @@ int wildcardmatch(const char *p, int fulltext) {
 		else if(fulltext && fnmatch(patternbuf, pkg.desc, 0) == 0)
 			putpkg(&pkg);
 	}
-	freepkg(&pkg);
 	return EXIT_SUCCESS;
 }
 

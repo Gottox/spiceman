@@ -64,7 +64,7 @@ int relate(int argc, char *argv[]) {
 	if(argc > 1 || argc != ARGC())
 		goto argerr;
 	bzero(&pkg, sizeof(pkg));
-	while(getpkg(&pkg) > 0) {
+	while(getfreepkg(&pkg) > 0) {
 		switch(action) {
 		case 'd':
 			for(p = pkg.dep; *p && !isalnum(*p); p++);
@@ -89,6 +89,5 @@ int relate(int argc, char *argv[]) {
 			break;
 		}
 	}
-	freepkg(&pkg);
 	return EXIT_SUCCESS;
 }

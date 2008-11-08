@@ -119,7 +119,7 @@ int download(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 	bzero(&pkg,sizeof(pkg));
-	while(getpkg(&pkg) > 0) {
+	while(getfreepkg(&pkg) > 0) {
 		snprintf(namebuf, LENGTH(namebuf), CACHEPREFIX "/%s-%s-%u.tar",
 				pkg.name, pkg.ver, pkg.rel);
 		if(!(url = fopenurl(&pkg, &isprocess)))
@@ -133,6 +133,5 @@ int download(int argc, char *argv[]) {
 		fclose(cache);
 		fclose(url);
 	}
-	freepkg(&pkg);
 	return EXIT_SUCCESS;
 }

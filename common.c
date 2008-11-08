@@ -113,6 +113,22 @@ eprint(int pe, const char *format, ...) {
 	exit(EXIT_FAILURE);
 }
 
+void
+freepkg(struct Package *pkg) {
+	if(pkg->buf)
+		free(pkg->buf);
+	pkg->buf = NULL;
+	pkg->blen = 0;
+}
+
+int
+getfreepkg(struct Package *pkg) {
+	int rc;
+	if(!(rc = getpkg(pkg)) > 0)
+		freepkg(pkg);
+	return rc;
+}
+
 int
 getpkg(struct Package *pkg) {
 	int l, n;
@@ -250,14 +266,6 @@ putpkg(const struct Package *pkg) {
 	fprintf(stdout,"%lu",pkg->instime);
 	fputc('\n', stdout);
 	fflush(stdout);
-}
-
-void
-freepkg(struct Package *pkg) {
-	if(pkg->buf)
-		free(pkg->buf);
-	pkg->buf = NULL;
-	pkg->blen = 0;
 }
 
 int
