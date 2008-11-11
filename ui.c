@@ -43,7 +43,7 @@ wordwrap(char *str, int width) {
 
 void
 ui_help() {
-	APPLETUSAGE("db");
+	APPLETUSAGE("ui");
 	fputs("	-s	short output\n", stderr);
 	fputs("	-m	medium output (default)\n", stderr);
 	fputs("	-f	full output\n", stderr);
