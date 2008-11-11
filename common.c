@@ -302,19 +302,19 @@ pkgcmp(const char *name1, const char *ver1, const int rel1,
 
 int
 vercmp(const char *v1, const char *v2) {
-	const char *p, *p1, *p2;
+	const char *p;
 	int isdig1, isdig2, dig1, dig2, retval = 0;
 
-	for(p1 = v1, p2 = v2; *p1 && *p2 && retval == 0; p1++, p2++) {
-		if(*p1 != *p2) {
-			isdig1 = isdigit(*p1);
-			isdig2 = isdigit(*p2);
+	for(; *v1 && *v2 && retval == 0; v1++, v2++) {
+		if(*v1 != *v2) {
+			isdig1 = isdigit(*v1);
+			isdig2 = isdigit(*v2);
 			if(isdig1 && isdig2) {
-				dig1 = atoi(p1);
-				dig2 = atoi(p2);
+				dig1 = atoi(v1);
+				dig2 = atoi(v2);
 				if (dig1 == dig2) {
-					for(; p1[1] && isdigit(p1[1]); p1++);
-					for(; p2[1] && isdigit(p2[1]); p2++);
+					for(; v1[1] && isdigit(v1[1]); v1++);
+					for(; v2[1] && isdigit(v2[1]); v2++);
 				}
 				else if(dig1 > dig2)
 					retval = 1;
@@ -325,17 +325,17 @@ vercmp(const char *v1, const char *v2) {
 				retval = 1;
 			else if(isdig2)
 				retval = -1;
-			else if((*p1 == '-' || *p1 == '.') && (*p2 == '-' || *p2 == '.'))
-				return *p1 == '.' ? 1 : -1;
+			else if((*v1 == '-' || *v1 == '.') && (*v2 == '-' || *v2 == '.'))
+				return *v1 == '.' ? 1 : -1;
 			else
-				retval = strcmp(p1, p2);
+				retval = strcmp(v1, v2);
 		}
 	}
-	for(p = *p1 ? p1 : p2; *p && retval == 0; p++) {
+	for(p = *v1 ? v1 : v2; *p && retval == 0; p++) {
 		if(isalpha(*p))
-			retval = *p1 ? -1 : 1;
+			retval = *v1 ? -1 : 1;
 		else if(!strchr("-.0", *p))
-			retval = *p1 ? 1 : -1;
+			retval = *v1 ? 1 : -1;
 	}
 	return retval;
 }
