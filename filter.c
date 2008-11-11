@@ -127,7 +127,7 @@ int typematch(const char *s) {
 
 	bzero(&pkg, sizeof(pkg));
 	while(getfreepkg(&pkg))
-		if(strchr(s, pkg.type));
+		if(strchr(s, pkg.type))
 			putpkg(&pkg);
 
 	return EXIT_SUCCESS;
