@@ -135,12 +135,13 @@ int typematch(const char *s) {
 
 int
 unique(int vercmp) {
+	/* BUG: Does not return the newest version. Why? */
 	int cmp;
 	struct Package pkg;
 	struct Pkglst *n, *l, *list = NULL, *prev = NULL;
 
 	bzero(&pkg, sizeof(pkg));
-	while(getfreepkg(&pkg) > 0) {
+	while(getpkg(&pkg) > 0) {
 		for(l = list, cmp = 1; l && (cmp = (vercmp &&
 				pkgcmp(l->pkg.name, l->pkg.ver, l->pkg.rel,
 					pkg.name, pkg.ver, pkg.rel)) != 0 ||
