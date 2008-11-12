@@ -29,6 +29,10 @@ ${TARGET}: ${OBJ}
 	@echo CC -o $@
 	@${CC} -o $@ ${OBJ} ${LDFLAGS}
 
+vercmp: vercmp.c common.c
+	@echo CC -o $@
+	@${CC} -o $@ vercmp.c common.o ${LDFLAGS}
+
 clean:
 	@echo cleaning
 	@rm -f -- ${OBJ} ${OBJ:.o=} ${TARGET} ${TARGET}-${VERSION}.tar.gz
