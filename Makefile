@@ -29,7 +29,7 @@ ${TARGET}: ${OBJ}
 	@echo CC -o $@
 	@${CC} -o $@ ${OBJ} ${LDFLAGS}
 
-vercmp: vercmp.c common.c
+vercmp: vercmp.c common.o
 	@echo CC -o $@
 	@${CC} -o $@ vercmp.c common.o ${LDFLAGS}
 
