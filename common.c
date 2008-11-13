@@ -305,7 +305,7 @@ vercmp(const char *v1, const char *v2) {
 	const char *p;
 	int isdig1, isdig2, dig1, dig2, retval = 0;
 
-	for(; *v1 && *v2 && retval == 0; v1++, v2++) {
+	for(; *v1 && *v2 && retval == 0; v1++, v2++)
 		if(*v1 != *v2) {
 			isdig1 = isdigit(*v1);
 			isdig2 = isdigit(*v2);
@@ -326,17 +326,15 @@ vercmp(const char *v1, const char *v2) {
 			else if(isdig2)
 				retval = -1;
 			else if((*v1 == '-' || *v1 == '.') && (*v2 == '-' || *v2 == '.'))
-				return *v1 == '.' ? 1 : -1;
+				retval = *v1 == '.' ? 1 : -1;
 			else
 				retval = strcmp(v1, v2);
 		}
-	}
-	for(p = *v1 ? v1 : v2; *p && retval == 0; p++) {
+	for(p = *v1 ? v1 : v2; *p && retval == 0; p++)
 		if(isalpha(*p))
 			retval = *v1 ? -1 : 1;
 		else if(!strchr("-.0", *p))
 			retval = *v1 ? 1 : -1;
-	}
 	return retval;
 }
 
