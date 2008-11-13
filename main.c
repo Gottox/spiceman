@@ -153,7 +153,6 @@ main_applet(int argc, char *argv[]) {
 		cmdchain(LENGTH(rmchain), rmchain);
 		break;
 	}
-	/* formating human readable output of cmdchain . */
 	return EXIT_SUCCESS;
 }
 
