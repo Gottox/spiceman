@@ -35,7 +35,7 @@ vercmp: vercmp.c common.o
 
 clean:
 	@echo cleaning
-	@rm -f -- ${OBJ} ${OBJ:.o=} ${TARGET} ${TARGET}-${VERSION}.tar.gz
+	@rm -f -- ${OBJ} ${OBJ:.o=} vercmp ${TARGET} ${TARGET}-${VERSION}.tar.gz
 
 dist: clean
 	@echo creating dist tarball
