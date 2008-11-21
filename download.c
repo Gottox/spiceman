@@ -44,7 +44,6 @@ fopenurl(const struct Package *pkg, int *isprocess) {
 	for(i = 0; i < BUFSIZ - len && pkg->url[i] && pkg->url[i] != ':'; i++)
 		path[len + i] = isalnum(pkg->url[i]) ? pkg->url[i] : '_';
 	path[len + i] = 0;
-	fputs(path, stderr);
 	fflush(NULL);
 	*isprocess = 0;
 	return fhttp(pkg->url);
@@ -111,7 +110,7 @@ void download_help() {
 
 /* download a Package */
 int download(int argc, char *argv[]) {
-	FILE *url, *cache;
+	FILE *file, *cache;
 	int nocache = 0, n, isprocess;
 	struct Package pkg = { 0 };
 	char path[LENGTH(CACHEPREFIX) + BUFSIZ];
@@ -124,24 +123,24 @@ int download(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 	while(getfreepkg(&pkg) > 0) {
-		snprintf(path, LENGTH(path), CACHEPREFIX "/%s",
+		snprintf(path, LENGTH(path), CACHEPREFIX "/dl/%s",
 				pkg.repo);
 		if(mkdirhier(path)) {
 			die(1, "Cannot create dir `%s`");
 			continue;
 		}
-		snprintf(path, LENGTH(path), CACHEPREFIX "/%s/%s-%s-%u.tar",
+		snprintf(path, LENGTH(path), CACHEPREFIX "/dl/%s/%s-%s-%u.tar",
 				pkg.repo, pkg.name, pkg.ver, pkg.rel);
-		if(!(url = fopenurl(&pkg, &isprocess)))
+		if(!(file = fopenurl(&pkg, &isprocess)))
 			die(1, "Cannot download: ");
 		if(!(cache = fopen(path, "w")))
-			die(0, "Cannot open cache file: ");
-		while((n = fread(buf, sizeof(char), LENGTH(buf), url)) > 0)
+			die(1, "Cannot open cache file: ");
+		while((n = fread(buf, sizeof(char), LENGTH(buf), file)) > 0)
 			fwrite(buf, sizeof(char), LENGTH(buf), cache);
 		pkg.url = path;
 		putpkg(&pkg);
 		fclose(cache);
-		fclose(url);
+		fclose(file);
 	}
 	return EXIT_SUCCESS;
 }
