@@ -3,7 +3,7 @@ VERSION = 0.0
 
 # builtin repository link:
 INITREPONAME="init-gottox"
-INITREPOADDR="http://127.0.0.1/~gottox/repositories/init/repos.tar"
+INITREPOADDR="http://s01.de/~gottox/repositories/init/repos.tar"
 
 # paths
 PREFIX = /usr/local

@@ -162,62 +162,27 @@ getpkg(struct Package *pkg) {
 		else if(*p == FIELDSEPERATOR) {
 			*p = 0;
 			switch(n) {
-			case TYPE:
-				pkg->type = *s;
-				break;
-			case NAME:
-				pkg->name = s;
-				break;
-			case VER:
-				pkg->ver = s;
-				break;
-			case REL:
-				pkg->rel = atoi(s);
-				break;
-			case DESC:
-				pkg->desc = s;
-				break;
-			case URL:
-				pkg->url = s;
-				break;
-			case USEF:
-				pkg->usef = s;
-				break;
-			case REPO:
-				pkg->repo = s;
-				break;
-			case INFOURL:
-				pkg->infourl = s;
-				break;
-			case DEP:
-				pkg->dep = s;
-				break;
-			case CONFLICT:
-				pkg->conflict = s;
-				break;
-			case PROV:
-				pkg->prov = s;
-				break;
-			case SIZE:
-				pkg->size = atoi(s);
-				break;
+			case TYPE:	pkg->type = *s; break;
+			case NAME:	pkg->name = s; break;
+			case VER:	pkg->ver = s; break;
+			case REL:	pkg->rel = atoi(s); break;
+			case DESC:	pkg->desc = s; break;
+			case URL:	pkg->url = s; break;
+			case USEF:	pkg->usef = s; break;
+			case REPO:	pkg->repo = s; break;
+			case INFOURL:	pkg->infourl = s; break;
+			case DEP:	pkg->dep = s; break;
+			case CONFLICT:	pkg->conflict = s; break;
+			case PROV:	pkg->prov = s; break;
+			case SIZE:	pkg->size = atoi(s); break;
 			case MD5:
-				str2hex(pkg->md5, s, LENGTH(pkg->md5));
-				break;
-			case SHA1:
-				str2hex(pkg->sha1, s, LENGTH(pkg->sha1));
-				break;
+				str2hex(pkg->md5, s, LENGTH(pkg->md5)); break;
+			case SHA:
+				str2hex(pkg->sha, s, LENGTH(pkg->sha)); break;
 			case KEY:
-				str2hex(pkg->key, s, LENGTH(pkg->key));
-				break;
-			case RELTIME:
-				pkg->reltime = atol(s);
-				break;
-			case INSTIME:
-				pkg->instime = atol(s);
-				break;
-			default:
-				break;
+				str2hex(pkg->key, s, LENGTH(pkg->key)); break;
+			case RELTIME:	pkg->reltime = atol(s); break;
+			case INSTIME:	pkg->instime = atol(s); break;
 			}
 			s = p + 1;
 			n++;
@@ -227,11 +192,13 @@ getpkg(struct Package *pkg) {
 }
 
 int
-mkdirhier(char *path) {
+mkdirhier(const char *p) {
 	int i, rc;
 	char tmp;
 	struct stat st = { .st_mode = 0700 };
+	char path[BUFSIZ];
 	
+	strncpy(path, p, LENGTH(path));
 	for(i = 0; path[i] != 0; i++)
 		if((tmp = path[i]) == '/' && stat(path, &st) != 0) {
 			path[i] = 0;
@@ -244,44 +211,38 @@ mkdirhier(char *path) {
 
 void
 putpkg(const struct Package *pkg) {
+	int n;
 	char sep[] = { FIELDSEPERATOR, '\n', '\t', 0 };
 	
-	if(pkg->type != '\0')
-		fputc(pkg->type, stdout);
-	fputc(FIELDSEPERATOR, stdout);
-	putbslash(pkg->name, sep, stdout);
-	fputc(FIELDSEPERATOR, stdout);
-	putbslash(pkg->ver, sep, stdout);
-	fputc(FIELDSEPERATOR, stdout);
-	fprintf(stdout,"%u", pkg->rel);
-	fputc(FIELDSEPERATOR, stdout);
-	putbslash(pkg->desc, sep, stdout);
-	fputc(FIELDSEPERATOR, stdout);
-	putbslash(pkg->url, sep, stdout);
-	fputc(FIELDSEPERATOR, stdout);
-	putbslash(pkg->usef, sep, stdout);
-	fputc(FIELDSEPERATOR, stdout);
-	putbslash(pkg->repo, sep, stdout);
-	fputc(FIELDSEPERATOR, stdout);
-	putbslash(pkg->infourl, sep, stdout);
-	fputc(FIELDSEPERATOR, stdout);
-	putbslash(pkg->dep, sep, stdout);
-	fputc(FIELDSEPERATOR, stdout);
-	putbslash(pkg->conflict, sep, stdout);
-	fputc(FIELDSEPERATOR, stdout);
-	putbslash(pkg->prov, sep, stdout);
-	fputc(FIELDSEPERATOR, stdout);
-	fprintf(stdout,"%u", pkg->size);
-	fputc(FIELDSEPERATOR, stdout);
-	puthex(pkg->md5, stdout, LENGTH(pkg->md5));
-	fputc(FIELDSEPERATOR, stdout);
-	puthex(pkg->sha1, stdout, LENGTH(pkg->sha1));
-	fputc(FIELDSEPERATOR, stdout);
-	puthex(pkg->key, stdout, LENGTH(pkg->key));
-	fputc(FIELDSEPERATOR, stdout);
-	fprintf(stdout,"%lu", pkg->reltime);
-	fputc(FIELDSEPERATOR, stdout);
-	fprintf(stdout,"%lu",pkg->instime);
+	for(n = 0; n < NENTRIES; n++) {
+		switch(n) {
+		case TYPE:
+			if(pkg->type != '\0')
+				fputc(pkg->type, stdout);
+			break;
+		case NAME:	putbslash(pkg->name, sep, stdout); break;
+		case VER:	putbslash(pkg->ver, sep, stdout); break;
+		case REL:	fprintf(stdout,"%u", pkg->rel); break;
+		case DESC:	putbslash(pkg->desc, sep, stdout); break;
+		case URL:	putbslash(pkg->url, sep, stdout); break;
+		case USEF:	putbslash(pkg->usef, sep, stdout); break;
+		case REPO:	putbslash(pkg->repo, sep, stdout); break;
+		case INFOURL:	putbslash(pkg->infourl, sep, stdout); break;
+		case DEP:	putbslash(pkg->dep, sep, stdout); break;
+		case CONFLICT:	putbslash(pkg->conflict, sep, stdout); break;
+		case PROV:	putbslash(pkg->prov, sep, stdout); break;
+		case SIZE:	fprintf(stdout,"%u", pkg->size); break;
+		case MD5:
+			puthex(pkg->md5, stdout, LENGTH(pkg->md5)); break;
+		case SHA:
+			puthex(pkg->sha, stdout, LENGTH(pkg->sha)); break;
+		case KEY:
+			puthex(pkg->key, stdout, LENGTH(pkg->key)); break;
+		case RELTIME:	fprintf(stdout,"%lu", pkg->reltime); break;
+		case INSTIME:	fprintf(stdout,"%lu",pkg->instime); break;
+		}
+		fputc(FIELDSEPERATOR, stdout);
+	}
 	fputc('\n', stdout);
 	fflush(stdout);
 }

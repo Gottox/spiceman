@@ -37,7 +37,7 @@
 typedef int (*Cmdfunction)(int, char *[]);
 
 enum PkgEnt	{ TYPE, NAME, VER, REL, DESC, URL, USEF, REPO, INFOURL, DEP,
-	CONFLICT, PROV, SIZE, MD5, SHA1, KEY, RELTIME, INSTIME, NENTRIES };
+	CONFLICT, PROV, SIZE, MD5, SHA, KEY, RELTIME, INSTIME, NENTRIES };
 
 struct Cmd {
 	Cmdfunction function;
@@ -67,7 +67,7 @@ struct Package {
 	/* pkg integrity */
 	unsigned int size;		/* size of package */
 	char md5[16];
-	char sha1[20];
+	char sha[20];
 	char key[4];
 
 	unsigned long reltime;		/* timestamp of release */
@@ -84,7 +84,7 @@ void die(int pe, const char *format, ...);
 void freepkg(struct Package *pkg);
 int getfreepkg(struct Package *pkg);	/* like getpkg but frees the pkg if getting fails */
 int getpkg(struct Package *pkg);	/* reads a package from in */
-int mkdirhier(char *path);
+int mkdirhier(const char *p);
 void putpkg(const struct Package *pkg);
 					/* puts a package to out */
 int pkgcmp(const char *name1, const char *ver1, const int rel1,
