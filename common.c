@@ -233,12 +233,9 @@ putpkg(const struct Package *pkg) {
 		case CONFLICT:	putbslash(pkg->conflict, sep); break;
 		case PROV:	putbslash(pkg->prov, sep); break;
 		case SIZE:	printf("%u", pkg->size); break;
-		case MD5:
-			puthex(pkg->md5, LENGTH(pkg->md5)); break;
-		case SHA:
-			puthex(pkg->sha, LENGTH(pkg->sha)); break;
-		case KEY:
-			puthex(pkg->key, LENGTH(pkg->key)); break;
+		case MD5:	puthex(pkg->md5, LENGTH(pkg->md5)); break;
+		case SHA:	puthex(pkg->sha, LENGTH(pkg->sha)); break;
+		case KEY:	puthex(pkg->key, LENGTH(pkg->key)); break;
 		case RELTIME:	printf("%lu", pkg->reltime); break;
 		case INSTIME:	printf("%lu",pkg->instime); break;
 		}
