@@ -66,14 +66,14 @@ static struct Cmd searchchain[] = {
 };
 static struct Cmd installchain[] = {
 	{ db,		1,	{ "-p" } },
-	{ filter,	2,	{ "-e", NULL } },
+	{ filter,	2,	{ "-o", NULL } },
 	{ download,	0,	{ NULL } },
 	{ install,	2,	{ "-fp" } },
 	{ ui,		0,	{ NULL } },
 };
 static struct Cmd rmchain[] = {
 	{ db,		1,	{ "-i" } },
-	{ filter,	2,	{ "-e", NULL } },
+	{ filter,	2,	{ "-o", NULL } },
 	{ delete,	0,	{ NULL } },
 	{ ui,		0,	{ NULL } },
 };
