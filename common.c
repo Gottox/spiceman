@@ -29,22 +29,22 @@
 
 /* static */
 static void
-putbslash(const char *str, const char *chrs, FILE *out) {
+putbslash(const char *str, const char *chrs) {
 	const char *p;
 
 	for(p = str; *p; p++) {
 		if(strchr(chrs, *p)) {
-			fwrite(str, sizeof(char), p - str, out);
-			fputc('\\', out);
+			fwrite(str, sizeof(char), p - str, stdout);
+			fputc('\\', stdout);
 			str = p + 1;
 			switch(*p) {
-				case '\n': fputc('n', out); break;
-				case '\t': fputc('t', out); break;
+				case '\n': fputc('n', stdout); break;
+				case '\t': fputc('t', stdout); break;
 				default: str--;
 			}
 		}
 	}
-	fwrite(str, sizeof(char), p - str, out);
+	fwrite(str, sizeof(char), p - str, stdout);
 }
 
 static void
@@ -58,11 +58,11 @@ str2hex(char *dst, const char *src, int l) {
 }
 
 static void
-puthex(const char *src, FILE* out, int l) {
+puthex(const char *src, int l) {
 	unsigned int i;
 
 	for(i = 0; i < l; i++)
-		fprintf(out, "%02x", (unsigned int )src[i] % 256);
+		printf("%02x", (unsigned int )src[i] % 256);
 }
 
 void
@@ -126,6 +126,7 @@ freepkg(struct Package *pkg) {
 int
 getfreepkg(struct Package *pkg) {
 	int rc;
+
 	if(!(rc = getpkg(pkg)) > 0)
 		freepkg(pkg);
 	return rc;
@@ -220,26 +221,26 @@ putpkg(const struct Package *pkg) {
 			if(pkg->type != '\0')
 				fputc(pkg->type, stdout);
 			break;
-		case NAME:	putbslash(pkg->name, sep, stdout); break;
-		case VER:	putbslash(pkg->ver, sep, stdout); break;
-		case REL:	fprintf(stdout,"%u", pkg->rel); break;
-		case DESC:	putbslash(pkg->desc, sep, stdout); break;
-		case URL:	putbslash(pkg->url, sep, stdout); break;
-		case USEF:	putbslash(pkg->usef, sep, stdout); break;
-		case REPO:	putbslash(pkg->repo, sep, stdout); break;
-		case INFOURL:	putbslash(pkg->infourl, sep, stdout); break;
-		case DEP:	putbslash(pkg->dep, sep, stdout); break;
-		case CONFLICT:	putbslash(pkg->conflict, sep, stdout); break;
-		case PROV:	putbslash(pkg->prov, sep, stdout); break;
-		case SIZE:	fprintf(stdout,"%u", pkg->size); break;
+		case NAME:	putbslash(pkg->name, sep); break;
+		case VER:	putbslash(pkg->ver, sep); break;
+		case REL:	printf("%u", pkg->rel); break;
+		case DESC:	putbslash(pkg->desc, sep); break;
+		case URL:	putbslash(pkg->url, sep); break;
+		case USEF:	putbslash(pkg->usef, sep); break;
+		case REPO:	putbslash(pkg->repo, sep); break;
+		case INFOURL:	putbslash(pkg->infourl, sep); break;
+		case DEP:	putbslash(pkg->dep, sep); break;
+		case CONFLICT:	putbslash(pkg->conflict, sep); break;
+		case PROV:	putbslash(pkg->prov, sep); break;
+		case SIZE:	printf("%u", pkg->size); break;
 		case MD5:
-			puthex(pkg->md5, stdout, LENGTH(pkg->md5)); break;
+			puthex(pkg->md5, LENGTH(pkg->md5)); break;
 		case SHA:
-			puthex(pkg->sha, stdout, LENGTH(pkg->sha)); break;
+			puthex(pkg->sha, LENGTH(pkg->sha)); break;
 		case KEY:
-			puthex(pkg->key, stdout, LENGTH(pkg->key)); break;
-		case RELTIME:	fprintf(stdout,"%lu", pkg->reltime); break;
-		case INSTIME:	fprintf(stdout,"%lu",pkg->instime); break;
+			puthex(pkg->key, LENGTH(pkg->key)); break;
+		case RELTIME:	printf("%lu", pkg->reltime); break;
+		case INSTIME:	printf("%lu",pkg->instime); break;
 		}
 		fputc(FIELDSEPERATOR, stdout);
 	}
