@@ -69,7 +69,8 @@ int relate(int argc, char *argv[]) {
 		case 'd':
 			for(p = pkg.dep; *p && !isalnum(*p); p++);
 			while(*p) {
-				for(i = 0; *p && isalnum(*p) && i < BUFSIZ; p++, i++)
+				for(i = 0; *p && *p != ' ' && i < LENGTH(buf);
+						p++, i++)
 					buf[i] = *p;
 				buf[i] = 0;
 				puts(buf);

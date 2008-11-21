@@ -19,6 +19,8 @@
 #define FIELDSEPERATOR		':'
 
 /* LENGTH macro copied from dwm. */
+#define MIN(a, b)		(a < b ? a : b)
+#define MAX(a, b)		(a > b ? a : b)
 #define LENGTH(x)		sizeof(x)/sizeof(x[0])
 #define APPLETUSAGE(a)		fputs("sp-" a " || spiceman " a \
 		"\n\t-h\thelp message\n", stderr);
@@ -26,7 +28,8 @@
 /* Plan9-style Argument parsing */
 /* Vars: _c -> count; _b -> break; _a -> argument */
 #define ARG int _c, _b; char *_a; \
-	for(_c = 0; _c < argc && argv[_c][0] == '-' && argv[_c][1] && (strcmp(argv[_c], "--") != 0); _c++) \
+	for(_c = 0; _c < argc && argv[_c][0] == '-' && argv[_c][1] && \
+			(strcmp(argv[_c], "--") != 0); _c++) \
 		for(_a = &argv[_c][1], _b = 0; !_b && *_a; _a++ ) \
 			switch(*_a)
 #define ARGVAL()	(!_b && _a[1] && (_b = 1) ? &_a[1] : _c + 1 == argc ? \
@@ -76,17 +79,15 @@ struct Package {
 
 
 /* common.c */
-void cmdchain(int cmdc, struct Cmd *cmd);
-					/* executes a chain of commands */
-void *erealloc(void *p, size_t size);	/* remalloc + error testing */
-void die(int pe, const char *format, ...);
-					/* prints message and exits */
+void cmdchain(int cmdc, struct Cmd *cmd);	/* executes a chain of commands */
+void *erealloc(void *p, size_t size);		/* remalloc + error testing */
+void die(int pe, const char *format, ...);	/* prints message and exits */
 void freepkg(struct Package *pkg);
-int getfreepkg(struct Package *pkg);	/* like getpkg but frees the pkg if getting fails */
-int getpkg(struct Package *pkg);	/* reads a package from in */
+int getfreepkg(struct Package *pkg);		/* like getpkg but frees the pkg
+						   if getting fails */
+int getpkg(struct Package *pkg);		/* reads a package from in */
 int mkdirhier(const char *p);
-void putpkg(const struct Package *pkg);
-					/* puts a package to out */
+void putpkg(const struct Package *pkg);		/* puts a package to out */
 int pkgcmp(const char *name1, const char *ver1, const int rel1,
 		const char *name2, const char *ver2, const int rel2);
 					/* compares two packages */

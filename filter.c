@@ -76,7 +76,7 @@ int operatormatch(const char *s) {
 		}
 		i++;
 		if((release = strchr(&s[i], '-'))) {
-			strncpy(buf, &s[i], BUFSIZ > release - &s[i] ? BUFSIZ : release - &s[i]);
+			strncpy(buf, &s[i], MIN(BUFSIZ, release - &s[i]));
 			result = pkgcmp(NULL, buf, atoi(release),
 					NULL, pkg.ver, pkg.rel);
 			if(strchr(buf, '-'))

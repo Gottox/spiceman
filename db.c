@@ -54,16 +54,20 @@ db(int argc, char *argv[]) {
 		break;
 	case 'i':
 	case 'p':
-		src = action == 'i' ? DBPREFIX "/installed" :  DBPREFIX "/packages";
+		if(action == 'i')
+			src = DBPREFIX "/installed";
+		else
+			src = DBPREFIX "/packages";
 		if(!(db = fopen(src, "r")))
 			die(1, "Cannot open database `%s`: ", src);
 		dup2(fileno(db), STDIN_FILENO);
 		bzero(&pkg, sizeof(pkg));
-		while((r = getfreepkg(&pkg) > 0))
+		while((r = getfreepkg(&pkg)) > 0)
 			putpkg(&pkg);
 		if(r < 0)
 			die(0, "You can start crying now.\n"
-					"Malformed Package in Database: ´%s´\n", src);
+					"Malformed Package in Database: ´%s´\n",
+					src);
 		fclose(db);
 		break;
 	default:
