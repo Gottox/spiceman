@@ -13,14 +13,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software */
-#include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
 
 #define APPLETPREFIX		"sp-"
 #define FIELDSEPERATOR		':'
 
 /* LENGTH macro copied from dwm. */
 #define MIN(a, b)		(a < b ? a : b)
-#define MAX(a, b)		(a > b ? a : b)
 #define LENGTH(x)		sizeof(x)/sizeof(x[0])
 #define APPLETUSAGE(a)		fputs("sp-" a " || spiceman " a \
 		"\n\t-h\thelp message\n", stderr);
@@ -80,7 +80,7 @@ struct Package {
 
 /* common.c */
 void cmdchain(int cmdc, struct Cmd *cmd);	/* executes a chain of commands */
-void *erealloc(void *p, size_t size);		/* remalloc + error testing */
+void *erealloc(void *p, size_t size);		/* realloc + error testing */
 void die(int pe, const char *format, ...);	/* prints message and exits */
 void freepkg(struct Package *pkg);
 int getfreepkg(struct Package *pkg);		/* like getpkg but frees the pkg

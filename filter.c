@@ -118,7 +118,6 @@ int repomatch(const char *s) {
 	while(getfreepkg(&pkg))
 		if(strcmp(pkg.repo, s) == 0)
 			putpkg(&pkg);
-
 	return EXIT_SUCCESS;
 }
 
@@ -129,7 +128,6 @@ int typematch(const char *s) {
 	while(getfreepkg(&pkg))
 		if(strchr(s, pkg.type))
 			putpkg(&pkg);
-
 	return EXIT_SUCCESS;
 }
 
@@ -205,14 +203,16 @@ int wildcardmatch(const char *p, int fulltext) {
 
 void filter_help() {
 	APPLETUSAGE("filter");
-	fputs("	-n	make packages unique name and version, use newest\n", stderr);
+	fputs("	-n	make packages unique name and version, use newest\n",
+			stderr);
 	fputs("	-N	make packages unique name, use newest\n", stderr);
 	fputs("	-t <t>	filters for types\n", stderr);
 	fputs("	-R <r>	filter repository\n", stderr);
 	fputs("	-s <p>	search in package-name, -version and -release\n", stderr);
 	fputs("	-S <p>	search in package-name, -version, -release and "
 			"-description\n", stderr);
-	fputs("	-o <p>	match using operators (e.g. spiceman>" VERSION ")\n", stderr);
+	fputs("	-o <p>	match using operators (e.g. spiceman>" VERSION
+			")\n", stderr);
 }
 
 int filter(int argc, char *argv[]) {
