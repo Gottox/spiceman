@@ -39,7 +39,7 @@ fopenurl(const struct Package *pkg, int *isprocess) {
 	int i;
 	char path[BUFSIZ] = DBPREFIX "/dl/";
 	int len = LENGTH(DBPREFIX "/dl");
-	
+
 	*isprocess = 1;
 	for(i = 0; i < BUFSIZ - len && pkg->url[i] && pkg->url[i] != ':'; i++)
 		path[len + i] = isalnum(pkg->url[i]) ? pkg->url[i] : '_';
@@ -61,6 +61,7 @@ FILE *fhttp(const char *url) {
 	unsigned int p = 80;
 	FILE *in;
 
+	/* parsing URI */
 	strncpy(urlbuf, url, BUFSIZ);
 	if(!(addr = strchr(urlbuf, ':')))
 		return 0;
@@ -76,6 +77,7 @@ FILE *fhttp(const char *url) {
 		if(!(p = atoi(port)))
 			return 0;
 	}
+	/* initializing socket */
 	if((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 		return 0;
 	bzero(&sin, sizeof(sin));
@@ -92,6 +94,7 @@ FILE *fhttp(const char *url) {
 		shutdown(sock, SHUT_RDWR);
 		return 0;
 	}
+	/* send header and receive header */
 	snprintf(headerbuf, LENGTH(headerbuf), HTTPHEADER, path, addr, p);
 	send(sock, headerbuf, strlen(headerbuf), 0);
 	if(!fgets(buf, LENGTH(buf), in) ||
@@ -125,10 +128,8 @@ int download(int argc, char *argv[]) {
 	while(getfreepkg(&pkg) > 0) {
 		snprintf(path, LENGTH(path), CACHEPREFIX "/dl/%s",
 				pkg.repo);
-		if(mkdirhier(path)) {
+		if(mkdirhier(path))
 			die(1, "Cannot create dir `%s`");
-			continue;
-		}
 		snprintf(path, LENGTH(path), CACHEPREFIX "/dl/%s/%s-%s-%u.tar",
 				pkg.repo, pkg.name, pkg.ver, pkg.rel);
 		if(!(file = fopenurl(&pkg, &isprocess)))
@@ -136,11 +137,14 @@ int download(int argc, char *argv[]) {
 		if(!(cache = fopen(path, "w")))
 			die(1, "Cannot open cache file: ");
 		while((n = fread(buf, sizeof(char), LENGTH(buf), file)) > 0)
-			fwrite(buf, sizeof(char), LENGTH(buf), cache);
+			fwrite(buf, sizeof(char), n, cache);
 		pkg.url = path;
 		putpkg(&pkg);
 		fclose(cache);
-		fclose(file);
+		if(isprocess)
+			pclose(file);
+		else
+			fclose(file);
 	}
 	return EXIT_SUCCESS;
 }
