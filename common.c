@@ -211,7 +211,7 @@ mkdirhier(const char *p) {
 }
 
 void
-putpkg(const struct Package *pkg, FILE *f) {
+putpkg(const struct Package *pkg) {
 	int n;
 	char sep[] = { FIELDSEPERATOR, '\n', '\t', 0 };
 	

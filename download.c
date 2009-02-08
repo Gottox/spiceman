@@ -133,7 +133,7 @@ int download(int argc, char *argv[]) {
 		snprintf(path, LENGTH(path), CACHEPREFIX "/dl/%s/%s-%s-%u.tar",
 				pkg.repo, pkg.name, pkg.ver, pkg.rel);
 		fputs("Getting: ", stderr);
-		fputs(pkg->url, stderr);
+		fputs(pkg.url, stderr);
 		fputc('\n', stderr);
 		if(!(file = fopenurl(&pkg, &isprocess))) {
 			perror("Cannot download");
@@ -146,7 +146,7 @@ int download(int argc, char *argv[]) {
 			putpkg(&pkg);
 			fclose(cache);
 			fputs("Finished: ", stderr);
-			fputs(pkg->url, stderr);
+			fputs(pkg.url, stderr);
 			fputc('\n', stderr);
 		}
 		else
