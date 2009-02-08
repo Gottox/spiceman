@@ -9,6 +9,7 @@ INITREPOADDR="http://s01.de/~gottox/repositories/init/repos.tar"
 PREFIX = /usr/local
 MANPREFIX = ${PREFIX}/share/man
 #DBPREFIX = ${PREFIX}/var/db/pkg
+#CACHEPREFIX = ${PREFIX}/var/cache/pkg
 # This is better for debugging
 DBPREFIX = .
 CACHEPREFIX = .
