@@ -67,7 +67,7 @@ puthex(const char *src, int l) {
 
 void
 cmdchain(int cmdc, struct Cmd *cmd) {
-	int fd[2], in, out , pid, i, status;
+	int fd[2], in, out, pid, i, status;
 
 	in = STDIN_FILENO;
 	for(i = 0; i < cmdc; i++) {
@@ -134,8 +134,8 @@ getfreepkg(struct Package *pkg) {
 
 int
 getpkg(struct Package *pkg) {
-	int l, n;
-	char *s, *p;
+	int l, n;	/* l = Stringlength; n = Fieldnumber */
+	char *s, *p;	/* s = Fieldstart; p = Pointer */
 
 	l = 0;
 	do {
@@ -211,7 +211,7 @@ mkdirhier(const char *p) {
 }
 
 void
-putpkg(const struct Package *pkg) {
+putpkg(const struct Package *pkg, FILE *f) {
 	int n;
 	char sep[] = { FIELDSEPERATOR, '\n', '\t', 0 };
 	
