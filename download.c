@@ -38,7 +38,7 @@ FILE *
 fopenurl(const struct Package *pkg, int *isprocess) {
 	int i;
 	char path[BUFSIZ] = DBPREFIX "/dl/";
-	int len = LENGTH(DBPREFIX "/dl");
+	int len = strlen(path);
 
 	*isprocess = 1;
 	for(i = 0; i < BUFSIZ - len && pkg->url[i] && pkg->url[i] != ':'; i++)
@@ -132,15 +132,25 @@ int download(int argc, char *argv[]) {
 			die(1, "Cannot create dir `%s`");
 		snprintf(path, LENGTH(path), CACHEPREFIX "/dl/%s/%s-%s-%u.tar",
 				pkg.repo, pkg.name, pkg.ver, pkg.rel);
-		if(!(file = fopenurl(&pkg, &isprocess)))
-			die(1, "Cannot download: ");
-		if(!(cache = fopen(path, "w")))
-			die(1, "Cannot open cache file: ");
-		while((n = fread(buf, sizeof(char), LENGTH(buf), file)) > 0)
-			fwrite(buf, sizeof(char), n, cache);
-		pkg.url = path;
-		putpkg(&pkg);
-		fclose(cache);
+		fputs("Getting: ", stderr);
+		fputs(pkg->url, stderr);
+		fputc('\n', stderr);
+		if(!(file = fopenurl(&pkg, &isprocess))) {
+			perror("Cannot download");
+			continue;
+		}
+		if((cache = fopen(path, "w"))) {
+			while((n = fread(buf, sizeof(char), LENGTH(buf), file)) > 0)
+				fwrite(buf, sizeof(char), n, cache);
+			pkg.url = path;
+			putpkg(&pkg);
+			fclose(cache);
+			fputs("Finished: ", stderr);
+			fputs(pkg->url, stderr);
+			fputc('\n', stderr);
+		}
+		else
+			perror("Cannot open cache file");
 		if(isprocess)
 			pclose(file);
 		else
