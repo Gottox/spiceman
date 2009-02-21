@@ -79,6 +79,8 @@ struct Package {
 
 
 /* common.c */
+char *astrcat(char *dest, const char *src);
+char *astrcpy(char *dest, const char *src);
 void cmdchain(int cmdc, struct Cmd *cmd);	/* executes a chain of commands */
 void *erealloc(void *p, size_t size);		/* realloc + error testing */
 void die(int pe, const char *format, ...);	/* prints message and exits */

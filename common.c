@@ -65,6 +65,32 @@ puthex(const char *src, int l) {
 		printf("%02x", (unsigned int )src[i] % 256);
 }
 
+char *
+astrcat(char *dest, const char *src) {
+	int dl, sl;
+
+	dl = dest ? strlen(dest) : 0;
+	sl = strlen(src);
+	if(!dest || (sl + dl) / BUFSIZ < sl / BUFSIZ) {
+		dest = erealloc(dest, (sl + dl) - ((sl + dl) % BUFSIZ) + BUFSIZ * sizeof(char));
+	}
+
+	return strcat(dest, src);
+}
+
+char *
+astrcpy(char *dest, const char *src) {
+	int dl, sl;
+
+	dl = dest ? strlen(dest) : 0;
+	sl = strlen(src);
+	if(!dest || dl / BUFSIZ < sl / BUFSIZ) {
+		dest = erealloc(dest, sl - (sl % BUFSIZ) + BUFSIZ * sizeof(char));
+	}
+
+	return strcpy(dest, src);
+}
+
 void
 cmdchain(int cmdc, struct Cmd *cmd) {
 	int fd[2], in, out, pid, i, status;

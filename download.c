@@ -36,16 +36,18 @@
 /* open URL */
 FILE *
 fopenurl(const struct Package *pkg, int *isprocess) {
-	int i;
-	char path[BUFSIZ] = DBPREFIX "/dl/";
-	int len = strlen(path);
+	char *p, *path = astrcpy(0, DBPREFIX "/dl/");
+	int l = strlen(path);
 
 	*isprocess = 1;
-	for(i = 0; i < BUFSIZ - len && pkg->url[i] && pkg->url[i] != ':'; i++)
-		path[len + i] = isalnum(pkg->url[i]) ? pkg->url[i] : '_';
-	path[len + i] = 0;
+	path = astrcat(path, pkg->url);
+	for(p = path + l; *p && *p != ':'; p++)
+		if(!isalnum(*p))
+			*p = '_';
+	*p = 0;
 	fflush(NULL);
 	*isprocess = 0;
+	free(path);
 	return fhttp(pkg->url);
 }
 
@@ -55,43 +57,54 @@ FILE *fhttp(const char *url) {
 	int sock;
 	struct sockaddr_in sin;
 	struct hostent *host;
-	char *addr, *path, *port;
-	char buf[BUFSIZ], urlbuf[BUFSIZ],
+	char *addr, *path, *port, *urlbuf;
+	char buf[BUFSIZ],
 		headerbuf[BUFSIZ * 2 + LENGTH(HTTPHEADER)];
 	unsigned int p = 80;
 	FILE *in;
 
 	/* parsing URI */
-	strncpy(urlbuf, url, BUFSIZ);
-	if(!(addr = strchr(urlbuf, ':')))
+	urlbuf = astrcpy(0, url);
+	if(!(addr = strchr(urlbuf, ':'))) {
+		free(urlbuf);
 		return 0;
+	}
 	addr++;
 	for(; *addr && *addr == '/'; addr++);
-	if(!(path = strchr(addr,'/')))
+	if(!(path = strchr(addr,'/'))) {
+		free(urlbuf);
 		return 0;
+	}
 	*path = 0;
 	path++;
 	if((port = strchr(addr, ':'))) {
 		*port = 0;
 		port++;
-		if(!(p = atoi(port)))
+		if(!(p = atoi(port))) {
+			free(urlbuf);
 			return 0;
+		}
 	}
 	/* initializing socket */
-	if((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+	if((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+		free(urlbuf);
 		return 0;
+	}
 	bzero(&sin, sizeof(sin));
 	sin.sin_family = AF_INET;
 	if((sin.sin_addr.s_addr = inet_addr(addr)) == INADDR_NONE) {
 		host = gethostbyname(addr);
-		if(!host)
+		if(!host) {
+			free(urlbuf);
 			return 0;
+		}
 		memcpy((char *)&sin.sin_addr, host->h_addr, host->h_length);
 	}
 	sin.sin_port = htons(p);
 	if(connect(sock, (struct sockaddr *)&sin, sizeof(sin)) ||
 			(!(in = fdopen(sock, "r")))) {
 		shutdown(sock, SHUT_RDWR);
+		free(urlbuf);
 		return 0;
 	}
 	/* send header and receive header */
@@ -100,9 +113,11 @@ FILE *fhttp(const char *url) {
 	if(!fgets(buf, LENGTH(buf), in) ||
 			strncmp(buf, RESPONSE, LENGTH(RESPONSE) - 1)) {
 		fclose(in);
+		free(urlbuf);
 		return 0;
 	}
 	while(fgets(buf, LENGTH(buf), in) && *buf != '\n' && *buf != '\r');
+	free(urlbuf);
 	return in;
 }
 
@@ -142,7 +157,8 @@ int download(int argc, char *argv[]) {
 		if((cache = fopen(path, "w"))) {
 			while((n = fread(buf, sizeof(char), LENGTH(buf), file)) > 0)
 				fwrite(buf, sizeof(char), n, cache);
-			pkg.url = path;
+			snprintf(buf, LENGTH(buf), "file:%s", path);
+			pkg.url = buf;
 			putpkg(&pkg);
 			fclose(cache);
 			fputs("Finished: ", stderr);
