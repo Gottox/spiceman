@@ -42,7 +42,8 @@ maxlength(const char *name, const char *str, int max, const char *label) {
 }
 
 static int
-alnumand(const char *name, const char *str, const char *allowed, const char *label) {
+alnumand(const char *name, const char *str, const char *allowed,
+		const char *label) {
 	const char *p;
 
 	for(p = str; *p && (isalnum(*p) || strchr(allowed, *p)); p++);
@@ -70,7 +71,8 @@ lower(const char *name, const char *str, const char *label) {
 }
 
 static int
-digitand(const char *name, const char *str, const char *allowed, const char *label) {
+digitand(const char *name, const char *str, const char *allowed,
+		const char *label) {
 	const char *p;
 
 	for(p = str; *p && (isdigit(*p) || strchr(allowed, *p)); p++);

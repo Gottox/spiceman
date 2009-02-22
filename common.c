@@ -72,7 +72,8 @@ astrcat(char *dest, const char *src) {
 	dl = dest ? strlen(dest) : 0;
 	sl = strlen(src);
 	if(!dest || (sl + dl) / BUFSIZ < sl / BUFSIZ)
-		dest = erealloc(dest, (sl + dl) - ((sl + dl) % BUFSIZ) + BUFSIZ * sizeof(char));
+		dest = erealloc(dest, (sl + dl) - ((sl + dl) % BUFSIZ) +
+				BUFSIZ * sizeof(char));
 
 	return strcat(dest, src);
 }
@@ -84,7 +85,8 @@ astrcpy(char *dest, const char *src) {
 	dl = dest ? strlen(dest) : 0;
 	sl = strlen(src);
 	if(!dest || dl / BUFSIZ < sl / BUFSIZ)
-		dest = erealloc(dest, sl - (sl % BUFSIZ) + BUFSIZ * sizeof(char));
+		dest = erealloc(dest, sl - (sl % BUFSIZ) +
+				BUFSIZ * sizeof(char));
 
 	return strcpy(dest, src);
 }
