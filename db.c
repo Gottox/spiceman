@@ -18,6 +18,10 @@
 #include <strings.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 #include "common.h"
 #include "db.h"
@@ -39,7 +43,7 @@ int
 db(int argc, char *argv[]) {
 	char action = 0;
 	int r, i;
-	FILE *db;
+	int db;
 	char *src;
 	struct Package pkg;
 
@@ -58,9 +62,9 @@ db(int argc, char *argv[]) {
 			src = DBPREFIX "/installed";
 		else
 			src = DBPREFIX "/packages";
-		if(!(db = fopen(src, "r")))
+		if(!(db = open(src, 0)))
 			die(1, "Cannot open database `%s`: ", src);
-		dup2(fileno(db), STDIN_FILENO);
+		dup2(db, STDIN_FILENO);
 		bzero(&pkg, sizeof(pkg));
 		while((r = getfreepkg(&pkg)) > 0)
 			putpkg(&pkg);
@@ -68,7 +72,7 @@ db(int argc, char *argv[]) {
 			die(0, "You can start crying now.\n"
 					"Malformed Package in Database: ´%s´\n",
 					src);
-		fclose(db);
+		close(db);
 		break;
 	default:
 		db_help();
