@@ -27,6 +27,7 @@
 #include "install.h"
 #include "relate.h"
 #include "ui.h"
+#include "validate.h"
 
 #define APPLET(x) { x, x ## _help, #x }
 
@@ -48,6 +49,7 @@ static struct Applet applets[] = {
 	APPLET(install),
 	APPLET(relate),
 	APPLET(ui),
+	APPLET(validate),
 	{ main_applet, help, NULL },
 };
 
@@ -207,8 +209,10 @@ int main(int argc, char *argv[]) {
 	 * (the last one) I'm so sorry for this :/ */
 	for(applet = 0; applet < LENGTH(applets) - 1; applet++)
 		if((strncmp(bn, APPLETPREFIX, LENGTH(APPLETPREFIX) - 1) == 0 &&
-				strcmp(bn + LENGTH(APPLETPREFIX) - 1, applets[applet].name) == 0) ||
-				(argc > 1 && strcmp(argv[1], applets[applet].name) == 0))
+				strcmp(bn + LENGTH(APPLETPREFIX) - 1,
+					applets[applet].name) == 0) ||
+				(argc > 1 && strcmp(argv[1],
+						    applets[applet].name) == 0))
 			break;
 	/* shifting to second argument to make ARG* work */
 	argc--;
