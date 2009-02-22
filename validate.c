@@ -86,6 +86,17 @@ digitand(const char *name, const char *str, const char *allowed,
 }
 
 static int
+notcontain(const char *name, const char *str, const char *disallowed,
+		const char *label) {
+	if(strstr(str, disallowed)) {
+		fprintf(stderr, "Warning: %s: %s contains not allowed "
+				"substring\n", name, label);
+		return 0;
+	}
+	return 1;
+}
+
+static int
 validatepkg(struct Package *pkg) {
 	int result = 1;
 	char *label;
@@ -109,19 +120,36 @@ validatepkg(struct Package *pkg) {
 	result &= maxlength(pkg->name, str, 255, label);
 	result &= alnumand(pkg->name, str, "_.", label);
 
-
 	label = "package release";
 	str = pkg->fields[REL];
 	result &= nonempty(pkg->name, str, label);
 	result &= digitand(pkg->name, str, "", label);
 
-	/* DESCRIPTION */
-	if(strstr(pkg->desc, "\n\n")) {
-		result = 0;
-		fprintf(stderr, "Warning: %s: Package description may not "
-				"contain empty lines.\n",
-				pkg->name);
-	}
+	label = "package description";
+	str = pkg->fields[DESC];
+	result &= notcontain(pkg->name, str, "\n\n", label);
+
+	label = "package url";
+	str = pkg->fields[URL];
+	result &= nonempty(pkg->name, str, label);
+	result &= alnumand(pkg->name, str, "/~._=?&-:", label);
+
+	label = "package useflags";
+	str = pkg->fields[USEF];
+	result &= alnumand(pkg->name, str, "_- \t", label);
+	result &= lower(pkg->name, str, label);
+
+	label = "package repository";
+	str = pkg->fields[REPO];
+	result &= nonempty(pkg->name, str, label);
+	result &= maxlength(pkg->name, str, 255, label);
+	result &= alnumand(pkg->name, str, "_-", label);
+	result &= lower(pkg->name, str, label);
+
+	label = "package info url";
+	str = pkg->fields[URL];
+	result &= nonempty(pkg->name, str, label);
+	result &= alnumand(pkg->name, str, "/~._=?&-:", label);
 
 	return result;
 }
