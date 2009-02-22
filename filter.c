@@ -83,8 +83,8 @@ int operatormatch(const char *s) {
 				continue;
 		}
 		else
-			result = pkgcmp(NULL, &s[i], 0,
-					NULL, pkg.ver, 0);
+			result = pkgcmp(NULL, pkg.ver, 0,
+					NULL, &s[i], 0);
 		switch(operator) {
 		case EQUAL:
 			result = result == 0;
@@ -93,16 +93,16 @@ int operatormatch(const char *s) {
 			result = result != 0;
 			break;
 		case LESSER:
-			result = result > 0;
-			break;
-		case GREATER:
 			result = result < 0;
 			break;
+		case GREATER:
+			result = result > 0;
+			break;
 		case LESSEREQUAL:
-			result = result >= 0;
+			result = result <= 0;
 			break;
 		case GREATEREQUAL:
-			result = result <= 0;
+			result = result >= 0;
 			break;
 		}
 		if(result)
