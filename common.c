@@ -66,29 +66,29 @@ puthex(const char *src, int l) {
 }
 
 char *
-astrcat(char *dest, const char *src) {
+astrcat(char **dest, const char *src) {
 	int dl, sl;
 
-	dl = dest ? strlen(dest) : 0;
+	dl = *dest ? strlen(*dest) : 0;
 	sl = strlen(src);
-	if(!dest || (sl + dl) / BUFSIZ < sl / BUFSIZ)
-		dest = erealloc(dest, (sl + dl) - ((sl + dl) % BUFSIZ) +
+	if(!*dest || (sl + dl) / BUFSIZ < sl / BUFSIZ)
+		*dest = erealloc(*dest, (sl + dl) - ((sl + dl) % BUFSIZ) +
 				BUFSIZ * sizeof(char));
 
-	return strcat(dest, src);
+	return strcat(*dest, src);
 }
 
 char *
-astrcpy(char *dest, const char *src) {
+astrcpy(char **dest, const char *src) {
 	int dl, sl;
 
-	dl = dest ? strlen(dest) : 0;
+	dl = *dest ? strlen(*dest) : 0;
 	sl = strlen(src);
-	if(!dest || dl / BUFSIZ < sl / BUFSIZ)
-		dest = erealloc(dest, sl - (sl % BUFSIZ) +
+	if(!*dest || dl / BUFSIZ < sl / BUFSIZ)
+		*dest = erealloc(*dest, sl - (sl % BUFSIZ) +
 				BUFSIZ * sizeof(char));
 
-	return strcpy(dest, src);
+	return strcpy(*dest, src);
 }
 
 int
@@ -109,7 +109,6 @@ asprintf(char **str, char *format, ...) {
 
 void
 cmdchain(int cmdc, struct Cmd *cmd) {
-	asprintf(0,0);
 	int fd[2], in, out, pid, i, status;
 
 	in = STDIN_FILENO;

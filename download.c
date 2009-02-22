@@ -31,7 +31,7 @@
 	"Accept: */*\r\n" \
 	"Host: %s:%i\r\n" \
 	"Connection: Close\r\n\r\n"
-#define RESPONSE "HTTP/1.0 200 OK"
+#define RESPONSE "HTTP/1.0 200"
 
 /* open URL */
 FILE *
@@ -40,7 +40,7 @@ fopenurl(const struct Package *pkg, int *isprocess) {
 	int l = strlen(path);
 
 	*isprocess = 1;
-	path = astrcat(path, pkg->url);
+	astrcat(&path, pkg->url);
 	for(p = path + l; *p && *p != ':'; p++)
 		if(!isalnum(*p))
 			*p = '_';
@@ -57,9 +57,8 @@ FILE *fhttp(const char *url) {
 	int sock;
 	struct sockaddr_in sin;
 	struct hostent *host;
-	char *addr, *path, *port, *urlbuf;
-	char buf[BUFSIZ],
-		headerbuf[BUFSIZ * 2 + LENGTH(HTTPHEADER)];
+	char *addr, *path, *port, *urlbuf, *header;
+	char buf[BUFSIZ];
 	unsigned int p = 80;
 	FILE *in;
 
@@ -108,15 +107,19 @@ FILE *fhttp(const char *url) {
 		return 0;
 	}
 	/* send header and receive header */
-	snprintf(headerbuf, LENGTH(headerbuf), HTTPHEADER, path, addr, p);
-	send(sock, headerbuf, strlen(headerbuf), 0);
-	if(!fgets(buf, LENGTH(buf), in) ||
+	asprintf(&header, HTTPHEADER, path, addr, p);
+	send(sock, header, strlen(header), 0);
+	if(!fgets(buf, LENGTH(RESPONSE), in) ||
 			strncmp(buf, RESPONSE, LENGTH(RESPONSE) - 1)) {
+		puts(buf);
+		puts(RESPONSE);
 		fclose(in);
-		free(urlbuf);
-		return 0;
+		in = 0;
 	}
-	while(fgets(buf, LENGTH(buf), in) && *buf != '\n' && *buf != '\r');
+	else
+		while(fgets(buf, LENGTH(buf), in) && *buf != '\n' &&
+				*buf != '\r');
+	free(header);
 	free(urlbuf);
 	return in;
 }

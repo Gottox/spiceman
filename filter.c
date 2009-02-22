@@ -36,7 +36,7 @@ int operatormatch(const char *s) {
 	int operator;
 	struct Package pkg;
 	const char *release;
-	char buf[BUFSIZ];
+	char *buf;
 
 	bzero(&pkg, sizeof(pkg));
 	while(getfreepkg(&pkg) > 0) {
@@ -76,7 +76,8 @@ int operatormatch(const char *s) {
 		}
 		i++;
 		if((release = strchr(&s[i], '-'))) {
-			strncpy(buf, &s[i], MIN(BUFSIZ, release - &s[i]));
+			astrcpy(&buf, &s[i]);
+			buf[release - &s[i]] = 0;
 			result = pkgcmp(NULL, buf, atoi(release),
 					NULL, pkg.ver, pkg.rel);
 			if(strchr(buf, '-'))
@@ -107,6 +108,7 @@ int operatormatch(const char *s) {
 		}
 		if(result)
 			putpkg(&pkg);
+		free(buf);
 	}
 	return 0;
 }
