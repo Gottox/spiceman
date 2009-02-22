@@ -228,6 +228,8 @@ getpkg(struct Package *pkg) {
 			case RELTIME:	pkg->reltime = atol(s); break;
 			case INSTIME:	pkg->instime = atol(s); break;
 			}
+			if(n < LENGTH(pkg->fields))
+				pkg->fields[n] = s;
 			s = p + 1;
 			n++;
 		}

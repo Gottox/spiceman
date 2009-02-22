@@ -21,54 +21,97 @@
 #include "common.h"
 #include "validate.h"
 
-static int validatepkg(struct Package *pkg) {
-	int result = 1;
-	char *p;
+static int
+nonempty(const char *name, const char *str, const char *label) {
+	if(str[0] == '\0') {
+		fprintf(stderr, "Warning: %s: %s may not empty.\n",
+				name, label);
+		return 0;
+	}
+	return 1;
+}
 
-	/* TYPE */
-	if(strchr("rsb", pkg->type)) {
-		result = 0;
-		fprintf(stderr, "Warning: %s: Type '%c' is unknown.\n",
-				pkg->name, pkg->type);
+static int
+maxlength(const char *name, const char *str, int max, const char *label) {
+	if(strlen(str) > max) {
+		fprintf(stderr, "Warning: %s: %s is too long.\n",
+				name, label);
+		return 0;
 	}
+	return 1;
+}
 
-	/* NAME */
-	if(pkg->name[0] == '\0') {
-		result = 0;
-		fprintf(stderr, "Warning: %s: Package name may not empty.\n",
-				pkg->name);
-	}
-	if(strlen(pkg->name) > 255) {
-		result = 0;
-		fprintf(stderr, "Warning: %s: Package name is too long.\n",
-				pkg->name);
-	}
-	for(p = pkg->name; *p && (isalnum(*p) || strchr("-_", *p)); p++);
+static int
+alnumand(const char *name, const char *str, const char *allowed, const char *label) {
+	const char *p;
+
+	for(p = str; *p && (isalnum(*p) || strchr(allowed, *p)); p++);
 	if(*p) {
-		fprintf(stderr, "Warning %s: non-valid ascii code '%u' "
-				"found.\n",
-				pkg->name, *p);
+		fprintf(stderr, "Warning %s: %s may not contain "
+				"ascii code '%u'.\n",
+				name, label, *p);
+		return 0;
 	}
+	return 1;
 
-	/* VERSION */
-	if(pkg->ver[0] == '\0') {
-		result = 0;
-		fprintf(stderr, "Warning: %s: Package version may not empty.\n",
-				pkg->name);
-	}
-	if(strlen(pkg->ver) > 255) {
-		result = 0;
-		fprintf(stderr, "Warning: %s: Package version is too long.\n",
-				pkg->name);
-	}
+}
 
-	/* RELEASE */
-	if(pkg->rel == 0) {
-		result = 0;
-		fprintf(stderr, "Warning: %s: Package release may not 0 or "
-				"ascii.\n",
-				pkg->name);
+static int
+lower(const char *name, const char *str, const char *label) {
+	const char *p;
+
+	for(p = str; *p && (islower(*p) || !isalpha(*p)); p++);
+	if(*p) {
+		fprintf(stderr, "Warning %s: %s must be lower case.\n",
+				name, label);
+		return 0;
 	}
+	return 1;
+}
+
+static int
+digitand(const char *name, const char *str, const char *allowed, const char *label) {
+	const char *p;
+
+	for(p = str; *p && (isdigit(*p) || strchr(allowed, *p)); p++);
+	if(*p) {
+		fprintf(stderr, "Warning %s: %s may not contain "
+				"ascii code '%u'\n",
+				name, label, *p);
+		return 0;
+	}
+	return 1;
+}
+
+static int
+validatepkg(struct Package *pkg) {
+	int result = 1;
+	char *label;
+	char *str;
+
+	label = "package type";
+	str = pkg->fields[TYPE];
+	result &= nonempty(pkg->name, str, label);
+	result &= maxlength(pkg->name, str, 1, label);
+
+	label = "package name";
+	str = pkg->fields[NAME];
+	result &= nonempty(pkg->name, str, label);
+	result &= maxlength(pkg->name, str, 255, label);
+	result &= alnumand(pkg->name, str, "_-", label);
+	result &= lower(pkg->name, str, label);
+
+	label = "package version";
+	str = pkg->fields[VER];
+	result &= nonempty(pkg->name, str, label);
+	result &= maxlength(pkg->name, str, 255, label);
+	result &= alnumand(pkg->name, str, "_.", label);
+
+
+	label = "package release";
+	str = pkg->fields[REL];
+	result &= nonempty(pkg->name, str, label);
+	result &= digitand(pkg->name, str, "", label);
 
 	/* DESCRIPTION */
 	if(strstr(pkg->desc, "\n\n")) {
@@ -98,7 +141,8 @@ int validate(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	while(getfreepkg(&pkg)) {
+	bzero(&pkg, sizeof(pkg));
+	while(getfreepkg(&pkg) > 0) {
 		if(!validatepkg(&pkg)) {
 			if(printdeprec)
 				putpkg(&pkg);
