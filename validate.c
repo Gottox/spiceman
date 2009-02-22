@@ -47,7 +47,7 @@ alnumand(const char *name, const char *str, const char *allowed, const char *lab
 
 	for(p = str; *p && (isalnum(*p) || strchr(allowed, *p)); p++);
 	if(*p) {
-		fprintf(stderr, "Warning %s: %s may not contain "
+		fprintf(stderr, "Warning: %s: %s may not contain "
 				"ascii code '%u'.\n",
 				name, label, *p);
 		return 0;
@@ -62,7 +62,7 @@ lower(const char *name, const char *str, const char *label) {
 
 	for(p = str; *p && (islower(*p) || !isalpha(*p)); p++);
 	if(*p) {
-		fprintf(stderr, "Warning %s: %s must be lower case.\n",
+		fprintf(stderr, "Warning: %s: %s must be lower case.\n",
 				name, label);
 		return 0;
 	}
@@ -75,7 +75,7 @@ digitand(const char *name, const char *str, const char *allowed, const char *lab
 
 	for(p = str; *p && (isdigit(*p) || strchr(allowed, *p)); p++);
 	if(*p) {
-		fprintf(stderr, "Warning %s: %s may not contain "
+		fprintf(stderr, "Warning: %s: %s may not contain "
 				"ascii code '%u'\n",
 				name, label, *p);
 		return 0;
