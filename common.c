@@ -91,8 +91,25 @@ astrcpy(char *dest, const char *src) {
 	return strcpy(dest, src);
 }
 
+int
+asprintf(char **str, char *format, ...) {
+	int size = 0, n;
+	va_list ap;
+
+	*str = NULL;
+	va_start(ap, format);
+	do {
+		size += BUFSIZ;
+		*str = erealloc(*str, size);
+	} while((n = vsnprintf(*str, size, format, ap)) + 1 == size);
+	va_end(ap);
+
+	return n;
+}
+
 void
 cmdchain(int cmdc, struct Cmd *cmd) {
+	asprintf(0,0);
 	int fd[2], in, out, pid, i, status;
 
 	in = STDIN_FILENO;
