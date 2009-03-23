@@ -101,7 +101,7 @@ asprintf(char **str, char *format, ...) {
 	do {
 		size += BUFSIZ;
 		*str = erealloc(*str, size);
-	} while((n = vsnprintf(*str, size, format, ap)) + 1 == size);
+	} while((n = vsnprintf(*str, size, format, ap)) + 1 > size);
 	va_end(ap);
 
 	return n;
