@@ -134,7 +134,7 @@ int download(int argc, char *argv[]) {
 	FILE *file, *cache;
 	int nocache = 0, n, isprocess;
 	struct Package pkg = { 0 };
-	char path[LENGTH(CACHEPREFIX) + BUFSIZ];
+	char *path = 0;
 	char buf[BUFSIZ];
 
 	if(argc == 1 && strcmp("-n", argv[0]) == 0)
@@ -148,7 +148,7 @@ int download(int argc, char *argv[]) {
 				pkg.repo);
 		if(mkdirhier(path))
 			die(1, "Cannot create dir `%s`");
-		snprintf(path, LENGTH(path), CACHEPREFIX "/dl/%s/%s-%s-%u.tar",
+		asprintf(&path, CACHEPREFIX "/dl/%s/%s-%s-%u.tar",
 				pkg.repo, pkg.name, pkg.ver, pkg.rel);
 		fputs("Getting: ", stderr);
 		fputs(pkg.url, stderr);
@@ -175,5 +175,7 @@ int download(int argc, char *argv[]) {
 		else
 			fclose(file);
 	}
+	if(path)
+		free(path);
 	return EXIT_SUCCESS;
 }
