@@ -176,30 +176,33 @@ unique(int vercmp) {
 
 int wildcardmatch(const char *p, int fulltext) {
 	unsigned int len;
-	char buf[BUFSIZ], patternbuf[BUFSIZ] = "*";
+	char *buf = 0, *patternbuf = 0;
 	struct Package pkg;
 
 	if(p[0] == '^')
-		strncpy(patternbuf, p + 1, LENGTH(patternbuf));
-	else
-		strncat(patternbuf, p, LENGTH(patternbuf));
-	len = strlen(patternbuf);
-	if(len < LENGTH(patternbuf) - 1 && patternbuf[len - 1] == '$')
-		patternbuf[len - 1] = 0;
-	else if(len + 2 < BUFSIZ) {
-		patternbuf[len++] = '*';
-		patternbuf[len] = 0;
+		astrcpy(&patternbuf, p + 1);
+	else {
+		astrcpy(&patternbuf, "*");
+		astrcat(&patternbuf, p);
 	}
+	len = strlen(patternbuf);
+	if(patternbuf[len - 1] == '$')
+		patternbuf[len - 1] = 0;
+	else
+		astrcat(&patternbuf, "*");
 
 	bzero(&pkg, sizeof(pkg));
 	while(getfreepkg(&pkg) > 0) {
-		snprintf(buf, LENGTH(buf), "%s-%s-%i", pkg.name,
+		asprintf(&buf, "%s-%s-%i", pkg.name,
 				pkg.ver, pkg.rel);
 		if(fnmatch(patternbuf, buf, 0) == 0)
 			putpkg(&pkg);
 		else if(fulltext && fnmatch(patternbuf, pkg.desc, 0) == 0)
 			putpkg(&pkg);
 	}
+	if(buf)
+		free(buf);
+	free(patternbuf);
 	return EXIT_SUCCESS;
 }
 
