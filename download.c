@@ -36,10 +36,12 @@
 /* open URL */
 FILE *
 fopenurl(const struct Package *pkg, int *isprocess) {
-	char *p, *path = astrcpy(0, DBPREFIX "/dl/");
-	int l = strlen(path);
+	char *p, *path = 0;
+	int l;
 
 	*isprocess = 1;
+	astrcpy(&path, DBPREFIX "/dl/");
+	l = strlen(path);
 	astrcat(&path, pkg->url);
 	for(p = path + l; *p && *p != ':'; p++)
 		if(!isalnum(*p))
@@ -53,17 +55,18 @@ fopenurl(const struct Package *pkg, int *isprocess) {
 
 /* builtin http download
  * only as fallback */
-FILE *fhttp(const char *url) {
+FILE
+*fhttp(const char *url) {
 	int sock;
 	struct sockaddr_in sin;
 	struct hostent *host;
-	char *addr, *path, *port, *urlbuf, *header;
+	char *addr, *path, *port, *urlbuf = 0, *header;
 	char buf[BUFSIZ];
 	unsigned int p = 80;
 	FILE *in;
 
 	/* parsing URI */
-	urlbuf = astrcpy(0, url);
+	astrcpy(&urlbuf, url);
 	if(!(addr = strchr(urlbuf, ':'))) {
 		free(urlbuf);
 		return 0;
@@ -144,8 +147,7 @@ int download(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 	while(getfreepkg(&pkg) > 0) {
-		snprintf(path, LENGTH(path), CACHEPREFIX "/dl/%s",
-				pkg.repo);
+		asprintf(&path, CACHEPREFIX "/dl/%s", pkg.repo);
 		if(mkdirhier(path))
 			die(1, "Cannot create dir `%s`");
 		asprintf(&path, CACHEPREFIX "/dl/%s/%s-%s-%u.tar",
