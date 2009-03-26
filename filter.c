@@ -31,7 +31,8 @@ enum Operator {
 	EQUAL, NOTEQUAL, LESSER, GREATER, LESSEREQUAL, GREATEREQUAL
 };
 
-int operatormatch(const char *s) {
+int
+operatormatch(const char *s) {
 	int i, result;
 	int operator;
 	struct Package pkg;
@@ -113,7 +114,8 @@ int operatormatch(const char *s) {
 	return 0;
 }
 
-int repomatch(const char *s) {
+int
+repomatch(const char *s) {
 	struct Package pkg;
 
 	bzero(&pkg, sizeof(pkg));
@@ -123,7 +125,8 @@ int repomatch(const char *s) {
 	return EXIT_SUCCESS;
 }
 
-int typematch(const char *s) {
+int
+typematch(const char *s) {
 	struct Package pkg;
 
 	bzero(&pkg, sizeof(pkg));
@@ -163,7 +166,6 @@ unique(int vercmp) {
 		pkg.buf = NULL;
 		pkg.blen = 0;
 	}
-
 	while(list) {
 		putpkg(&list->pkg);
 		freepkg(&list->pkg);
@@ -174,7 +176,8 @@ unique(int vercmp) {
 	return EXIT_SUCCESS;
 }
 
-int wildcardmatch(const char *p, int fulltext) {
+int
+wildcardmatch(const char *p, int fulltext) {
 	unsigned int len;
 	char *buf = 0, *patternbuf = 0;
 	struct Package pkg;
@@ -206,7 +209,8 @@ int wildcardmatch(const char *p, int fulltext) {
 	return EXIT_SUCCESS;
 }
 
-void filter_help() {
+void
+filter_help() {
 	APPLETUSAGE("filter");
 	fputs("	-n	make packages unique name and version, use newest\n",
 			stderr);
@@ -220,7 +224,8 @@ void filter_help() {
 			")\n", stderr);
 }
 
-int filter(int argc, char *argv[]) {
+int
+filter(int argc, char *argv[]) {
 	char action = 0;
 	char *arg = NULL;
 
@@ -232,6 +237,7 @@ int filter(int argc, char *argv[]) {
 	case 'o':
 		if(!(arg = ARGVAL()))
 			goto argerr;
+		/* no break here */
 	case 'n':
 	case 'N':
 		if(action)
