@@ -22,13 +22,13 @@
 #include "validate.h"
 
 static int
-nonempty(const char *name, const char *str, const char *label) {
+empty(const char *name, const char *str, const char *label) {
 	if(str[0] == '\0') {
 		fprintf(stderr, "Warning: %s: %s may not empty.\n",
 				name, label);
-		return 0;
+		return 1;
 	}
-	return 1;
+	return 0;
 }
 
 static int
@@ -86,14 +86,14 @@ digitand(const char *name, const char *str, const char *allowed,
 }
 
 static int
-notcontain(const char *name, const char *str, const char *disallowed,
+contain(const char *name, const char *str, const char *disallowed,
 		const char *label) {
 	if(strstr(str, disallowed)) {
 		fprintf(stderr, "Warning: %s: %s contains not allowed "
 				"substring\n", name, label);
-		return 0;
+		return 1;
 	}
-	return 1;
+	return 0;
 }
 
 static int
@@ -104,34 +104,34 @@ validatepkg(struct Package *pkg) {
 
 	label = "package type";
 	str = pkg->fields[TYPE];
-	result &= nonempty(pkg->name, str, label);
+	result &= !empty(pkg->name, str, label);
 	result &= maxlength(pkg->name, str, 1, label);
 
 	label = "package name";
 	str = pkg->fields[NAME];
-	result &= nonempty(pkg->name, str, label);
+	result &= !empty(pkg->name, str, label);
 	result &= maxlength(pkg->name, str, 255, label);
 	result &= alnumand(pkg->name, str, "_-", label);
 	result &= lower(pkg->name, str, label);
 
 	label = "package version";
 	str = pkg->fields[VER];
-	result &= nonempty(pkg->name, str, label);
+	result &= !empty(pkg->name, str, label);
 	result &= maxlength(pkg->name, str, 255, label);
 	result &= alnumand(pkg->name, str, "_.", label);
 
 	label = "package release";
 	str = pkg->fields[REL];
-	result &= nonempty(pkg->name, str, label);
+	result &= !empty(pkg->name, str, label);
 	result &= digitand(pkg->name, str, "", label);
 
 	label = "package description";
 	str = pkg->fields[DESC];
-	result &= notcontain(pkg->name, str, "\n\n", label);
+	result &= !contain(pkg->name, str, "\n\n", label);
 
 	label = "package url";
 	str = pkg->fields[URL];
-	result &= nonempty(pkg->name, str, label);
+	result &= !empty(pkg->name, str, label);
 	result &= alnumand(pkg->name, str, "/~._=?&-:", label);
 
 	label = "package useflags";
@@ -141,14 +141,14 @@ validatepkg(struct Package *pkg) {
 
 	label = "package repository";
 	str = pkg->fields[REPO];
-	result &= nonempty(pkg->name, str, label);
+	result &= !empty(pkg->name, str, label);
 	result &= maxlength(pkg->name, str, 255, label);
 	result &= alnumand(pkg->name, str, "_-", label);
 	result &= lower(pkg->name, str, label);
 
 	label = "package info url";
 	str = pkg->fields[URL];
-	result &= nonempty(pkg->name, str, label);
+	result &= !empty(pkg->name, str, label);
 	result &= alnumand(pkg->name, str, "/~._=?&-:", label);
 
 	return result;
