@@ -151,7 +151,8 @@ download(int argc, char *argv[]) {
 	while(getfreepkg(&pkg) > 0) {
 		asprintf(&path, CACHEPREFIX "/dl/%s", pkg.repo);
 		if(mkdirhier(path))
-			die(1, "Cannot create dir `%s`");
+			die(1, "Cannot create dir `" CACHEPREFIX "/dl/%s`",
+					pkg.repo);
 		asprintf(&path, CACHEPREFIX "/dl/%s/%s-%s-%u.tar",
 				pkg.repo, pkg.name, pkg.ver, pkg.rel);
 		fputs("Getting: ", stderr);
@@ -162,7 +163,8 @@ download(int argc, char *argv[]) {
 			continue;
 		}
 		if((cache = fopen(path, "w"))) {
-			while((n = fread(buf, sizeof(char), LENGTH(buf), file)) > 0)
+			while((n = fread(buf, sizeof(char), LENGTH(buf),
+							file)) > 0)
 				fwrite(buf, sizeof(char), n, cache);
 			snprintf(buf, LENGTH(buf), "file:%s", path);
 			pkg.url = buf;

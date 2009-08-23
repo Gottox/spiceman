@@ -154,12 +154,14 @@ validatepkg(struct Package *pkg) {
 	return result;
 }
 
-void validate_help() {
+void
+validate_help() {
 	APPLETUSAGE("validate");
 	fputs("	-r	remove deprecated packages from output\n", stderr);
 }
 
-int validate(int argc, char *argv[]) {
+int
+validate(int argc, char *argv[]) {
 	struct Package pkg;
 	int error = 0;
 	int printdeprec = 0;
