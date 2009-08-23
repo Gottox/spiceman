@@ -55,8 +55,8 @@ fopenurl(const struct Package *pkg, int *isprocess) {
 
 /* builtin http download
  * only as fallback */
-FILE
-*fhttp(const char *url) {
+FILE *
+fhttp(const char *url) {
 	int sock;
 	struct sockaddr_in sin;
 	struct hostent *host;
@@ -127,13 +127,15 @@ FILE
 	return in;
 }
 
-void download_help() {
+void
+download_help() {
 	APPLETUSAGE("download");
 	fputs("	-n	force downloading. Do not use cache.\n", stderr);
 }
 
 /* download a Package */
-int download(int argc, char *argv[]) {
+int
+download(int argc, char *argv[]) {
 	FILE *file, *cache;
 	int nocache = 0, n, isprocess;
 	struct Package pkg = { 0 };

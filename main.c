@@ -34,6 +34,7 @@
 void help();
 int main_applet(int argc, char *argv[]);
 void printchain(int cmdc, struct Cmd *cmd);
+void version();
 
 struct Applet {
 	Cmdfunction function;
@@ -91,6 +92,21 @@ static struct Cmd updatechain[] = {
 static char *progname;
 
 /* fallback applet if no other fits */
+void
+help() {
+	fputs("spaceman\n", stderr);
+	fputs("	-H	help message for all applets\n", stderr);
+	fputs("	-I	use installed packages as db source.\n", stderr);
+	fputs("	-h	help message\n", stderr);
+	fputs("	-i <p>	Install packages\n", stderr);
+	fputs("	-r <p>	Remove packages\n", stderr);
+	fputs("	-s <p>	search package\n", stderr);
+	fputs("	-S <p>	search package by description too.\n", stderr);
+	fputs("	-y	sync with repositories\n", stderr);
+	fputs("	-u	Update system\n", stderr);
+	fputs("	-v	Version\n", stderr);
+}
+
 int
 main_applet(int argc, char *argv[]) {
 	int action = 0, installed = 0, sync = 0;
@@ -182,19 +198,11 @@ printchain(int cmdc, struct Cmd *cmd) {
 	fputc('\n', stderr);
 }
 
+
 void
-help() {
-	fputs("spaceman\n", stderr);
-	fputs("	-H	help message for all applets\n", stderr);
-	fputs("	-I	use installed packages as db source.\n", stderr);
-	fputs("	-h	help message\n", stderr);
-	fputs("	-i <p>	Install packages\n", stderr);
-	fputs("	-r <p>	Remove packages\n", stderr);
-	fputs("	-s <p>	search package\n", stderr);
-	fputs("	-S <p>	search package by description too.\n", stderr);
-	fputs("	-y	sync with repositories\n", stderr);
-	fputs("	-u	Update system\n", stderr);
-	fputs("	-v	Version\n", stderr);
+version() {
+	fputs("spiceman-" VERSION " - distributed package management tools\n",
+			stderr);
 }
 
 int main(int argc, char *argv[]) {

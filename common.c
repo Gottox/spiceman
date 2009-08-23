@@ -324,7 +324,8 @@ vercmp(const char *v1, const char *v2) {
 				return 1;
 			else if(isdig2)
 				return -1;
-			else if((*v1 == '-' || *v1 == '.') && (*v2 == '-' || *v2 == '.'))
+			else if((*v1 == '-' || *v1 == '.') && (*v2 == '-'
+						|| *v2 == '.'))
 				return *v1 == '.' ? 1 : -1;
 			else
 				return *v1 > *v2 ? 1 : -1;
@@ -335,10 +336,4 @@ vercmp(const char *v1, const char *v2) {
 		else if(*p != '-' && *p != '.' && *p != '0')
 			return *v1 ? 1 : -1;
 	return 0;
-}
-
-void
-version() {
-	fputs("spiceman-" VERSION " - distributed package management tools\n",
-			stderr);
 }

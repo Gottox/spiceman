@@ -97,6 +97,3 @@ int pkgcmp(const char *name1, const char *ver1, const int rel1,
 		const char *name2, const char *ver2, const int rel2);
 					/* compares two packages */
 int vercmp(const char *v1, const char *v2);
-void version();
-
-
