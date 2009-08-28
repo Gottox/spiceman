@@ -51,11 +51,13 @@ int relate(int argc, char *argv[]) {
 	case 't':
 	case 'r':
 	case 'o':
-		if(!action) {
-			action = ARGCHR();
-			break;
+		if(action) {
+			relate_help();
+			return EXIT_FAILURE;
 		}
+		action = ARGCHR();
 		/* no break, for error handling*/
+		break;
 	argerr:
 	default:
 		relate_help();
