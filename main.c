@@ -31,6 +31,8 @@
 
 #define APPLET(x) { x, x ## _help, #x }
 
+enum ShowHelp { SHOW_NONE, SHOW_APPLET, SHOW_ALL };
+
 void help();
 int main_applet(int argc, char *argv[]);
 void printchain(int cmdc, struct Cmd *cmd);
@@ -127,6 +129,7 @@ main_applet(int argc, char *argv[]) {
 			goto argerr;
 		action = ARGCHR();
 		break;
+		/* Argument switches */
 	case 'y':
 		sync = 1;
 		break;
@@ -208,10 +211,10 @@ version() {
 int main(int argc, char *argv[]) {
 	int applet, i;
 	char *bn;
-	unsigned int showhelp;
+	enum ShowHelp showhelp;
 
 	progname = argv[0];
-	showhelp = argc < 1;
+	showhelp = argc < 1 ? SHOW_APPLET : SHOW_NONE;
 	bn = basename(argv[0]);
 	/* finding the right applet if none is found use the fallback applet
 	 * (the last one) I'm so sorry for this :/ */
@@ -222,7 +225,7 @@ int main(int argc, char *argv[]) {
 				(argc > 1 && strcmp(argv[1],
 						    applets[applet].name) == 0))
 			break;
-	/* shifting to second argument to make ARG* work */
+	/* shifting to second argument to make ARG* macros work */
 	argc--;
 	argv++;
 	/* global options */
@@ -231,15 +234,15 @@ int main(int argc, char *argv[]) {
 		version();
 		exit(EXIT_FAILURE);
 	case 'h':
-		showhelp = 1;
+		showhelp = SHOW_APPLET;
 		break;
 	case 'H':
-		showhelp = 2;
+		showhelp = SHOW_ALL;
 		break;
 	}
-	if(showhelp) {
+	if(showhelp != SHOW_NONE) {
 		version();
-		if(showhelp == 2 && applet == LENGTH(applets) - 1) {
+		if(showhelp == SHOW_ALL && applet == LENGTH(applets) - 1) {
 			applets[applet].help();
 			for(i = 0; i < LENGTH(applets) - 1; i++)
 				applets[i].help();
